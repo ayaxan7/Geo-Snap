@@ -11,52 +11,77 @@ import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.chirag.geosnap.R
+import com.chirag.geosnap.presentation.components.CommonButton
+import com.chirag.geosnap.ui.theme.PrimaryGreen
 
 /**
- * Runtime permissions the app requires. [Manifest.permission.WRITE_EXTERNAL_STORAGE]
- * is only needed below API 29 where MediaStore writes still use the DATA path.
+ * Runtime permissions the app requires.
  */
 fun requiredRuntimePermissions(): List<String> = buildList {
     add(Manifest.permission.CAMERA)
-    add(Manifest.permission.RECORD_AUDIO)
     add(Manifest.permission.ACCESS_FINE_LOCATION)
     add(Manifest.permission.ACCESS_COARSE_LOCATION)
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-        add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        add(Manifest.permission.READ_MEDIA_IMAGES)
+        add(Manifest.permission.READ_MEDIA_VIDEO)
+    } else {
+        add(Manifest.permission.READ_EXTERNAL_STORAGE)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        }
+    }
+    add(Manifest.permission.RECORD_AUDIO)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        add(Manifest.permission.POST_NOTIFICATIONS)
     }
 }
 
@@ -74,27 +99,46 @@ private fun permissionsCopy(permissions: List<String>): List<PermissionsViewMode
                 R.string.permission_camera_description,
                 R.drawable.ic_camera
             )
+
             Manifest.permission.RECORD_AUDIO -> PermissionsViewModel.PermissionRequirement(
                 permission,
                 R.string.permission_microphone_label,
                 R.string.permission_microphone_description,
                 R.drawable.ic_microphone
             )
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION -> PermissionsViewModel.PermissionRequirement(
+
+            Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION -> PermissionsViewModel.PermissionRequirement(
                 permission,
                 R.string.permission_location_label,
                 R.string.permission_location_description,
                 R.drawable.ic_location
             )
-            else -> PermissionsViewModel.PermissionRequirement(
+
+            Manifest.permission.POST_NOTIFICATIONS -> PermissionsViewModel.PermissionRequirement(
+                permission,
+                R.string.permission_notifications_label,
+                R.string.permission_notifications_description,
+                R.drawable.ic_notification
+            )
+
+            Manifest.permission.READ_MEDIA_IMAGES,
+            Manifest.permission.READ_MEDIA_VIDEO,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE -> PermissionsViewModel.PermissionRequirement(
                 permission,
                 R.string.permission_storage_label,
                 R.string.permission_storage_description,
                 R.drawable.ic_storage
             )
+
+            else -> PermissionsViewModel.PermissionRequirement(
+                permission,
+                R.string.permission_storage_label, // Fallback
+                R.string.permission_storage_description,
+                R.drawable.ic_storage
+            )
         }
-    }
+    }.distinctBy { it.label } // Group permissions with the same label so we only show one row
 
 private tailrec fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this
@@ -104,16 +148,14 @@ private tailrec fun Context.findActivity(): Activity? = when (this) {
 
 private fun Context.openAppSettings() {
     val intent = Intent(
-        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-        Uri.fromParts("package", packageName, null)
+        Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageName, null)
     )
     startActivity(intent)
 }
 
 @Composable
 fun PermissionsScreen(
-    onAllPermissionsGranted: () -> Unit,
-    viewModel: PermissionsViewModel = hiltViewModel()
+    onAllPermissionsGranted: () -> Unit, viewModel: PermissionsViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -129,7 +171,9 @@ fun PermissionsScreen(
     }
 
     LaunchedEffect(Unit) {
-        viewModel.initialize(requirements, context.currentPermissionGrants(requirements.map { it.permission }))
+        viewModel.initialize(
+            requirements, context.currentPermissionGrants(requirements.map { it.permission })
+        )
     }
     LifecycleResumeEffect(Unit) {
         val grants = context.currentPermissionGrants(requirements.map { it.permission })
@@ -137,20 +181,15 @@ fun PermissionsScreen(
         onPauseOrDispose { }
     }
 
-    LaunchedEffect(uiState.allGranted) {
-        if (uiState.allGranted) {
-            onAllPermissionsGranted()
-        }
-    }
+    // We no longer automatically navigate on all granted. 
+    // We let the user click Get Started.
 
     PermissionsContent(
-        uiState = uiState,
-        onRequest = { permissionList ->
-            if (permissionList.isNotEmpty()) {
-                launcher.launch(permissionList.toTypedArray())
-            }
-        },
-        onOpenSettings = { context.openAppSettings() }
+        uiState = uiState, onRequest = { permissionList ->
+        if (permissionList.isNotEmpty()) {
+            launcher.launch(permissionList.toTypedArray())
+        }
+    }, onOpenSettings = { context.openAppSettings() }, onGetStarted = onAllPermissionsGranted
     )
 }
 
@@ -160,66 +199,137 @@ private fun rememberPermissionsCopy(): List<PermissionsViewModel.PermissionRequi
     return remember(context) { permissionsCopy(requiredRuntimePermissions()) }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PermissionsContent(
     uiState: PermissionsViewModel.UiState,
     onRequest: (List<String>) -> Unit,
-    onOpenSettings: () -> Unit
+    onOpenSettings: () -> Unit,
+    onGetStarted: () -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .safeDrawingPadding()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 24.dp, vertical = 16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Spacer(Modifier.height(24.dp))
-        Text(
-            text = stringResource(R.string.permissions_title),
-            style = MaterialTheme.typography.headlineMedium,
-            textAlign = TextAlign.Center
-        )
-        Spacer(Modifier.height(8.dp))
-        Text(
-            text = stringResource(R.string.permissions_subtitle),
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
-        Spacer(Modifier.height(24.dp))
+    var isAgreed by remember { mutableStateOf(false) }
 
-        uiState.items.forEach { item ->
-            PermissionRow(item = item)
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+    Scaffold(topBar = {
+        TopAppBar(
+            title = {
+                Text(
+                    text = stringResource(R.string.permissions_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            })
+    }, bottomBar = {
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 24.dp, vertical = 16.dp)
+                .safeDrawingPadding()
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { isAgreed = !isAgreed }
+                    .padding(vertical = 8.dp)) {
+                Checkbox(
+                    checked = isAgreed,
+                    onCheckedChange = { isAgreed = it },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = PrimaryGreen, uncheckedColor = PrimaryGreen
+                    ),
+                    modifier = Modifier
+                        .size(28.dp)
+                        .background(
+                            shape = RoundedCornerShape(12.dp), color = Color.Transparent
+                        ),
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "I agree to the Permissions, Terms & Conditions, and Privacy Policy.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray,
+                    lineHeight = 14.sp,
+                    fontSize = 12.sp
+                )
+            }
+
+            Spacer(Modifier.height(8.dp))
+
+            CommonButton(
+                text = "Get Started", enabled = isAgreed, onClick = {
+                    val requestable = viewModelRequestable(uiState)
+                    if (requestable.isNotEmpty()) {
+                        onRequest(requestable)
+                    } else {
+                        onGetStarted()
+                    }
+                })
         }
-
-        Spacer(Modifier.height(24.dp))
-
-        if (uiState.canOpenSettings) {
+    }) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(horizontal = 24.dp)
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+//            Spacer(Modifier.height(16.dp))
             Text(
-                text = stringResource(R.string.permissions_permanently_denied),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.error,
-                textAlign = TextAlign.Center
+                text = stringResource(R.string.permissions_subtitle_header),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black,
+                lineHeight = 16.sp
             )
-            Spacer(Modifier.height(12.dp))
-            TextButton(onClick = onOpenSettings) {
-                Text(stringResource(R.string.permissions_open_settings))
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = stringResource(R.string.permissions_subtitle),
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Gray,
+                lineHeight = 14.sp
+            )
+//            Spacer(Modifier.height(24.dp))
+
+            uiState.items.forEach { item ->
+                PermissionRow(
+                    item = item, onToggle = {
+                        if (!item.granted) {
+                            // If it's a grouped permission (like location or media), request all missing ones that match this label
+                            val relatedPermissions = uiState.items
+                                .filter { it.label == item.label && !it.granted }
+                                .map { it.permission }
+                            if (relatedPermissions.isNotEmpty()) {
+                                onRequest(relatedPermissions)
+                            } else {
+                                onRequest(listOf(item.permission))
+                            }
+                        } else {
+                            // On Android, permissions cannot be revoked programmatically by the app.
+                            // The user must do this via the system Settings.
+                            onOpenSettings()
+                        }
+                    })
+            }
+
+            if (uiState.canOpenSettings) {
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    text = stringResource(R.string.permissions_permanently_denied),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                TextButton(
+                    onClick = onOpenSettings,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                ) {
+                    Text(stringResource(R.string.permissions_open_settings))
+                }
             }
         }
-
-        val permissions = viewModelRequestable(uiState)
-        if (permissions.isNotEmpty()) {
-            Button(
-                onClick = { onRequest(permissions) },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(stringResource(R.string.permissions_allow))
-            }
-        }
-
-        Spacer(Modifier.height(16.dp))
     }
 }
 
@@ -227,25 +337,23 @@ private fun viewModelRequestable(uiState: PermissionsViewModel.UiState): List<St
     uiState.items.filter { !it.granted && !it.permanentlyDenied }.map { it.permission }
 
 @Composable
-private fun PermissionRow(item: PermissionsViewModel.PermissionItemState) {
+private fun PermissionRow(
+    item: PermissionsViewModel.PermissionItemState, onToggle: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 16.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(vertical = 12.dp),
+        verticalAlignment = Alignment.Top
     ) {
-        Surface(
-            modifier = Modifier.size(48.dp),
-            shape = MaterialTheme.shapes.medium,
-            color = MaterialTheme.colorScheme.primaryContainer
-        ) {
-            Icon(
-                painterResource(item.iconRes),
-                contentDescription = null,
-                modifier = Modifier.padding(12.dp),
-                tint = MaterialTheme.colorScheme.onPrimaryContainer
-            )
-        }
+        Icon(
+            painter = painterResource(item.iconRes),
+            contentDescription = stringResource(item.label),
+            modifier = Modifier
+                .padding(top = 4.dp)
+                .size(24.dp),
+            tint = PrimaryGreen
+        )
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -253,43 +361,27 @@ private fun PermissionRow(item: PermissionsViewModel.PermissionItemState) {
         ) {
             Text(
                 text = stringResource(item.label),
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
             )
+            Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = stringResource(item.description),
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = Color.Gray,
+                lineHeight = 14.sp
             )
         }
-        PermissionStatus(item = item)
-    }
-}
-
-@Composable
-private fun PermissionStatus(item: PermissionsViewModel.PermissionItemState) {
-    val (text, color, container) = when {
-        item.granted -> Triple(
-            stringResource(R.string.permissions_granted),
-            MaterialTheme.colorScheme.onTertiaryContainer,
-            MaterialTheme.colorScheme.tertiaryContainer
-        )
-        item.permanentlyDenied -> Triple(
-            stringResource(R.string.permissions_denied),
-            MaterialTheme.colorScheme.onErrorContainer,
-            MaterialTheme.colorScheme.errorContainer
-        )
-        else -> Triple(
-            stringResource(R.string.permissions_status_needed),
-            MaterialTheme.colorScheme.onSurfaceVariant,
-            MaterialTheme.colorScheme.surfaceVariant
-        )
-    }
-    Surface(color = container, shape = MaterialTheme.shapes.small) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelMedium,
-            color = color,
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+        Switch(
+            checked = item.granted,
+            onCheckedChange = { onToggle() },
+            modifier = Modifier.offset(y = (-12).dp),
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = Color.White,
+                checkedTrackColor = PrimaryGreen,
+                uncheckedThumbColor = Color.White,
+                uncheckedTrackColor = Color.LightGray
+            )
         )
     }
 }
