@@ -13,7 +13,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -128,14 +127,14 @@ private fun permissionsCopy(permissions: List<String>): List<PermissionsViewMode
                 permission,
                 R.string.permission_storage_label,
                 R.string.permission_storage_description,
-                R.drawable.ic_storage
+                R.drawable.ic_media
             )
 
             else -> PermissionsViewModel.PermissionRequirement(
                 permission,
                 R.string.permission_storage_label, // Fallback
                 R.string.permission_storage_description,
-                R.drawable.ic_storage
+                R.drawable.ic_media
             )
         }
     }.distinctBy { it.label } // Group permissions with the same label so we only show one row
@@ -351,7 +350,7 @@ private fun PermissionRow(
             contentDescription = stringResource(item.label),
             modifier = Modifier
                 .padding(top = 4.dp)
-                .size(24.dp),
+                .size(18.dp),
             tint = PrimaryGreen
         )
         Column(
