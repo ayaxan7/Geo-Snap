@@ -2,7 +2,25 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Camera is the core feature of the app. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <!-- Required because video recordings capture audio. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- Required to geolocation-tag captured media. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- Only needed on Android 9 and below because MediaStore insertions there
+         require write access. Modern Android versions use scoped storage. -->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
+
+    <uses-feature
+        android:name="android.hardware.camera.any"
+        android:required="true" />
+
     <application
+        android:name=".GeoSnapApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
