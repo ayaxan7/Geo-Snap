@@ -67,7 +67,7 @@ private fun LanguageContent(
             .fillMaxSize()
             .paint(
                 painterResource(id = R.drawable.select_lang_bg),
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.FillBounds
             )
             .safeDrawingPadding()
             .padding(horizontal = 24.dp, vertical = 16.dp),

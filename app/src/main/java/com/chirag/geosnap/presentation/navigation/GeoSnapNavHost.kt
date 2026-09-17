@@ -16,13 +16,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import com.chirag.geosnap.R
 import com.chirag.geosnap.presentation.camera.CameraMode
 import com.chirag.geosnap.presentation.camera.CameraScreen
@@ -41,12 +45,20 @@ import com.chirag.geosnap.presentation.onboarding.PermissionsScreen
 fun GeoSnapAppRoot(viewModel: MainViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    val context = LocalContext.current
     var resolvedStartDestination by rememberSaveable { mutableStateOf<String?>(null) }
 
     LaunchedEffect(uiState.loading, uiState.onboardingCompleted) {
         if (resolvedStartDestination == null && !uiState.loading) {
             resolvedStartDestination = if (uiState.onboardingCompleted == true) {
-                Routes.HOME
+                val requiredPermissions = listOf(
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+                val allGranted = requiredPermissions.all {
+                    ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+                }
+                if (allGranted) Routes.HOME else Routes.PERMISSIONS
             } else {
                 Routes.PERMISSIONS
             }
@@ -57,7 +69,7 @@ fun GeoSnapAppRoot(viewModel: MainViewModel = hiltViewModel()) {
     if (startDestination == null) {
         LoadingScreen()
     } else {
-        GeoSnapNavHost(startDestination = startDestination)
+        GeoSnapNavHost(startDestination = startDestination, isAlreadyOnboarded = uiState.onboardingCompleted == true)
     }
 }
 
@@ -77,15 +89,22 @@ internal fun LoadingScreen() {
 }
 
 @Composable
-internal fun GeoSnapNavHost(startDestination: String) {
+internal fun GeoSnapNavHost(startDestination: String, isAlreadyOnboarded: Boolean = false) {
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = startDestination) {
         composable(Routes.PERMISSIONS) {
             PermissionsScreen(
                 onAllPermissionsGranted = {
-                    navController.navigate(Routes.LANGUAGE) {
-                        launchSingleTop = true
+                    if (isAlreadyOnboarded) {
+                        navController.navigate(Routes.HOME) {
+                            popUpTo(Routes.PERMISSIONS) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    } else {
+                        navController.navigate(Routes.LANGUAGE) {
+                            launchSingleTop = true
+                        }
                     }
                 }
             )
