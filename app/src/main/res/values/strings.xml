@@ -6,8 +6,8 @@
 
     <!-- Permissions screen -->
     <string name="permissions_title">App Permissions</string>
-    <string name="permissions_subtitle_header">We need the following permissions to use Geo Camera</string>
-    <string name="permissions_subtitle">These permissions help Geo Camera capture photos and videos with accurate location details.</string>
+    <string name="permissions_subtitle_header">We need the following permissions to use Geo Snap</string>
+    <string name="permissions_subtitle">These permissions help Geo Snap capture photos and videos with accurate location details.</string>
     <string name="permissions_allow">Allow</string>
     <string name="permissions_open_settings">Open Settings</string>
     <string name="permissions_granted">Granted</string>
@@ -16,17 +16,17 @@
     <string name="permissions_permanently_denied">Permanently denied — enable it in Settings</string>
 
     <string name="permission_camera_label">Camera</string>
-    <string name="permission_camera_description">Allows Geo Camera to use your camera to take photos and record videos. This permission is required for the main camera features of the app.</string>
+    <string name="permission_camera_description">Allows Geo Snap to use your camera to take photos and record videos. This permission is required for the main camera features of the app.</string>
     <string name="permission_microphone_label">Microphone</string>
-    <string name="permission_microphone_description">Allows Geo Camera to record audio while you capture videos. This permission is only used when recording video with sound.</string>
+    <string name="permission_microphone_description">Allows Geo Snap to record audio while you capture videos. This permission is only used when recording video with sound.</string>
     <string name="permission_location_label">Location access</string>
-    <string name="permission_location_description">Allows Geo Camera to detect your current location and add details such as your address, coordinates, and GPS accuracy to your photos and videos.</string>
+    <string name="permission_location_description">Allows Geo Snap to detect your current location and add details such as your address, coordinates, and GPS accuracy to your photos and videos.</string>
     <string name="permission_coarse_location_label">Location access</string>
-    <string name="permission_coarse_location_description">Allows Geo Camera to detect your current location and add details such as your address, coordinates, and GPS accuracy to your photos and videos.</string>
+    <string name="permission_coarse_location_description">Allows Geo Snap to detect your current location and add details such as your address, coordinates, and GPS accuracy to your photos and videos.</string>
     <string name="permission_storage_label">Photos &amp; media access</string>
     <string name="permission_storage_description">Allows you to save captured photos and videos to your device and select existing photos for editing, location updates, or sharing.</string>
     <string name="permission_notifications_label">Notifications</string>
-    <string name="permission_notifications_description">Allows Geo Camera to send important updates, reminders, and subscription information</string>
+    <string name="permission_notifications_description">Allows Geo Snap to send important updates, reminders, and subscription information</string>
 
     <!-- Language screen -->
     <string name="language_title">Choose your language</string>

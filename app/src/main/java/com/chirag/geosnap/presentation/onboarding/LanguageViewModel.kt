@@ -86,10 +86,9 @@ class LanguageViewModel @Inject constructor(
         fun supportedLanguages(): List<Language> = listOf(
             Language("en", "English", "English"),
             Language("hi", "हिन्दी", "Hindi"),
-            Language("gu", "ગુજરાતી", "Gujarati"),
-            Language("fr", "Français", "French"),
-            Language("es", "Español", "Spanish"),
-            Language("de", "Deutsch", "German")
+            Language("te", "తెలుగు", "Telugu"),
+            Language("ta", "தமிழ்", "Tamil"),
+            Language("kn", "ಕನ್ನಡ", "Kannada")
         )
     }
 }
