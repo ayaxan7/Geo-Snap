@@ -69,21 +69,22 @@ class MediaRepositoryImpl @Inject constructor(
         coordinate: GeoCoordinate?,
         overlay: Bitmap?
     ): String = withContext(Dispatchers.IO) {
-        if (coordinate != null) {
-            writeGpsExifTo(sourceFile, coordinate)
-        }
+        val now = System.currentTimeMillis()
         val toPersist = if (overlay != null) {
             try {
+                // Burn from the pristine CameraX JPEG (no prior EXIF rewrite so the
+                // decoder sees the untouched file); GPS is written onto the output.
                 burnOverlayIntoImage(sourceFile, overlay, coordinate)
             } catch (t: Throwable) {
                 Log.w(TAG, "Image overlay burn failed, saving original", t)
+                if (coordinate != null) writeGpsExifTo(sourceFile, coordinate)
                 sourceFile
             }
         } else {
+            if (coordinate != null) writeGpsExifTo(sourceFile, coordinate)
             sourceFile
         }
         try {
-            val now = System.currentTimeMillis()
             persist(
                 sourceFile = toPersist,
                 displayName = "${FILE_PREFIX}_${timestampText(now)}.jpg",
