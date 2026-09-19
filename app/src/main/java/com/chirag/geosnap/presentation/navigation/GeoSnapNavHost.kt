@@ -59,9 +59,9 @@ fun GeoSnapAppRoot(viewModel: MainViewModel = hiltViewModel()) {
                 val allGranted = requiredPermissions.all {
                     ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
                 }
-                if (allGranted) Routes.HOME else Routes.PERMISSIONS
+                if (allGranted) Destination.Home.route else Destination.Permissions.route
             } else {
-                Routes.PERMISSIONS
+                Destination.Permissions.route
             }
         }
     }
@@ -94,72 +94,46 @@ internal fun GeoSnapNavHost(startDestination: String, isAlreadyOnboarded: Boolea
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = startDestination, modifier = Modifier.padding(PaddingValues(0.dp))) {
-        composable(Routes.PERMISSIONS) {
+        composable(Destination.Permissions.route) {
             PermissionsScreen(
                 onAllPermissionsGranted = {
                     if (isAlreadyOnboarded) {
-                        navController.navigate(Routes.HOME) {
-                            popUpTo(Routes.PERMISSIONS) { inclusive = true }
-                            launchSingleTop = true
-                        }
+                        navController.navigateToHome()
                     } else {
-                        navController.navigate(Routes.LANGUAGE) {
-                            launchSingleTop = true
-                        }
+                        navController.navigateToLanguage()
                     }
                 }
             )
         }
 
-        composable(Routes.LANGUAGE) {
+        composable(Destination.Language.route) {
             LanguageScreen(
                 onBack = navController::popBackStack,
-                onCompleted = {
-                    navController.navigate(Routes.HOME) {
-                        popUpTo(Routes.PERMISSIONS) { inclusive = true }
-                        launchSingleTop = true
-                    }
-                }
+                onCompleted = navController::navigateToHome
             )
         }
 
-        composable(Routes.HOME) {
+        composable(Destination.Home.route) {
             HomeScreen(
-                onTakePhoto = {
-                    navController.navigate(Routes.cameraRoute(CameraMode.PHOTO)) {
-                        launchSingleTop = true
-                    }
-                },
-                onTakeVideo = {
-                    navController.navigate(Routes.cameraRoute(CameraMode.VIDEO)) {
-                        launchSingleTop = true
-                    }
-                },
-                onQuickShare = {
-                    navController.navigate(Routes.cameraRoute(CameraMode.QUICK_SHARE)) {
-                        launchSingleTop = true
-                    }
-                },
-                onOpenGallery = {
-                    navController.navigate(Routes.GALLERY) {
-                        launchSingleTop = true
-                    }
-                }
+                onTakePhoto = { navController.navigateToCamera(CameraMode.PHOTO) },
+                onTakeVideo = { navController.navigateToCamera(CameraMode.VIDEO) },
+                onQuickShare = { navController.navigateToCamera(CameraMode.QUICK_SHARE) },
+                onOpenGallery = navController::navigateToGallery
             )
         }
 
-        composable(Routes.GALLERY) {
+        composable(Destination.Gallery.route) {
             GalleryScreen(onBack = navController::popBackStack)
         }
 
         composable(
-            route = "camera/{${Routes.CAMERA_ARGUMENT}}",
+            route = Destination.Camera.ROUTE_PATTERN,
             arguments = listOf(
-                navArgument(Routes.CAMERA_ARGUMENT) { type = NavType.StringType }
+                navArgument(Destination.Camera.ARGUMENT_MODE) { type = NavType.StringType }
             )
         ) { backStackEntry ->
             val mode = CameraMode.fromRoute(
-                backStackEntry.arguments?.getString(Routes.CAMERA_ARGUMENT)
+                backStackEntry.arguments?.getString(Destination.Camera.ARGUMENT_MODE)
             ) ?: CameraMode.PHOTO
             CameraScreen(mode = mode, onBack = navController::popBackStack)
         }

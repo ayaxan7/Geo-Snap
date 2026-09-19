@@ -1,13 +1,16 @@
 package com.chirag.geosnap.presentation.camera
 
+import android.content.ContextWrapper
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import com.chirag.geosnap.domain.model.GeoCoordinate
 import com.chirag.geosnap.domain.usecase.GetCurrentLocationUseCase
-import com.chirag.geosnap.presentation.navigation.Routes
+import com.chirag.geosnap.presentation.navigation.Destination
 import com.chirag.geosnap.testutils.FakeCameraEngine
 import com.chirag.geosnap.testutils.FakeLocationRepository
 import com.chirag.geosnap.testutils.FakeMediaRepository
 import com.chirag.geosnap.testutils.MainDispatcherRule
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
@@ -34,7 +37,8 @@ class CameraViewModelTest {
         location: FakeLocationRepository = FakeLocationRepository(coordinate)
     ): CameraViewModel {
         val viewModel = CameraViewModel(
-            savedStateHandle = SavedStateHandle(mapOf(Routes.CAMERA_ARGUMENT to mode)),
+            context = ContextWrapper(null),
+            savedStateHandle = SavedStateHandle(mapOf(Destination.Camera.ARGUMENT_MODE to mode)),
             mediaRepository = media,
             getCurrentLocation = GetCurrentLocationUseCase(location)
         )
@@ -162,6 +166,7 @@ class CameraViewModelTest {
         val vm = createViewModel()
         vm.onCameraReady()
         assertTrue(vm.uiState.value.isReady)
+        vm.viewModelScope.cancel()
     }
 
     @Test

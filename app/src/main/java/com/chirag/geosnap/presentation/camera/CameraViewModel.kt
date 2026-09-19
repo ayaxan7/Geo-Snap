@@ -9,7 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.chirag.geosnap.domain.model.GeoCoordinate
 import com.chirag.geosnap.domain.repository.MediaRepository
 import com.chirag.geosnap.domain.usecase.GetCurrentLocationUseCase
-import com.chirag.geosnap.presentation.navigation.Routes
+import com.chirag.geosnap.presentation.navigation.Destination
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
@@ -42,7 +42,7 @@ class CameraViewModel @Inject constructor(
 ) : ViewModel() {
 
     val mode: CameraMode = CameraMode.fromRoute(
-        savedStateHandle.get<String>(Routes.CAMERA_ARGUMENT)
+        savedStateHandle.get<String>(Destination.Camera.ARGUMENT_MODE)
     ) ?: CameraMode.PHOTO
 
     private var attachedEngine: CameraEngine? = null
