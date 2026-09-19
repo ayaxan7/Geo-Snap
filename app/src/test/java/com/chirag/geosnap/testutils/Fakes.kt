@@ -1,5 +1,6 @@
 package com.chirag.geosnap.testutils
 
+import android.graphics.Bitmap
 import android.net.Uri
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -12,6 +13,8 @@ import com.chirag.geosnap.domain.repository.PreferencesRepository
 import com.chirag.geosnap.presentation.camera.CameraEngine
 import com.chirag.geosnap.presentation.camera.CameraMode
 import com.chirag.geosnap.presentation.camera.CameraCaptureException
+import com.chirag.geosnap.presentation.camera.GeoTagCardContent
+import com.chirag.geosnap.presentation.camera.GeoTagOverlayRenderer
 import androidx.camera.view.PreviewView
 import androidx.lifecycle.LifecycleOwner
 import java.io.File
@@ -80,7 +83,7 @@ class FakeLocationRepository(
     override suspend fun isLocationEnabled(): Boolean = locationEnabled
 }
 
-data class SavedMedia(val file: File, val coordinate: GeoCoordinate?)
+data class SavedMedia(val file: File, val coordinate: GeoCoordinate?, val overlay: Bitmap? = null)
 
 /** Scripted MediaRepository that records calls instead of touching MediaStore. */
 class FakeMediaRepository : MediaRepository {
@@ -92,19 +95,21 @@ class FakeMediaRepository : MediaRepository {
 
     override suspend fun saveCapturedImage(
         sourceFile: File,
-        coordinate: GeoCoordinate?
+        coordinate: GeoCoordinate?,
+        overlay: Bitmap?
     ): String {
         failSaveOnce()
-        savedImages += SavedMedia(sourceFile, coordinate)
+        savedImages += SavedMedia(sourceFile, coordinate, overlay)
         return "content://geosnap.test/images/${nextId++}"
     }
 
     override suspend fun saveCapturedVideo(
         sourceFile: File,
-        coordinate: GeoCoordinate?
+        coordinate: GeoCoordinate?,
+        overlay: Bitmap?
     ): String {
         failSaveOnce()
-        savedVideos += SavedMedia(sourceFile, coordinate)
+        savedVideos += SavedMedia(sourceFile, coordinate, overlay)
         return "content://geosnap.test/videos/${nextId++}"
     }
 
@@ -112,6 +117,23 @@ class FakeMediaRepository : MediaRepository {
 
     private fun failSaveOnce() {
         if (failSave) throw IOException("simulated storage failure")
+    }
+}
+
+/**
+ * Scripted GeoTagOverlayRenderer. Bitmaps cannot be constructed on the JVM, so
+ * [result] is left null by default; tests assert the card content that was
+ * requested for rendering rather than the pixels.
+ */
+class FakeGeoTagOverlayRenderer(
+    var result: Bitmap? = null
+) : GeoTagOverlayRenderer {
+
+    val rendered = mutableListOf<GeoTagCardContent>()
+
+    override suspend fun render(content: GeoTagCardContent): Bitmap? {
+        rendered += content
+        return result
     }
 }
 

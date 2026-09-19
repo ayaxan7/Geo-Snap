@@ -6,6 +6,8 @@ import com.chirag.geosnap.data.media.MediaRepositoryImpl
 import com.chirag.geosnap.domain.repository.LocationRepository
 import com.chirag.geosnap.domain.repository.MediaRepository
 import com.chirag.geosnap.domain.repository.PreferencesRepository
+import com.chirag.geosnap.presentation.camera.CanvasGeoTagOverlayRenderer
+import com.chirag.geosnap.presentation.camera.GeoTagOverlayRenderer
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -33,4 +35,10 @@ abstract class RepositoryModule {
     abstract fun bindMediaRepository(
         impl: MediaRepositoryImpl
     ): MediaRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindGeoTagOverlayRenderer(
+        impl: CanvasGeoTagOverlayRenderer
+    ): GeoTagOverlayRenderer
 }

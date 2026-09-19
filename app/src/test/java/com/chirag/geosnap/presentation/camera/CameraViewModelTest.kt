@@ -8,6 +8,7 @@ import com.chirag.geosnap.domain.usecase.GetCurrentLocationUseCase
 import com.chirag.geosnap.domain.usecase.IsLocationEnabledUseCase
 import com.chirag.geosnap.presentation.navigation.Destination
 import com.chirag.geosnap.testutils.FakeCameraEngine
+import com.chirag.geosnap.testutils.FakeGeoTagOverlayRenderer
 import com.chirag.geosnap.testutils.FakeLocationRepository
 import com.chirag.geosnap.testutils.FakeMediaRepository
 import com.chirag.geosnap.testutils.MainDispatcherRule
@@ -37,14 +38,16 @@ class CameraViewModelTest {
         mode: String = CameraMode.PHOTO.routeName,
         engine: FakeCameraEngine = FakeCameraEngine(),
         media: FakeMediaRepository = FakeMediaRepository(),
-        location: FakeLocationRepository = FakeLocationRepository(coordinate)
+        location: FakeLocationRepository = FakeLocationRepository(coordinate),
+        renderer: FakeGeoTagOverlayRenderer = FakeGeoTagOverlayRenderer()
     ): CameraViewModel {
         val viewModel = CameraViewModel(
             context = ContextWrapper(null),
             savedStateHandle = SavedStateHandle(mapOf(Destination.Camera.ARGUMENT_MODE to mode)),
             mediaRepository = media,
             getCurrentLocation = GetCurrentLocationUseCase(location),
-            isLocationEnabled = IsLocationEnabledUseCase(location)
+            isLocationEnabled = IsLocationEnabledUseCase(location),
+            geoTagOverlayRenderer = renderer
         )
         viewModel.attachEngine(engine)
         return viewModel
@@ -220,5 +223,76 @@ class CameraViewModelTest {
         val vm = createViewModel()
         vm.reportError(CameraError.CAMERA_UNAVAILABLE)
         assertEquals(CameraError.CAMERA_UNAVAILABLE, vm.uiState.value.error)
+    }
+
+    @Test
+    fun `photo capture renders burn overlay from captured coordinate`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val media = FakeMediaRepository()
+            val renderer = FakeGeoTagOverlayRenderer()
+            val vm = createViewModel(
+                mode = CameraMode.PHOTO.routeName,
+                media = media,
+                renderer = renderer
+            )
+
+            vm.capturePhoto()
+            advanceUntilIdle()
+
+            assertEquals(1, renderer.rendered.size)
+            val card = renderer.rendered.first()
+            assertEquals(coordinate.latitude, card.latitude)
+            assertEquals(coordinate.longitude, card.longitude)
+            assertEquals(coordinate.timestamp, card.timestamp)
+            assertEquals(1, media.savedImages.size)
+            assertEquals(null, media.savedImages.first().overlay)
+            assertNull(vm.uiState.value.error)
+        }
+
+    @Test
+    fun `photo capture renders fallback card when location unavailable`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val media = FakeMediaRepository()
+            val renderer = FakeGeoTagOverlayRenderer()
+            val vm = createViewModel(
+                mode = CameraMode.PHOTO.routeName,
+                media = media,
+                location = FakeLocationRepository(null),
+                renderer = renderer
+            )
+
+            vm.capturePhoto()
+            advanceUntilIdle()
+
+            assertEquals(1, renderer.rendered.size)
+            val card = renderer.rendered.first()
+            assertNull(card.latitude)
+            assertNull(card.staticMapUrl)
+            assertEquals(1, media.savedImages.size)
+            assertNull(media.savedImages.first().coordinate)
+            assertEquals(null, media.savedImages.first().overlay)
+            assertNull(vm.uiState.value.error)
+        }
+
+    @Test
+    fun `video capture renders burn overlay content`() = runTest(mainDispatcherRule.scheduler) {
+        val media = FakeMediaRepository()
+        val renderer = FakeGeoTagOverlayRenderer()
+        val vm = createViewModel(
+            mode = CameraMode.VIDEO.routeName,
+            media = media,
+            renderer = renderer
+        )
+
+        vm.startRecording()
+        runCurrent()
+        vm.stopRecording()
+        advanceUntilIdle()
+
+        assertEquals(1, renderer.rendered.size)
+        assertEquals(coordinate.latitude, renderer.rendered.first().latitude)
+        assertEquals(coordinate.longitude, renderer.rendered.first().longitude)
+        assertEquals(1, media.savedVideos.size)
+        assertEquals(null, media.savedVideos.first().overlay)
     }
 }

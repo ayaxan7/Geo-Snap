@@ -1,6 +1,7 @@
 package com.chirag.geosnap.presentation.camera
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.location.Geocoder
 import android.os.SystemClock
 import androidx.lifecycle.SavedStateHandle
@@ -46,7 +47,8 @@ class CameraViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val mediaRepository: MediaRepository,
     private val getCurrentLocation: GetCurrentLocationUseCase,
-    private val isLocationEnabled: IsLocationEnabledUseCase
+    private val isLocationEnabled: IsLocationEnabledUseCase,
+    private val geoTagOverlayRenderer: GeoTagOverlayRenderer
 ) : ViewModel() {
 
     var mode: CameraMode = CameraMode.fromRoute(
@@ -171,9 +173,10 @@ class CameraViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val coordinate = fetchCoordinateForTagging()
+                val overlay = buildOverlay(coordinate)
                 val file = engine.capturePhoto()
                 val uri = try {
-                    mediaRepository.saveCapturedImage(file, coordinate)
+                    mediaRepository.saveCapturedImage(file, coordinate, overlay)
                 } catch (e: Exception) {
                     throw CaptureException(CameraError.SAVE_FAILED)
                 }
@@ -220,8 +223,9 @@ class CameraViewModel @Inject constructor(
                 val file = engine.stopRecording()
                 val coordinate = pendingCoordinate
                 pendingCoordinate = null
+                val overlay = buildOverlay(coordinate)
                 val uri = try {
-                    mediaRepository.saveCapturedVideo(file, coordinate)
+                    mediaRepository.saveCapturedVideo(file, coordinate, overlay)
                 } catch (e: Exception) {
                     throw CaptureException(CameraError.SAVE_FAILED)
                 }
@@ -249,6 +253,19 @@ class CameraViewModel @Inject constructor(
         getCurrentLocation()
     } catch (e: Exception) {
         null
+    }
+
+    /**
+     * Snapshots the current UI state into a burnable [GeoTagCardContent] and
+     * renders it off-screen. Rendering is best-effort: a null result simply
+     * means the capture is saved without the burnt card.
+     */
+    private suspend fun buildOverlay(coordinate: GeoCoordinate?): Bitmap? {
+        val content = uiState.value.toGeoTagCardContent(
+            coordinate = coordinate,
+            mapSizePx = BURN_MAP_SIZE_PX
+        )
+        return runCatching { geoTagOverlayRenderer.render(content) }.getOrNull()
     }
 
     private fun startLocationUpdates() {
@@ -360,4 +377,9 @@ class CameraViewModel @Inject constructor(
     }
 
     private class CaptureException(val error: CameraError) : Throwable()
+
+    private companion object {
+        /** Static map thumbnail size used on the burnt card (pages the URL). */
+        const val BURN_MAP_SIZE_PX = 320
+    }
 }

@@ -93,6 +93,11 @@ dependencies {
     // EXIF geotagging
     implementation(libs.androidx.exifinterface)
 
+    // Media3 (Transformer for burning the location card into videos)
+    implementation(libs.androidx.media3.common)
+    implementation(libs.androidx.media3.effect)
+    implementation(libs.androidx.media3.transformer)
+
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
 
