@@ -1,5 +1,7 @@
 package com.chirag.geosnap.presentation.camera
 
+import android.content.Context
+import android.location.Geocoder
 import android.os.SystemClock
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -9,7 +11,9 @@ import com.chirag.geosnap.domain.repository.MediaRepository
 import com.chirag.geosnap.domain.usecase.GetCurrentLocationUseCase
 import com.chirag.geosnap.presentation.navigation.Routes
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
+import java.util.Locale
 import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -31,6 +35,7 @@ import kotlinx.coroutines.launch
  */
 @HiltViewModel
 class CameraViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     savedStateHandle: SavedStateHandle,
     private val mediaRepository: MediaRepository,
     private val getCurrentLocation: GetCurrentLocationUseCase
@@ -99,6 +104,7 @@ class CameraViewModel @Inject constructor(
     /** Called by the screen once [CameraEngine.bind] succeeded. */
     fun onCameraReady() {
         _uiState.update { it.copy(isReady = true, isProcessing = false) }
+        startLocationUpdates()
     }
 
     fun flipLensFacing() {
@@ -208,6 +214,34 @@ class CameraViewModel @Inject constructor(
         getCurrentLocation()
     } catch (e: Exception) {
         null
+    }
+
+    private fun startLocationUpdates() {
+        viewModelScope.launch {
+            while (true) {
+                val coord = fetchCoordinateForTagging()
+                if (coord != null) {
+                    val address = reverseGeocode(coord)
+                    _uiState.update { it.copy(currentLocation = coord, addressString = address) }
+                }
+                delay(10000L) // fetch every 10s
+            }
+        }
+    }
+
+    private fun reverseGeocode(coord: GeoCoordinate): String? {
+        return try {
+            val geocoder = Geocoder(context, Locale.getDefault())
+            val addresses = geocoder.getFromLocation(coord.latitude, coord.longitude, 1)
+            if (!addresses.isNullOrEmpty()) {
+                val address = addresses[0]
+                val locality = address.locality ?: address.subAdminArea ?: address.adminArea ?: ""
+                val state = address.adminArea ?: ""
+                listOf(locality, state).filter { it.isNotBlank() }.joinToString(", ")
+            } else null
+        } catch (e: Exception) {
+            null
+        }
     }
 
     private fun startRecordingTimer() {

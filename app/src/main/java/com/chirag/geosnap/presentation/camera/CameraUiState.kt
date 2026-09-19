@@ -1,6 +1,7 @@
 package com.chirag.geosnap.presentation.camera
 
 import androidx.compose.runtime.Immutable
+import com.chirag.geosnap.domain.model.GeoCoordinate
 
 @Immutable
 data class CameraUiState(
@@ -11,5 +12,7 @@ data class CameraUiState(
     val flashEnabled: Boolean = false,
     val hasFlash: Boolean = false,
     val isProcessing: Boolean = false,
-    val error: CameraError? = null
+    val error: CameraError? = null,
+    val currentLocation: GeoCoordinate? = null,
+    val addressString: String? = null
 )

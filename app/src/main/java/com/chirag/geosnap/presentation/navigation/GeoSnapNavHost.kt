@@ -25,6 +25,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import android.Manifest
 import android.content.pm.PackageManager
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import com.chirag.geosnap.R
@@ -92,7 +93,7 @@ internal fun LoadingScreen() {
 internal fun GeoSnapNavHost(startDestination: String, isAlreadyOnboarded: Boolean = false) {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = startDestination) {
+    NavHost(navController = navController, startDestination = startDestination, modifier = Modifier.padding(PaddingValues(0.dp))) {
         composable(Routes.PERMISSIONS) {
             PermissionsScreen(
                 onAllPermissionsGranted = {

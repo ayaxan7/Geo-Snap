@@ -157,22 +157,22 @@ fun HomeScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+//            Spacer(modifier = Modifier.height(24.dp))
 
-            Button(
-                onClick = { onTakePhoto() },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp),
-                shape = RoundedCornerShape(50),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White, contentColor = PrimaryGreen
-                )
-            ) {
-                Text(
-                    text = "Start with Photo", fontSize = 18.sp, fontWeight = FontWeight.Bold
-                )
-            }
+//            Button(
+//                onClick = { onTakePhoto() },
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .height(48.dp),
+//                shape = RoundedCornerShape(50),
+//                colors = ButtonDefaults.buttonColors(
+//                    containerColor = Color.White, contentColor = PrimaryGreen
+//                )
+//            ) {
+//                Text(
+//                    text = "Start with Photo", fontSize = 18.sp, fontWeight = FontWeight.Bold
+//                )
+//            }
 //            Spacer(modifier = Modifier.height(8.dp))
         }
     }

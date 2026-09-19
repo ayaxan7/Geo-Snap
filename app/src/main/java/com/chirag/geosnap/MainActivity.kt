@@ -15,9 +15,9 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+//        enableEdgeToEdge()
         setContent {
-            GeoSnapTheme {
+            GeoSnapTheme(darkTheme = false) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     GeoSnapAppRoot()
                 }
