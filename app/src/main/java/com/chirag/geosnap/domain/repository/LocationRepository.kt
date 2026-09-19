@@ -14,4 +14,11 @@ interface LocationRepository {
      * Never throws for these expected conditions.
      */
     suspend fun getCurrentLocation(): GeoCoordinate?
+
+    /**
+     * Whether the device location service (master switch) is turned on.
+     * Does not require the location permission and never throws for expected
+     * conditions (e.g. a provider being unavailable).
+     */
+    suspend fun isLocationEnabled(): Boolean
 }

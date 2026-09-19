@@ -31,6 +31,8 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalMinimumInteractiveComponentEnforcement
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
@@ -39,6 +41,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,6 +53,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.PlatformTextStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -208,64 +213,81 @@ private fun PermissionsContent(
 ) {
     var isAgreed by remember { mutableStateOf(false) }
 
-    Scaffold(topBar = {
-        TopAppBar(
-            title = {
-                Text(
-                    text = stringResource(R.string.permissions_title),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            })
-    }, bottomBar = {
-        Column(
-            modifier = Modifier
-                .padding(horizontal = 24.dp, vertical = 16.dp)
-                .safeDrawingPadding()
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = stringResource(R.string.permissions_title),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            )
+        },
+        bottomBar = {
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { isAgreed = !isAgreed }
-                    .padding(vertical = 8.dp)) {
-                Checkbox(
-                    checked = isAgreed,
-                    onCheckedChange = { isAgreed = it },
-                    colors = CheckboxDefaults.colors(
-                        checkedColor = PrimaryGreen, uncheckedColor = PrimaryGreen
-                    ),
+                    .padding(horizontal = 24.dp, vertical = 16.dp)
+//                    .safeDrawingPadding()
+            ) {
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .size(28.dp)
-                        .background(
-                            shape = RoundedCornerShape(12.dp), color = Color.Transparent
+                        .fillMaxWidth()
+                        .clickable { isAgreed = !isAgreed }
+                        .padding(bottom = 8.dp,top=4.dp)
+                ) {
+                    CompositionLocalProvider(
+                        LocalMinimumInteractiveComponentSize provides 4.dp,
+                    ) {
+                        Checkbox(
+                            checked = isAgreed,
+                            onCheckedChange = { isAgreed = it },
+                            colors = CheckboxDefaults.colors(
+                                checkedColor = PrimaryGreen,
+                                uncheckedColor = PrimaryGreen
+                            ),
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
+//
+//                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Text(
+                        text = "I agree to the Permissions, Terms & Conditions, and Privacy Policy.",
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            platformStyle = PlatformTextStyle(
+                                includeFontPadding = false
+                            ),
+                            fontStyle = FontStyle.Italic
                         ),
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "I agree to the Permissions, Terms & Conditions, and Privacy Policy.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray,
-                    lineHeight = 14.sp,
-                    fontSize = 12.sp
+                        color = Color.Gray,
+                        lineHeight = 14.sp,
+                        fontSize = 12.sp
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                CommonButton(
+                    text = "Get Started",
+                    enabled = isAgreed,
+                    onClick = {
+                        val requestable = viewModelRequestable(uiState)
+
+                        if (requestable.isNotEmpty()) {
+                            onRequest(requestable)
+                        } else {
+                            onGetStarted()
+                        }
+                    }
                 )
             }
-
-            Spacer(Modifier.height(8.dp))
-
-            CommonButton(
-                text = "Get Started", enabled = isAgreed, onClick = {
-                    val requestable = viewModelRequestable(uiState)
-                    if (requestable.isNotEmpty()) {
-                        onRequest(requestable)
-                    } else {
-                        onGetStarted()
-                    }
-                })
         }
-    }) { innerPadding ->
+    ) { innerPadding ->
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -274,7 +296,7 @@ private fun PermissionsContent(
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-//            Spacer(Modifier.height(16.dp))
+
             Text(
                 text = stringResource(R.string.permissions_subtitle_header),
                 style = MaterialTheme.typography.titleMedium,
@@ -282,38 +304,47 @@ private fun PermissionsContent(
                 color = Color.Black,
                 lineHeight = 16.sp
             )
+
             Spacer(Modifier.height(8.dp))
+
             Text(
                 text = stringResource(R.string.permissions_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.Gray,
                 lineHeight = 14.sp
             )
-//            Spacer(Modifier.height(24.dp))
 
             uiState.items.forEach { item ->
                 PermissionRow(
-                    item = item, onToggle = {
+                    item = item,
+                    onToggle = {
                         if (!item.granted) {
-                            // If it's a grouped permission (like location or media), request all missing ones that match this label
+
                             val relatedPermissions = uiState.items
-                                .filter { it.label == item.label && !it.granted }
-                                .map { it.permission }
+                                .filter {
+                                    it.label == item.label && !it.granted
+                                }
+                                .map {
+                                    it.permission
+                                }
+
                             if (relatedPermissions.isNotEmpty()) {
                                 onRequest(relatedPermissions)
                             } else {
                                 onRequest(listOf(item.permission))
                             }
+
                         } else {
-                            // On Android, permissions cannot be revoked programmatically by the app.
-                            // The user must do this via the system Settings.
                             onOpenSettings()
                         }
-                    })
+                    }
+                )
             }
 
             if (uiState.canOpenSettings) {
+
                 Spacer(Modifier.height(16.dp))
+
                 Text(
                     text = stringResource(R.string.permissions_permanently_denied),
                     style = MaterialTheme.typography.bodyMedium,
@@ -321,11 +352,14 @@ private fun PermissionsContent(
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
+
                 TextButton(
                     onClick = onOpenSettings,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 ) {
-                    Text(stringResource(R.string.permissions_open_settings))
+                    Text(
+                        stringResource(R.string.permissions_open_settings)
+                    )
                 }
             }
         }

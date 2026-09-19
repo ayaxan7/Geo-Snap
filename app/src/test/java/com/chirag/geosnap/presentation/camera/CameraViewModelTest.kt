@@ -5,11 +5,13 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.chirag.geosnap.domain.model.GeoCoordinate
 import com.chirag.geosnap.domain.usecase.GetCurrentLocationUseCase
+import com.chirag.geosnap.domain.usecase.IsLocationEnabledUseCase
 import com.chirag.geosnap.presentation.navigation.Destination
 import com.chirag.geosnap.testutils.FakeCameraEngine
 import com.chirag.geosnap.testutils.FakeLocationRepository
 import com.chirag.geosnap.testutils.FakeMediaRepository
 import com.chirag.geosnap.testutils.MainDispatcherRule
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -23,6 +25,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class CameraViewModelTest {
 
     @get:Rule
@@ -40,7 +43,8 @@ class CameraViewModelTest {
             context = ContextWrapper(null),
             savedStateHandle = SavedStateHandle(mapOf(Destination.Camera.ARGUMENT_MODE to mode)),
             mediaRepository = media,
-            getCurrentLocation = GetCurrentLocationUseCase(location)
+            getCurrentLocation = GetCurrentLocationUseCase(location),
+            isLocationEnabled = IsLocationEnabledUseCase(location)
         )
         viewModel.attachEngine(engine)
         return viewModel
@@ -178,6 +182,27 @@ class CameraViewModelTest {
         vm.stopRecording()
         advanceUntilIdle()
     }
+
+    @Test
+    fun `location dialog shows when device location is off`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val location = FakeLocationRepository(coordinate).apply { locationEnabled = false }
+            val vm = createViewModel(location = location)
+            runCurrent()
+            assertFalse(vm.uiState.value.isLocationEnabled)
+            assertTrue(vm.uiState.value.showLocationDialog)
+            vm.dismissLocationDialog()
+            assertFalse(vm.uiState.value.showLocationDialog)
+        }
+
+    @Test
+    fun `location dialog stays hidden when device location is on`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val vm = createViewModel()
+            runCurrent()
+            assertTrue(vm.uiState.value.isLocationEnabled)
+            assertFalse(vm.uiState.value.showLocationDialog)
+        }
 
     @Test
     fun `reportError surfaces error`() {

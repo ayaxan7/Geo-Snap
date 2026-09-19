@@ -192,7 +192,7 @@ fun ActionCard(
                 border = BorderStroke(1.dp, Color.White), shape = RoundedCornerShape(16.dp)
             )
             .clickable(onClick = onClick)
-            .padding(vertical = 16.dp, horizontal = 8.dp),
+            .padding(vertical = 16.dp, horizontal = 2.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -213,14 +213,15 @@ fun ActionCard(
             textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(4.dp))
+//        Spacer(modifier = Modifier.height(2.dp))
 
         Text(
             text = subtitle,
             style = MaterialTheme.typography.bodySmall,
             color = Color.White.copy(alpha = 0.8f),
             textAlign = TextAlign.Center,
-            fontStyle = FontStyle.Italic
+            fontStyle = FontStyle.Italic,
+            fontSize = 10.sp
         )
     }
 }

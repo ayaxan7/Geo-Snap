@@ -6,15 +6,20 @@ import android.os.SystemClock
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.chirag.geosnap.BuildConfig
 import com.chirag.geosnap.domain.model.GeoCoordinate
 import com.chirag.geosnap.domain.repository.MediaRepository
 import com.chirag.geosnap.domain.usecase.GetCurrentLocationUseCase
+import com.chirag.geosnap.domain.usecase.IsLocationEnabledUseCase
 import com.chirag.geosnap.presentation.navigation.Destination
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
+import java.net.HttpURLConnection
+import java.net.URL
 import java.util.Locale
 import javax.inject.Inject
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.channels.BufferOverflow
@@ -27,6 +32,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Orchestrates camera captures: owns the temp-file pipeline, geotagging data
@@ -38,12 +45,17 @@ class CameraViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     savedStateHandle: SavedStateHandle,
     private val mediaRepository: MediaRepository,
-    private val getCurrentLocation: GetCurrentLocationUseCase
+    private val getCurrentLocation: GetCurrentLocationUseCase,
+    private val isLocationEnabled: IsLocationEnabledUseCase
 ) : ViewModel() {
 
     val mode: CameraMode = CameraMode.fromRoute(
         savedStateHandle.get<String>(Destination.Camera.ARGUMENT_MODE)
     ) ?: CameraMode.PHOTO
+
+    init {
+        checkLocationEnabled()
+    }
 
     private var attachedEngine: CameraEngine? = null
 
@@ -105,6 +117,23 @@ class CameraViewModel @Inject constructor(
     fun onCameraReady() {
         _uiState.update { it.copy(isReady = true, isProcessing = false) }
         startLocationUpdates()
+    }
+
+    /** Re-reads the device location master switch and prompts when it is off. */
+    fun checkLocationEnabled() {
+        viewModelScope.launch {
+            val enabled = runCatching { isLocationEnabled() }.getOrDefault(false)
+            _uiState.update {
+                it.copy(
+                    isLocationEnabled = enabled,
+                    showLocationDialog = it.showLocationDialog || !enabled
+                )
+            }
+        }
+    }
+
+    fun dismissLocationDialog() {
+        _uiState.update { it.copy(showLocationDialog = false) }
     }
 
     fun flipLensFacing() {
@@ -221,27 +250,89 @@ class CameraViewModel @Inject constructor(
             while (true) {
                 val coord = fetchCoordinateForTagging()
                 if (coord != null) {
-                    val address = reverseGeocode(coord)
-                    _uiState.update { it.copy(currentLocation = coord, addressString = address) }
+                    val address = resolveAddressForUi(coord)
+                    _uiState.update {
+                        it.copy(
+                            currentLocation = coord,
+                            cityString = address.city.ifBlank { null },
+                            fullAddress = address.full
+                        )
+                    }
                 }
-                delay(10000L) // fetch every 10s
+                delay(10000L.milliseconds) // fetch every 10s
             }
         }
     }
 
-    private fun reverseGeocode(coord: GeoCoordinate): String? {
+    private data class ResolvedAddress(val city: String, val full: String?)
+
+    /**
+     * City/street come from the framework [Geocoder]; the complete formatted
+     * address is fetched from the Google Maps Geocoding API when a key exists
+     * (falling back to the local geocoder when it does not).
+     */
+    private suspend fun resolveAddressForUi(coord: GeoCoordinate): ResolvedAddress {
+        val local = reverseGeocode(coord)
+        val full = fetchGoogleFormattedAddress(coord) ?: local?.full
+        return ResolvedAddress(city = local?.city ?: "", full = full)
+    }
+
+    private fun reverseGeocode(coord: GeoCoordinate): ResolvedAddress? {
         return try {
             val geocoder = Geocoder(context, Locale.getDefault())
             val addresses = geocoder.getFromLocation(coord.latitude, coord.longitude, 1)
-            if (!addresses.isNullOrEmpty()) {
-                val address = addresses[0]
-                val locality = address.locality ?: address.subAdminArea ?: address.adminArea ?: ""
-                val state = address.adminArea ?: ""
-                listOf(locality, state).filter { it.isNotBlank() }.joinToString(", ")
-            } else null
+            val address = addresses?.firstOrNull() ?: return null
+            val city = address.locality ?: address.subAdminArea ?: address.adminArea ?: ""
+            val state = address.adminArea ?: ""
+            val place = buildList {
+                add(city)
+                if (state.isNotBlank() && state != city) add(state)
+            }.filter { it.isNotBlank() }
+            val full = listOfNotNull(
+                address.thoroughfare,
+                address.subLocality,
+                address.locality,
+                address.subAdminArea ?: address.adminArea,
+                address.postalCode,
+                address.countryName
+            ).filter { it.isNotBlank() }.joinToString(", ")
+            ResolvedAddress(
+                city = place.joinToString(", "),
+                full = full.ifBlank { null }
+            )
         } catch (e: Exception) {
             null
         }
+    }
+
+    private suspend fun fetchGoogleFormattedAddress(coord: GeoCoordinate): String? {
+        val apiKey = BuildConfig.MAPS_API_KEY
+        if (apiKey.isBlank()) return null
+        return withContext(Dispatchers.IO) {
+            runCatching {
+                val url = URL(
+                    "https://maps.googleapis.com/maps/api/geocode/json" +
+                        "?latlng=${coord.latitude},${coord.longitude}" +
+                        "&key=$apiKey"
+                )
+                val connection = (url.openConnection() as HttpURLConnection).apply {
+                    requestMethod = "GET"
+                    connectTimeout = 5000
+                    readTimeout = 5000
+                }
+                try {
+                    val body = connection.inputStream.bufferedReader().use { it.readText() }
+                    extractFormattedAddress(body)
+                } finally {
+                    connection.disconnect()
+                }
+            }.getOrNull()
+        }
+    }
+
+    private fun extractFormattedAddress(body: String): String? {
+        val formattedRegex = Regex("\"formatted_address\"\\s*:\\s*\"((?:[^\"\\\\]|\\\\.)*)\"")
+        return formattedRegex.find(body)?.groupValues?.get(1)
     }
 
     private fun startRecordingTimer() {

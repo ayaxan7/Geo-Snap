@@ -69,12 +69,15 @@ class FakeLocationRepository(
 
     var calls = 0
     var failWith: Throwable? = null
+    var locationEnabled = true
 
     override suspend fun getCurrentLocation(): GeoCoordinate? {
         calls++
         failWith?.let { throw it }
         return result
     }
+
+    override suspend fun isLocationEnabled(): Boolean = locationEnabled
 }
 
 data class SavedMedia(val file: File, val coordinate: GeoCoordinate?)

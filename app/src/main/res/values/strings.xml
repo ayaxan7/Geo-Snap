@@ -28,6 +28,12 @@
     <string name="permission_notifications_label">Notifications</string>
     <string name="permission_notifications_description">Allows Geo Snap to send important updates, reminders, and subscription information</string>
 
+    <!-- Location disabled dialog -->
+    <string name="location_dialog_title">Location is turned off</string>
+    <string name="location_dialog_message">GeoSnap needs your device location to tag photos and videos with GPS coordinates. Turn on location to continue.</string>
+    <string name="location_dialog_turn_on">Turn On</string>
+    <string name="location_dialog_not_now">Not Now</string>
+
     <!-- Language screen -->
     <string name="language_title">Choose your language</string>
     <string name="language_subtitle">You can change this later from Settings.</string>

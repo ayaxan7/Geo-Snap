@@ -53,6 +53,12 @@ class LocationProviderImpl @Inject constructor(
         bestLastKnown?.toGeoCoordinate() ?: requestSingleFix()
     }
 
+    override suspend fun isLocationEnabled(): Boolean = withContext(Dispatchers.IO) {
+        PROVIDER_PRIORITY.any { provider ->
+            runCatching { locationManager.isProviderEnabled(provider) }.getOrDefault(false)
+        }
+    }
+
     private suspend fun requestSingleFix(): GeoCoordinate? = withTimeoutOrNull(FIX_TIMEOUT_MS) {
         val provider = enabledProvider() ?: return@withTimeoutOrNull null
         if (!hasLocationPermission()) return@withTimeoutOrNull null

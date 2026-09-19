@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.provider.Settings
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -26,6 +27,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -33,6 +35,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -51,11 +54,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
@@ -67,6 +73,7 @@ import com.chirag.geosnap.ui.theme.PrimaryGreen
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.Locale.getDefault
 
 @Composable
 fun CameraScreen(
@@ -80,6 +87,10 @@ fun CameraScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     var currentMode by remember(mode) { mutableStateOf(mode) }
+
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        viewModel.checkLocationEnabled()
+    }
 
     val previewView = remember(context) {
         PreviewView(context).apply {
@@ -137,15 +148,25 @@ fun CameraScreen(
         }
     }
 
-    val currentError = uiState.error
+    val currentError = uiState.error.toString()
     LaunchedEffect(currentError) {
-        if (currentError != null) {
+        if (currentError != null && currentError.lowercase() !="null") {
             snackbarHostState.currentSnackbarData?.dismiss()
             snackbarHostState.showSnackbar(
-                message = context.getString(currentError.stringRes())
+                message = "Error: $currentError"
             )
             viewModel.clearError()
         }
+    }
+
+    if (uiState.showLocationDialog) {
+        LocationDisabledDialog(
+            onTurnOn = {
+                viewModel.dismissLocationDialog()
+                openLocationSettings(context)
+            },
+            onDismiss = viewModel::dismissLocationDialog
+        )
     }
 
     Scaffold(
@@ -176,7 +197,7 @@ fun CameraScreen(
                 val bannerError = currentError
                 if (!uiState.isReady && bannerError != null) {
                     CameraUnavailableBanner(
-                        text = stringResource(bannerError.stringRes()),
+                        text = bannerError,
                         modifier = Modifier.align(Alignment.TopCenter).padding(16.dp)
                     )
                 }
@@ -210,14 +231,14 @@ fun CameraScreen(
                 }
             )
 
-            // Bottom Green Bar
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(64.dp)
-                    .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
-                    .background(PrimaryGreen)
-            )
+//            // Bottom Green Bar
+//            Box(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .height(64.dp)
+//                    .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
+//                    .background(PrimaryGreen)
+//            )
         }
     }
 }
@@ -226,10 +247,11 @@ fun CameraScreen(
 fun LocationCard(uiState: CameraUiState, modifier: Modifier = Modifier) {
     val lat = uiState.currentLocation?.latitude
     val lng = uiState.currentLocation?.longitude
-    val addressStr = uiState.addressString ?: "Fetching location..."
+    val cityStr = uiState.cityString ?: "Fetching location..."
+    val fullAddressStr = uiState.fullAddress ?: uiState.cityString ?: "Fetching location..."
 
     val apiKey = BuildConfig.MAPS_API_KEY
-    Log.d("LocationCard", "API Key: $apiKey, Lat: $lat, Lng: $lng , Address: $addressStr")
+    Log.d("LocationCard", "API Key: $apiKey, Lat: $lat, Lng: $lng ,city: $cityStr, Address: $fullAddressStr")
     val mapUrl = if (lat != null && lng != null && apiKey.isNotBlank()) {
         "https://maps.googleapis.com/maps/api/staticmap?center=$lat,$lng&zoom=15&size=200x200&markers=color:red%7C$lat,$lng&key=$apiKey"
     } else null
@@ -270,7 +292,7 @@ fun LocationCard(uiState: CameraUiState, modifier: Modifier = Modifier) {
         // Details
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = addressStr,
+                text = cityStr,
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp,
@@ -281,13 +303,13 @@ fun LocationCard(uiState: CameraUiState, modifier: Modifier = Modifier) {
             Row(verticalAlignment = Alignment.Top) {
                 Icon(
                     painter = painterResource(android.R.drawable.ic_menu_mylocation),
-                    contentDescription = null,
+                    contentDescription = "",
                     tint = Color.Red,
                     modifier = Modifier.size(12.dp).padding(top = 2.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = addressStr,
+                    text = fullAddressStr,
                     color = Color.White.copy(alpha = 0.8f),
                     fontSize = 11.sp,
                     maxLines = 2,
@@ -304,7 +326,7 @@ fun LocationCard(uiState: CameraUiState, modifier: Modifier = Modifier) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     painter = painterResource(android.R.drawable.ic_menu_today),
-                    contentDescription = null,
+                    contentDescription = "Date",
                     tint = Color.White,
                     modifier = Modifier.size(12.dp)
                 )
@@ -355,6 +377,32 @@ private fun CameraUnavailableBanner(text: String, modifier: Modifier = Modifier)
             modifier = Modifier.padding(16.dp)
         )
     }
+}
+
+@Composable
+private fun LocationDisabledDialog(
+    onTurnOn: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.location_dialog_title)) },
+        text = { Text(stringResource(R.string.location_dialog_message)) },
+        confirmButton = {
+            TextButton(onClick = onTurnOn) {
+                Text(stringResource(R.string.location_dialog_turn_on))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.location_dialog_not_now))
+            }
+        }
+    )
+}
+
+private fun openLocationSettings(context: Context) {
+    context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
 }
 
 private fun launchShareChooser(

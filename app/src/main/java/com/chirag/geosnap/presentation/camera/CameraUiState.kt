@@ -14,5 +14,8 @@ data class CameraUiState(
     val isProcessing: Boolean = false,
     val error: CameraError? = null,
     val currentLocation: GeoCoordinate? = null,
-    val addressString: String? = null
+    val cityString: String? = null,
+    val fullAddress: String? = null,
+    val isLocationEnabled: Boolean = false,
+    val showLocationDialog: Boolean = false
 )
