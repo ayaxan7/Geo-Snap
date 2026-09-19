@@ -14,6 +14,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import android.util.Log
 import androidx.exifinterface.media.ExifInterface
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
@@ -72,7 +73,12 @@ class MediaRepositoryImpl @Inject constructor(
             writeGpsExifTo(sourceFile, coordinate)
         }
         val toPersist = if (overlay != null) {
-            burnOverlayIntoImage(sourceFile, overlay, coordinate)
+            try {
+                burnOverlayIntoImage(sourceFile, overlay, coordinate)
+            } catch (t: Throwable) {
+                Log.w(TAG, "Image overlay burn failed, saving original", t)
+                sourceFile
+            }
         } else {
             sourceFile
         }
@@ -101,7 +107,12 @@ class MediaRepositoryImpl @Inject constructor(
         // in the GeoMedia model for videos so it can be written once an MP4 GPS
         // writer is introduced.
         val toPersist = if (overlay != null) {
-            transcodeWithOverlay(sourceFile, overlay)
+            try {
+                transcodeWithOverlay(sourceFile, overlay)
+            } catch (t: Throwable) {
+                Log.w(TAG, "Video overlay transcode failed, saving original", t)
+                sourceFile
+            }
         } else {
             sourceFile
         }
@@ -176,6 +187,7 @@ class MediaRepositoryImpl @Inject constructor(
         }
 
         if (inserted.isFailure) {
+            Log.e(TAG, "MediaStore write failed for $uri", inserted.exceptionOrNull())
             resolver.delete(uri, null, null)
             throw inserted.exceptionOrNull() ?: IOException("Insert failed")
         }
@@ -426,6 +438,7 @@ class MediaRepositoryImpl @Inject constructor(
         SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date(millis))
 
     private companion object {
+        const val TAG = "MediaRepositoryImpl"
         const val DIRECTORY_NAME = "GeoSnap"
         const val FILE_PREFIX = "GeoSnap"
         const val MAX_DECODE_EDGE = 4096

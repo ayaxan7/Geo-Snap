@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.location.Geocoder
 import android.os.SystemClock
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -178,6 +179,7 @@ class CameraViewModel @Inject constructor(
                 val uri = try {
                     mediaRepository.saveCapturedImage(file, coordinate, overlay)
                 } catch (e: Exception) {
+                    Log.e(TAG, "Photo save failed", e)
                     throw CaptureException(CameraError.SAVE_FAILED)
                 }
                 file.delete()
@@ -227,6 +229,7 @@ class CameraViewModel @Inject constructor(
                 val uri = try {
                     mediaRepository.saveCapturedVideo(file, coordinate, overlay)
                 } catch (e: Exception) {
+                    Log.e(TAG, "Video save failed", e)
                     throw CaptureException(CameraError.SAVE_FAILED)
                 }
                 file.delete()
@@ -381,5 +384,6 @@ class CameraViewModel @Inject constructor(
     private companion object {
         /** Static map thumbnail size used on the burnt card (pages the URL). */
         const val BURN_MAP_SIZE_PX = 320
+        const val TAG = "CameraViewModel"
     }
 }

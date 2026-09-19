@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.view.PreviewView
@@ -134,6 +135,7 @@ fun CameraScreen(
             snackbarHostState.showSnackbar(
                 message = "Error: $currentError"
             )
+            Log.d("CameraScreen", "Error: $currentError")
             viewModel.clearError()
         }
     }
