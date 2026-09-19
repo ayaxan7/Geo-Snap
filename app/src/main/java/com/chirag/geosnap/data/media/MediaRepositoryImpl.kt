@@ -237,6 +237,9 @@ class MediaRepositoryImpl @Inject constructor(
         BitmapFactory.decodeFile(sourceFile.absolutePath, bounds)
         val decodeOptions = BitmapFactory.Options().apply {
             inSampleSize = computeSampleSize(bounds.outWidth, bounds.outHeight, MAX_DECODE_EDGE)
+            // decodeFile() returns an immutable bitmap by default (API 26+); the canvas
+            // burn below needs to draw onto it, so request a mutable allocation.
+            inMutable = true
         }
         var base = BitmapFactory.decodeFile(sourceFile.absolutePath, decodeOptions)
             ?: throw IOException("Failed to decode ${sourceFile.absolutePath}")
