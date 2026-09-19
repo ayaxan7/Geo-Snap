@@ -38,12 +38,12 @@ fun CameraTopBar(
     flashEnabled: Boolean,
     hasFlash: Boolean,
     onBack: () -> Unit,
-    onFlash: () -> Unit
+    onFlash: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .background(Color.Black)
             .padding(horizontal = 24.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
@@ -51,7 +51,7 @@ fun CameraTopBar(
         // Timer icon
         IconButton(onClick = { /* TODO */ }) {
             Icon(
-                painter = painterResource(android.R.drawable.ic_menu_recent_history),
+                painter = painterResource(R.drawable.ic_timer),
                 contentDescription = "Timer",
                 tint = Color.White
             )
@@ -60,7 +60,7 @@ fun CameraTopBar(
         // Grid icon
         IconButton(onClick = { /* TODO */ }) {
             Icon(
-                painter = painterResource(android.R.drawable.ic_menu_manage),
+                painter = painterResource(R.drawable.ic_menu),
                 contentDescription = "Grid",
                 tint = Color.White
             )
@@ -88,12 +88,12 @@ fun CameraBottomControls(
     onModeSelected: (CameraMode) -> Unit,
     onCapture: () -> Unit,
     onFlip: () -> Unit,
-    onGallery: () -> Unit
+    onGallery: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .background(Color.Black)
             .padding(top = 16.dp, bottom = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -138,7 +138,7 @@ fun CameraBottomControls(
                     .border(1.dp, Color.White, CircleShape)
             ) {
                 Icon(
-                    painter = painterResource(android.R.drawable.ic_menu_gallery),
+                    painter = painterResource(R.drawable.ic_gallery),
                     contentDescription = "Gallery",
                     tint = Color.White
                 )

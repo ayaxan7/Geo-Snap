@@ -81,6 +81,17 @@ class CameraViewModelTest {
     }
 
     @Test
+    fun `switching mode to quick share in camera emits QuickShareRequested`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val vm = createViewModel() // enters as PHOTO
+            vm.setMode(CameraMode.QUICK_SHARE)
+            vm.capturePhoto()
+            advanceUntilIdle()
+            val event = withTimeoutOrNull(1000) { vm.events.first() }
+            assertTrue(event is CameraEvent.QuickShareRequested)
+        }
+
+    @Test
     fun `capture still succeeds when location is unavailable`() =
         runTest(mainDispatcherRule.scheduler) {
             val media = FakeMediaRepository()

@@ -18,14 +18,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
@@ -69,7 +71,6 @@ import com.chirag.geosnap.BuildConfig
 import com.chirag.geosnap.R
 import com.chirag.geosnap.presentation.camera.components.CameraBottomControls
 import com.chirag.geosnap.presentation.camera.components.CameraTopBar
-import com.chirag.geosnap.ui.theme.PrimaryGreen
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -171,74 +172,71 @@ fun CameraScreen(
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        containerColor = Color.Black
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .safeDrawingPadding()
-        ) {
+        containerColor = Color.Black,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0)
+    ) { _ ->
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Full-bleed camera preview
+            AndroidView(
+                factory = { previewView },
+                modifier = Modifier.fillMaxSize()
+            )
+
+            val bannerError = currentError
+            if (!uiState.isReady && bannerError != null) {
+                CameraUnavailableBanner(
+                    text = bannerError,
+                    modifier = Modifier.align(Alignment.TopCenter).padding(16.dp)
+                )
+            }
+
+            // Top bar overlay
             CameraTopBar(
                 mode = currentMode,
                 flashEnabled = uiState.flashEnabled,
                 hasFlash = uiState.hasFlash,
                 onBack = onBack,
-                onFlash = viewModel::toggleFlash
+                onFlash = viewModel::toggleFlash,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.TopCenter)
+                    .windowInsetsPadding(WindowInsets.systemBars)
             )
 
-            // Middle section with preview and overlay
-            Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                AndroidView(
-                    factory = { previewView },
-                    modifier = Modifier.fillMaxSize()
-                )
-
-                val bannerError = currentError
-                if (!uiState.isReady && bannerError != null) {
-                    CameraUnavailableBanner(
-                        text = bannerError,
-                        modifier = Modifier.align(Alignment.TopCenter).padding(16.dp)
-                    )
-                }
-
-                // Location Card Overlay
+            // Bottom overlays: location card above the controls
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+                    .windowInsetsPadding(WindowInsets.systemBars)
+            ) {
                 LocationCard(
                     uiState = uiState,
                     modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(16.dp)
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+
+                CameraBottomControls(
+                    uiState = uiState,
+                    mode = currentMode,
+                    onModeSelected = { newMode -> currentMode = newMode; viewModel.setMode(newMode) },
+                    onCapture = {
+                        when (currentMode) {
+                            CameraMode.PHOTO, CameraMode.QUICK_SHARE -> viewModel.capturePhoto()
+                            CameraMode.VIDEO -> if (uiState.isRecording) {
+                                viewModel.stopRecording()
+                            } else {
+                                viewModel.startRecording()
+                            }
+                        }
+                    },
+                    onFlip = viewModel::flipLensFacing,
+                    onGallery = {
+                        // Navigate to gallery (not passed directly to CameraScreen right now, so we placeholder)
+                    }
                 )
             }
-
-            CameraBottomControls(
-                uiState = uiState,
-                mode = currentMode,
-                onModeSelected = { newMode -> currentMode = newMode },
-                onCapture = {
-                    when (currentMode) {
-                        CameraMode.PHOTO, CameraMode.QUICK_SHARE -> viewModel.capturePhoto()
-                        CameraMode.VIDEO -> if (uiState.isRecording) {
-                            viewModel.stopRecording()
-                        } else {
-                            viewModel.startRecording()
-                        }
-                    }
-                },
-                onFlip = viewModel::flipLensFacing,
-                onGallery = {
-                    // Navigate to gallery (not passed directly to CameraScreen right now, so we placeholder)
-                }
-            )
-
-//            // Bottom Green Bar
-//            Box(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .height(64.dp)
-//                    .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
-//                    .background(PrimaryGreen)
-//            )
         }
     }
 }

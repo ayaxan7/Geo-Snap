@@ -224,6 +224,7 @@ class CameraXController(
             ?: throw CameraInitException("No active recording session")
 
         recording.stop()
+        _isRecording.value = false
         val file = session.awaitFinalize()
         activeRecording = null
         activeSession = null

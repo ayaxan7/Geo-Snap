@@ -49,9 +49,15 @@ class CameraViewModel @Inject constructor(
     private val isLocationEnabled: IsLocationEnabledUseCase
 ) : ViewModel() {
 
-    val mode: CameraMode = CameraMode.fromRoute(
+    var mode: CameraMode = CameraMode.fromRoute(
         savedStateHandle.get<String>(Destination.Camera.ARGUMENT_MODE)
     ) ?: CameraMode.PHOTO
+        private set
+
+    /** The UI lets the user switch modes in-camera; keep the VM in sync. */
+    fun setMode(newMode: CameraMode) {
+        mode = newMode
+    }
 
     init {
         checkLocationEnabled()
