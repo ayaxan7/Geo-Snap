@@ -10,10 +10,13 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 
 /**
- * Applies the persisted app language to any base context at `attachBaseContext`
- * time. Both the Activity (Compose UI) and the Application (Hilt
- * `@ApplicationContext`, used by the burn renderer) go through here so all
- * resources resolve against the chosen language.
+ * Applies the persisted app language to a base context at `attachBaseContext`
+ * time. The Activity (Compose UI) runs through [applyToContext], which can read
+ * DataStore because the Application already exists by then. The Application
+ * itself must use [wrapApplicationContext] instead: at its `attachBaseContext`
+ * moment `applicationContext` is still null and the DataStore singleton would
+ * NPE. Services that only have the app context (the burn renderer) resolve
+ * strings via [localizedContext].
  */
 object LocaleHelper {
 
@@ -27,28 +30,51 @@ object LocaleHelper {
     fun localeFor(code: String?): Locale =
         Locale(code?.takeIf { it in SUPPORTED_LANGUAGES } ?: DEFAULT_LANGUAGE)
 
+    /** Application attach path: no DataStore access, follows the system default. */
+    fun wrapApplicationContext(base: Context): Context {
+        val locale = localeFor(defaultFromSystem())
+        Locale.setDefault(locale)
+        return wrapWithLocale(base, locale)
+    }
+
+    /** Activity attach path: reads the stored language and applies it. */
     fun applyToContext(base: Context): Context {
         val code = storedLanguageCode(base)
         activeLanguageCode = code
         Locale.setDefault(localeFor(code))
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            return base.createConfigurationContext(
-                Configuration(base.resources.configuration).apply {
-                    setLocales(android.os.LocaleList(localeFor(code)))
-                }
-            )
-        }
-        @Suppress("DEPRECATION")
-        return base.createConfigurationContext(
-            Configuration(base.resources.configuration).apply {
-                setLocale(localeFor(code))
-            }
-        )
+        return wrapWithLocale(base, localeFor(code))
+    }
+
+    /** A context whose resources resolve against the stored language. */
+    fun localizedContext(context: Context): Context =
+        wrapWithLocale(context, localeFor(activeLanguageCode ?: defaultFromSystem()))
+
+    /** Refreshes the in-process language after the Application is fully created. */
+    suspend fun refreshLanguage(context: Context) {
+        val code = runCatching {
+            context.geoSnapDataStore.data.first()[SELECTED_LANGUAGE_KEY]
+        }.getOrNull()
+        activeLanguageCode = code ?: defaultFromSystem()
+        Locale.setDefault(localeFor(code ?: defaultFromSystem()))
     }
 
     private fun storedLanguageCode(base: Context): String =
-        runBlocking { base.geoSnapDataStore.data.first()[SELECTED_LANGUAGE_KEY] }
-            ?: defaultFromSystem()
+        runBlocking {
+            runCatching { base.geoSnapDataStore.data.first()[SELECTED_LANGUAGE_KEY] }
+                .getOrNull()
+        } ?: defaultFromSystem()
+
+    private fun wrapWithLocale(base: Context, locale: Locale): Context {
+        val configuration = Configuration(base.resources.configuration).apply {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                setLocales(android.os.LocaleList(locale))
+            } else {
+                @Suppress("DEPRECATION")
+                setLocale(locale)
+            }
+        }
+        return base.createConfigurationContext(configuration)
+    }
 
     private fun defaultFromSystem(): String {
         val system = Locale.getDefault().language.lowercase()

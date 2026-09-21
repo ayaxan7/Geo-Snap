@@ -12,6 +12,7 @@ import android.text.StaticLayout
 import android.text.TextPaint
 import android.text.TextUtils
 import com.chirag.geosnap.R
+import com.chirag.geosnap.core.LocaleHelper
 import com.chirag.geosnap.data.maps.StaticMapFetcher
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.text.SimpleDateFormat
@@ -43,6 +44,9 @@ class CanvasGeoTagOverlayRenderer @Inject constructor(
     }
 
     private fun renderCardToBitmap(content: GeoTagCardContent, mapBitmap: Bitmap?): Bitmap {
+        // The injected app context keeps its early system-locale resources, so
+        // resolve card copy against a context configured with the stored language.
+        val localizedContext = LocaleHelper.localizedContext(context)
         val density = context.resources.displayMetrics.density * DENSITY_SCALE
         fun dp(value: Float) = (value * density).toInt()
         fun sp(value: Float) = (value * density).toInt()
@@ -62,9 +66,9 @@ class CanvasGeoTagOverlayRenderer @Inject constructor(
         val cardText = "EEEE , dd/MM/yyyy - h:mm a"
         val dateText = SafeDateFormat.get(cardText).format(Date(content.timestamp))
 
-        val latLabel = context.getString(R.string.geotag_latitude)
-        val lngLabel = context.getString(R.string.geotag_longitude)
-        val fetchingLocation = context.getString(R.string.geotag_fetching_location)
+        val latLabel = localizedContext.getString(R.string.geotag_latitude)
+        val lngLabel = localizedContext.getString(R.string.geotag_longitude)
+        val fetchingLocation = localizedContext.getString(R.string.geotag_fetching_location)
         val coordinateText = "$latLabel: ${content.latitude?.let { "%.4f\u00B0".format(it) } ?: "--"} / " +
             "$lngLabel: ${content.longitude?.let { "%.4f\u00B0".format(it) } ?: "--"}"
 
@@ -132,7 +136,13 @@ class CanvasGeoTagOverlayRenderer @Inject constructor(
             (padding + mapSize).toFloat(),
             (top + mapSize).toFloat()
         )
-        drawMapThumbnail(canvas, mapRect, mapBitmap, density)
+        drawMapThumbnail(
+            canvas,
+            mapRect,
+            mapBitmap,
+            density,
+            localizedContext.getString(R.string.geotag_map)
+        )
 
         val textLeft = (padding + mapSize + rowGap).toFloat()
         var y = top.toFloat() - addressPaint.fontMetrics.ascent // align top of first line
@@ -159,7 +169,8 @@ class CanvasGeoTagOverlayRenderer @Inject constructor(
         canvas: Canvas,
         rect: RectF,
         mapBitmap: Bitmap?,
-        density: Float
+        density: Float,
+        mapLabel: String
     ) {
         val corner = 8 * density
         val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -197,12 +208,7 @@ class CanvasGeoTagOverlayRenderer @Inject constructor(
             }
             val baseline =
                 (rect.centerY() - (textPaint.descent() + textPaint.ascent()) / 2)
-            canvas.drawText(
-                context.getString(R.string.geotag_map),
-                rect.centerX(),
-                baseline,
-                textPaint
-            )
+            canvas.drawText(mapLabel, rect.centerX(), baseline, textPaint)
         }
     }
 
