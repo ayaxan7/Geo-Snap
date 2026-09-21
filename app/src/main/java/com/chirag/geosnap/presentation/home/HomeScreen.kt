@@ -30,6 +30,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -74,12 +75,12 @@ fun HomeScreen(
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Image(
                     painter = painterResource(R.drawable.geo_snap_icon),
-                    contentDescription = "Logo",
+                    contentDescription = stringResource(R.string.home_logo),
                     modifier = Modifier.size(40.dp)
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "GeoSnap",
+                    text = stringResource(R.string.app_name),
                     color = PrimaryGreen,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
@@ -88,7 +89,7 @@ fun HomeScreen(
             IconButton(onClick = { /* TODO: Open settings */ }) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_settings),
-                    contentDescription = "Settings",
+                    contentDescription = stringResource(R.string.home_settings),
                     tint = PrimaryGreen,
                     modifier = Modifier.size(24.dp)
                 )
@@ -105,7 +106,7 @@ fun HomeScreen(
         ) {
             Image(
                 painter = painterResource(id = R.drawable.home_india),
-                contentDescription = "India Map",
+                contentDescription = stringResource(R.string.home_india_map),
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Fit
             )
@@ -131,13 +132,13 @@ fun HomeScreen(
                 ) {
                     ActionCard(
                         iconRes = R.drawable.ic_take_photo,
-                        title = "Take Photo",
-                        subtitle = "Capture with location",
+                        title = stringResource(R.string.home_take_photo),
+                        subtitle = stringResource(R.string.home_take_photo_desc),
                         onClick = { onTakePhoto() })
                     ActionCard(
                         iconRes = R.drawable.ic_quick_share,
-                        title = "Quick Share",
-                        subtitle = "Capture & share instantly",
+                        title = stringResource(R.string.home_quick_share),
+                        subtitle = stringResource(R.string.home_quick_share_desc),
                         onClick = { onQuickShare() })
                 }
                 Column(
@@ -146,13 +147,13 @@ fun HomeScreen(
                 ) {
                     ActionCard(
                         iconRes = R.drawable.ic_take_video,
-                        title = "Take Video",
-                        subtitle = "Record with location",
+                        title = stringResource(R.string.home_take_video),
+                        subtitle = stringResource(R.string.home_take_video_desc),
                         onClick = { onTakeVideo() })
                     ActionCard(
                         iconRes = R.drawable.ic_gallery,
-                        title = "Gallery",
-                        subtitle = "Customize your shot",
+                        title = stringResource(R.string.home_gallery),
+                        subtitle = stringResource(R.string.home_gallery_desc),
                         onClick = { onOpenGallery() })
                 }
             }

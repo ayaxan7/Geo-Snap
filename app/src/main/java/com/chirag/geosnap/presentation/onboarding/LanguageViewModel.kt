@@ -61,6 +61,10 @@ class LanguageViewModel @Inject constructor(
         _uiState.update { it.copy(saving = true) }
         viewModelScope.launch {
             try {
+                val currentCode = _uiState.value.selectedCode
+                if (currentCode != null) {
+                    setSelectedLanguage(currentCode)
+                }
                 completeOnboarding()
                 onCompleted()
             } finally {

@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -57,8 +58,9 @@ fun GeoTagCard(
         "API Key: ${BuildConfig.MAPS_API_KEY}, Lat: ${content.latitude}, Lng: ${content.longitude}," +
             " city: ${content.cityString}, Address: ${content.fullAddress}"
     )
-    val cityText = content.cityString ?: "Fetching location..."
-    val fullAddressText = content.fullAddress ?: content.cityString ?: "Fetching location..."
+    val fetchingText = stringResource(R.string.geotag_fetching_location)
+    val cityText = content.cityString ?: fetchingText
+    val fullAddressText = content.fullAddress ?: content.cityString ?: fetchingText
 
     Row(
         modifier = modifier
@@ -102,8 +104,10 @@ fun GeoTagCard(
             }
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "LAT: ${content.latitude?.let { "%.4f°".format(it) } ?: "--"} / " +
-                    "LOG: ${content.longitude?.let { "%.4f°".format(it) } ?: "--"}",
+                text = stringResource(R.string.geotag_latitude) + ": " +
+                    "${content.latitude?.let { "%.4f°".format(it) } ?: "--"} / " +
+                    stringResource(R.string.geotag_longitude) + ": " +
+                    "${content.longitude?.let { "%.4f°".format(it) } ?: "--"}",
                 color = Color.White,
                 fontSize = 11.sp
             )
@@ -111,7 +115,7 @@ fun GeoTagCard(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     painter = painterResource(android.R.drawable.ic_menu_today),
-                    contentDescription = "Date",
+                    contentDescription = stringResource(R.string.geotag_date),
                     tint = Color.White,
                     modifier = Modifier.size(12.dp)
                 )
@@ -137,7 +141,7 @@ fun GeoTagCard(
         ) {
             Image(
                 painter = painterResource(R.drawable.geo_snap_icon),
-                contentDescription = "Our Logo",
+                contentDescription = stringResource(R.string.geotag_logo),
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.FillBounds
             )
@@ -156,18 +160,18 @@ private fun MapThumbnail(image: Any?) {
         when (image) {
             is Bitmap -> Image(
                 bitmap = image.asImageBitmap(),
-                contentDescription = "Static Map",
+                contentDescription = stringResource(R.string.geotag_static_map),
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
             is String -> AsyncImage(
                 model = image,
-                contentDescription = "Static Map",
+                contentDescription = stringResource(R.string.geotag_static_map),
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
             else -> Text(
-                text = "Map",
+                text = stringResource(R.string.geotag_map),
                 modifier = Modifier.align(Alignment.Center),
                 color = Color.White
             )

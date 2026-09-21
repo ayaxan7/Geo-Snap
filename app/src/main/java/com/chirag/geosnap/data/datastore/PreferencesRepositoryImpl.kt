@@ -14,6 +14,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 
+/** Shared key so startup locale application can read the persisted language off the same DataStore. */
+internal val SELECTED_LANGUAGE_KEY = stringPreferencesKey("selected_language")
+
 @Singleton
 class PreferencesRepositoryImpl @Inject constructor(
     private val dataStore: DataStore<Preferences>

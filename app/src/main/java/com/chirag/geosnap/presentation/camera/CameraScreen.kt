@@ -133,7 +133,7 @@ fun CameraScreen(
         if (currentError != null && currentError.lowercase() !="null") {
             snackbarHostState.currentSnackbarData?.dismiss()
             snackbarHostState.showSnackbar(
-                message = "Error: $currentError"
+                message = context.getString(R.string.camera_error_snackbar, currentError)
             )
             Log.d("CameraScreen", "Error: $currentError")
             viewModel.clearError()

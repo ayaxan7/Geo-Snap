@@ -24,6 +24,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import android.Manifest
+import android.app.Activity
 import android.content.pm.PackageManager
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.platform.LocalContext
@@ -107,9 +108,14 @@ internal fun GeoSnapNavHost(startDestination: String, isAlreadyOnboarded: Boolea
         }
 
         composable(Destination.Language.route) {
+            val activity = LocalContext.current as? Activity
             LanguageScreen(
                 onBack = navController::popBackStack,
-                onCompleted = navController::navigateToHome
+                onCompleted = {
+                    navController.navigateToHome()
+                    // Recreate so the just-chosen language is applied app-wide.
+                    activity?.recreate()
+                }
             )
         }
 

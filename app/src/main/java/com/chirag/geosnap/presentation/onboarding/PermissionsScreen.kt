@@ -258,7 +258,7 @@ private fun PermissionsContent(
 //                    Spacer(modifier = Modifier.width(8.dp))
 
                     Text(
-                        text = "I agree to the Permissions, Terms & Conditions, and Privacy Policy.",
+                        text = stringResource(R.string.permissions_agree),
                         style = MaterialTheme.typography.bodyMedium.copy(
                             platformStyle = PlatformTextStyle(
                                 includeFontPadding = false
@@ -272,7 +272,7 @@ private fun PermissionsContent(
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 CommonButton(
-                    text = "Get Started",
+                    text = stringResource(R.string.permissions_get_started),
                     enabled = isAgreed,
                     onClick = {
                         val requestable = viewModelRequestable(uiState)

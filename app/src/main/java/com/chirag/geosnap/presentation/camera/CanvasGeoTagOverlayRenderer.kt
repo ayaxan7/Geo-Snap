@@ -62,8 +62,11 @@ class CanvasGeoTagOverlayRenderer @Inject constructor(
         val cardText = "EEEE , dd/MM/yyyy - h:mm a"
         val dateText = SafeDateFormat.get(cardText).format(Date(content.timestamp))
 
-        val coordinateText = "LAT: ${content.latitude?.let { "%.4f\u00B0".format(it) } ?: "--"} / " +
-            "LOG: ${content.longitude?.let { "%.4f\u00B0".format(it) } ?: "--"}"
+        val latLabel = context.getString(R.string.geotag_latitude)
+        val lngLabel = context.getString(R.string.geotag_longitude)
+        val fetchingLocation = context.getString(R.string.geotag_fetching_location)
+        val coordinateText = "$latLabel: ${content.latitude?.let { "%.4f\u00B0".format(it) } ?: "--"} / " +
+            "$lngLabel: ${content.longitude?.let { "%.4f\u00B0".format(it) } ?: "--"}"
 
         val cityPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.WHITE
@@ -88,12 +91,12 @@ class CanvasGeoTagOverlayRenderer @Inject constructor(
                 .build()
 
         val cityLayout = measure(
-            content.cityString ?: "Fetching location...",
+            content.cityString ?: fetchingLocation,
             cityPaint,
             maxLines = 1
         )
         val addressLayout = measure(
-            content.fullAddress ?: content.cityString ?: "Fetching location...",
+            content.fullAddress ?: content.cityString ?: fetchingLocation,
             addressPaint,
             maxLines = 2
         )
@@ -194,7 +197,12 @@ class CanvasGeoTagOverlayRenderer @Inject constructor(
             }
             val baseline =
                 (rect.centerY() - (textPaint.descent() + textPaint.ascent()) / 2)
-            canvas.drawText("Map", rect.centerX(), baseline, textPaint)
+            canvas.drawText(
+                context.getString(R.string.geotag_map),
+                rect.centerX(),
+                baseline,
+                textPaint
+            )
         }
     }
 

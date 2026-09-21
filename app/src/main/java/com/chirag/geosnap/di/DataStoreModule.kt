@@ -11,7 +11,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
-private val Context.geoSnapDataStore: DataStore<Preferences> by preferencesDataStore(
+internal val Context.geoSnapDataStore: DataStore<Preferences> by preferencesDataStore(
     name = "geosnap_preferences"
 )
 

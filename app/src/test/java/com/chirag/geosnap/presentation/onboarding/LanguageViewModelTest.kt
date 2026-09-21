@@ -73,4 +73,20 @@ class LanguageViewModelTest {
             assertFalse(vm.uiState.value.saving)
             assertEquals(1, completed)
         }
+
+    @Test
+    fun `confirm persists the selected language before completing`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val repository = FakePreferencesRepository()
+            val vm = createViewModel(repository)
+
+            advanceUntilIdle()
+            vm.selectLanguage("ta")
+            advanceUntilIdle()
+            vm.confirmAndContinue {}
+            advanceUntilIdle()
+
+            assertEquals("ta", repository.languageValue)
+            assertTrue(repository.onboardingValue)
+        }
 }

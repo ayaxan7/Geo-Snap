@@ -1,0 +1,96 @@
+<resources>
+    <string name="app_name">GeoSnap</string>
+
+    <string name="loading">లోడ్ అవుతోంది…</string>
+
+    <string name="permissions_title">యాప్ అనుమతులు</string>
+    <string name="permissions_subtitle_header">GeoSnapకి కావాల్సిన అనుమతులు</string>
+    <string name="permissions_subtitle">షాట్లకు ఖచ్చితమైన లొకేషన్ జతచేస్తుంది.</string>
+    <string name="permissions_allow">అనుమతించు</string>
+    <string name="permissions_open_settings">సెట్టింగ్స్ తెరవండి</string>
+    <string name="permissions_granted">అనుమతి ఇచ్చారు</string>
+    <string name="permissions_denied">తిరస్కరించారు</string>
+    <string name="permissions_status_needed">అవసరం</string>
+    <string name="permissions_permanently_denied">తిరస్కరించారు — సెట్టింగ్స్లో ఆన్ చేయండి</string>
+    <string name="permissions_agree">నిబంధనలు &amp; ప్రైవసీ పాలసీకి అంగీకరిస్తున్నాను.</string>
+    <string name="permissions_get_started">ప్రారంభించండి</string>
+
+    <string name="permission_camera_label">కెమెరా</string>
+    <string name="permission_camera_description">ఫోటోలు, వీడియోలు తీయండి.</string>
+    <string name="permission_microphone_label">మైక్రోఫోన్</string>
+    <string name="permission_microphone_description">వీడియోలకు ఆడియో రికార్డ్ చేయండి.</string>
+    <string name="permission_location_label">లొకేషన్</string>
+    <string name="permission_location_description">షాట్లకు చిరునామా, నిర్దేశాంకాలు జతచేయండి.</string>
+    <string name="permission_coarse_location_label">లొకేషన్</string>
+    <string name="permission_coarse_location_description">షాట్లకు చిరునామా, నిర్దేశాంకాలు జతచేయండి.</string>
+    <string name="permission_storage_label">ఫోటోలు &amp; మీడియా</string>
+    <string name="permission_storage_description">షాట్లను సేవ్ చేయండి, ఎంచుకోండి.</string>
+    <string name="permission_notifications_label">నోటిఫికేషన్లు</string>
+    <string name="permission_notifications_description">అప్డేట్లు, రిమైండర్లు పంపండి.</string>
+
+    <string name="location_dialog_title">లొకేషన్ ఆఫ్ చేయబడింది</string>
+    <string name="location_dialog_message">GPS ట్యాగింగ్ కోసం లొకేషన్ ఆన్ చేయండి.</string>
+    <string name="location_dialog_turn_on">ఆన్ చేయండి</string>
+    <string name="location_dialog_not_now">ఇప్పుడు కాదు</string>
+
+    <string name="language_title">మీ భాషను ఎంచుకోండి</string>
+    <string name="language_subtitle">యాప్ మొత్తంలో వర్తిస్తుంది.</string>
+    <string name="language_continue">కొనసాగించండి</string>
+
+    <string name="home_tagline">తీయండి. ట్యాగ్ చేయండి. షేర్ చేయండి.</string>
+    <string name="home_take_photo">ఫోటో తీయండి</string>
+    <string name="home_take_photo_desc">లొకేషన్తో తీయండి</string>
+    <string name="home_take_video">వీడియో తీయండి</string>
+    <string name="home_take_video_desc">లొకేషన్తో రికార్డ్ చేయండి</string>
+    <string name="home_quick_share">క్విక్ షేర్</string>
+    <string name="home_quick_share_desc">ఇప్పుడే తీసి షేర్ చేయండి</string>
+    <string name="home_gallery">గ్యాలరీ</string>
+    <string name="home_gallery_desc">మీ షాట్ను ఎడిట్ చేయండి</string>
+    <string name="home_logo">లోగో</string>
+    <string name="home_settings">సెట్టింగ్స్</string>
+    <string name="home_india_map">ఇండియా మ్యాప్</string>
+
+    <string name="camera_back">వెనుకకు</string>
+    <string name="camera_flip">కెమెరా మార్చండి</string>
+    <string name="camera_flash">ఫ్లాష్</string>
+    <string name="camera_capture">క్యాప్చర్</string>
+    <string name="camera_quick_share_hint">వెంటనే షేర్ చేయడానికి ఫోటో తీయండి</string>
+    <string name="camera_recording">రికార్డింగ్</string>
+    <string name="camera_photo_saved">గ్యాలరీలో ఫోటో సేవ్ చేయబడింది</string>
+    <string name="camera_video_saved">గ్యాలరీలో వీడియో సేవ్ చేయబడింది</string>
+    <string name="camera_share_again">మరోసారి షేర్ చేయండి</string>
+    <string name="camera_mode_photo">ఫోటో</string>
+    <string name="camera_mode_quick_share">క్విక్ షేర్</string>
+    <string name="camera_mode_video">వీడియో</string>
+    <string name="camera_timer">టైమర్</string>
+    <string name="camera_grid">గ్రిడ్</string>
+    <string name="camera_gallery">గ్యాలరీ</string>
+
+    <string name="camera_error_unavailable">ఈ పరికరంలో కెమెరా లేదు.</string>
+    <string name="camera_error_permission">కెమెరా అనుమతి అవసరం.</string>
+    <string name="camera_error_init">కెమెరా ప్రారంభించలేకపోయింది.</string>
+    <string name="camera_error_capture">ఫోటో తీయలేకపోయింది. మళ్లీ ప్రయత్నించండి.</string>
+    <string name="camera_error_record">రికార్డింగ్ ప్రారంభించలేకపోయింది. మళ్లీ ప్రయత్నించండి.</string>
+    <string name="camera_error_save">మీడియా సేవ్ చేయలేదు. స్టోరేజ్ను తనిఖీ చేయండి.</string>
+    <string name="camera_error_generic">కెమెరాలో సమస్య ఏర్పడింది.</string>
+    <string name="camera_error_snackbar">లోపం: %1$s</string>
+
+    <string name="share_title">వీటి ద్వారా షేర్ చేయండి</string>
+    <string name="share_image">GeoSnap ఫోటో</string>
+    <string name="share_error">షేర్ చేయడానికి యాప్ లేదు.</string>
+
+    <string name="gallery_title">గ్యాలరీ</string>
+    <string name="gallery_empty">మీడియా లేదు.\nమీ షాట్లు ఇక్కడ కనిపిస్తాయి.</string>
+    <string name="gallery_error">మీడియా లోడ్ చేయలేదు.</string>
+    <string name="retry">మళ్లీ ప్రయత్నించండి</string>
+
+    <string name="geotag_fetching_location">లొకేషన్ తెలుసుకుంటోంది…</string>
+    <string name="geotag_latitude">Lat</string>
+    <string name="geotag_longitude">Lng</string>
+    <string name="geotag_date">తేదీ</string>
+    <string name="geotag_map">మ్యాప్</string>
+    <string name="geotag_static_map">మ్యాప్</string>
+    <string name="geotag_logo">లోగో</string>
+
+    <string name="error_generic">ఏదో లోపం జరిగింది. మళ్లీ ప్రయత్నించండి.</string>
+</resources>

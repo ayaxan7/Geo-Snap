@@ -52,7 +52,7 @@ fun CameraTopBar(
         IconButton(onClick = { /* TODO */ }) {
             Icon(
                 painter = painterResource(R.drawable.ic_timer),
-                contentDescription = "Timer",
+                contentDescription = stringResource(R.string.camera_timer),
                 tint = Color.White
             )
         }
@@ -61,7 +61,7 @@ fun CameraTopBar(
         IconButton(onClick = { /* TODO */ }) {
             Icon(
                 painter = painterResource(R.drawable.ic_menu),
-                contentDescription = "Grid",
+                contentDescription = stringResource(R.string.camera_grid),
                 tint = Color.White
             )
         }
@@ -104,17 +104,17 @@ fun CameraBottomControls(
             verticalAlignment = Alignment.CenterVertically
         ) {
             ModeText(
-                text = "Photo",
+                text = stringResource(R.string.camera_mode_photo),
                 isSelected = mode == CameraMode.PHOTO,
                 onClick = { onModeSelected(CameraMode.PHOTO) }
             )
             ModeText(
-                text = "Quick Share",
+                text = stringResource(R.string.camera_mode_quick_share),
                 isSelected = mode == CameraMode.QUICK_SHARE,
                 onClick = { onModeSelected(CameraMode.QUICK_SHARE) }
             )
             ModeText(
-                text = "Video",
+                text = stringResource(R.string.camera_mode_video),
                 isSelected = mode == CameraMode.VIDEO,
                 onClick = { onModeSelected(CameraMode.VIDEO) }
             )
@@ -139,7 +139,7 @@ fun CameraBottomControls(
             ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_gallery),
-                    contentDescription = "Gallery",
+                    contentDescription = stringResource(R.string.camera_gallery),
                     tint = Color.White
                 )
             }

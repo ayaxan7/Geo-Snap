@@ -1,0 +1,96 @@
+<resources>
+    <string name="app_name">GeoSnap</string>
+
+    <string name="loading">ಲೋಡ್ ಆಗುತ್ತಿದೆ…</string>
+
+    <string name="permissions_title">ಅಪ್ ಅನುಮತಿಗಳು</string>
+    <string name="permissions_subtitle_header">GeoSnapಗೆ ಬೇಕಾದ ಅನುಮತಿಗಳು</string>
+    <string name="permissions_subtitle">ಶಾಟ್ಗಳಿಗೆ ನಿಖರ ಸ್ಥಳ ಸೇರಿಸುತ್ತದೆ.</string>
+    <string name="permissions_allow">ಅನುಮತಿಸು</string>
+    <string name="permissions_open_settings">ಸೆಟ್ಟಿಂಗ್ಸ್ ತೆರೆಯಿರಿ</string>
+    <string name="permissions_granted">ಅನುಮತಿ ನೀಡಲಾಗಿದೆ</string>
+    <string name="permissions_denied">ನಿರಾಕರಿಸಲಾಗಿದೆ</string>
+    <string name="permissions_status_needed">ಅಗತ್ಯ</string>
+    <string name="permissions_permanently_denied">ನಿರಾಕರಿಸಲಾಗಿದೆ — ಸೆಟ್ಟಿಂಗ್ಸ್ನಲ್ಲಿ ಆನ್ ಮಾಡಿ</string>
+    <string name="permissions_agree">ನಿಯಮಗಳು &amp; ಗೌಪ್ಯತಾ ನೀತಿಗೆ ಒಪ್ಪುತ್ತೇನೆ.</string>
+    <string name="permissions_get_started">ಪ್ರಾರಂಭಿಸಿ</string>
+
+    <string name="permission_camera_label">ಕ್ಯಾಮೆರಾ</string>
+    <string name="permission_camera_description">ಫೋಟೋ, ವೀಡಿಯೋ ತೆಗೆಯಿರಿ.</string>
+    <string name="permission_microphone_label">ಮೈಕ್ರೊಫೋನ್</string>
+    <string name="permission_microphone_description">ವೀಡಿಯೋಗಳಿಗೆ ಧ್ವನಿ ರೆಕಾರ್ಡ್ ಮಾಡಿ.</string>
+    <string name="permission_location_label">ಸ್ಥಳ</string>
+    <string name="permission_location_description">ಶಾಟ್ಗಳಿಗೆ ವಿಳಾಸ, ನಿರ್ದೇಶಾಂಕ ಸೇರಿಸಿ.</string>
+    <string name="permission_coarse_location_label">ಸ್ಥಳ</string>
+    <string name="permission_coarse_location_description">ಶಾಟ್ಗಳಿಗೆ ವಿಳಾಸ, ನಿರ್ದೇಶಾಂಕ ಸೇರಿಸಿ.</string>
+    <string name="permission_storage_label">ಫೋಟೋ &amp; ಮೀಡಿಯಾ</string>
+    <string name="permission_storage_description">ಶಾಟ್ಗಳನ್ನು ಉಳಿಸಿ, ಆಯ್ಕೆಮಾಡಿ.</string>
+    <string name="permission_notifications_label">ಅಧಿಸೂಚನೆಗಳು</string>
+    <string name="permission_notifications_description">ಅಪ್ಡೇಟ್, ಜ್ಞಾಪನೆಗಳನ್ನು ಕಳುಹಿಸಿ.</string>
+
+    <string name="location_dialog_title">ಸ್ಥಳ ಆಫ್ ಆಗಿದೆ</string>
+    <string name="location_dialog_message">GPS ಟ್ಯಾಗ್ಗೆ ಸ್ಥಳವನ್ನು ಆನ್ ಮಾಡಿ.</string>
+    <string name="location_dialog_turn_on">ಆನ್ ಮಾಡಿ</string>
+    <string name="location_dialog_not_now">ಈಗಲ್ಲ</string>
+
+    <string name="language_title">ನಿಮ್ಮ ಭಾಷೆ ಆಯ್ಕೆಮಾಡಿ</string>
+    <string name="language_subtitle">ಅಪ್ಪುದ್ದಕ್ಕೂ ಅನ್ವಯಿಸುತ್ತದೆ.</string>
+    <string name="language_continue">ಮುಂದುವರಿಸಿ</string>
+
+    <string name="home_tagline">ತೆಗೆದುಕೊಳ್ಳಿ. ಟ್ಯಾಗ್ ಮಾಡಿ. ಹಂಚಿಕೊಳ್ಳಿ.</string>
+    <string name="home_take_photo">ಫೋಟೋ ತೆಗೆಯಿರಿ</string>
+    <string name="home_take_photo_desc">ಸ್ಥಳ ಜೊತೆ ತೆಗೆಯಿರಿ</string>
+    <string name="home_take_video">ವೀಡಿಯೋ ತೆಗೆಯಿರಿ</string>
+    <string name="home_take_video_desc">ಸ್ಥಳ ಜೊತೆ ರೆಕಾರ್ಡ್ ಮಾಡಿ</string>
+    <string name="home_quick_share">ಕ್ವಿಕ್ ಶೇರ್</string>
+    <string name="home_quick_share_desc">ಈಗಲೇ ತೆಗೆದು ಹಂಚಿ</string>
+    <string name="home_gallery">ಗ್ಯಾಲರಿ</string>
+    <string name="home_gallery_desc">ನಿಮ್ಮ ಶಾಟ್ ಕಸ್ಟಮೈಜ್ ಮಾಡಿ</string>
+    <string name="home_logo">ಲೋಗೋ</string>
+    <string name="home_settings">ಸೆಟ್ಟಿಂಗ್ಸ್</string>
+    <string name="home_india_map">ಭಾರತ ನಕ್ಷೆ</string>
+
+    <string name="camera_back">ಹಿಂದೆ</string>
+    <string name="camera_flip">ಕ್ಯಾಮೆರಾ ಬದಲಿಸಿ</string>
+    <string name="camera_flash">ಫ್ಲ್ಯಾಷ್</string>
+    <string name="camera_capture">ಕ್ಯಾಪ್ಚರ್</string>
+    <string name="camera_quick_share_hint">ತಕ್ಷಣ ಹಂಚಲು ಫೋಟೋ ತೆಗೆಯಿರಿ</string>
+    <string name="camera_recording">ರೆಕಾರ್ಡಿಂಗ್</string>
+    <string name="camera_photo_saved">ಫೋಟೋ ಗ್ಯಾಲರಿಯಲ್ಲಿ ಉಳಿಸಲಾಗಿದೆ</string>
+    <string name="camera_video_saved">ವೀಡಿಯೋ ಗ್ಯಾಲರಿಯಲ್ಲಿ ಉಳಿಸಲಾಗಿದೆ</string>
+    <string name="camera_share_again">ಮತ್ತೆ ಹಂಚಿ</string>
+    <string name="camera_mode_photo">ಫೋಟೋ</string>
+    <string name="camera_mode_quick_share">ಕ್ವಿಕ್ ಶೇರ್</string>
+    <string name="camera_mode_video">ವೀಡಿಯೋ</string>
+    <string name="camera_timer">ಟೈಮರ್</string>
+    <string name="camera_grid">ಗ್ರಿಡ್</string>
+    <string name="camera_gallery">ಗ್ಯಾಲರಿ</string>
+
+    <string name="camera_error_unavailable">ಈ ಸಾಧನದಲ್ಲಿ ಕ್ಯಾಮೆರಾ ಇಲ್ಲ.</string>
+    <string name="camera_error_permission">ಕ್ಯಾಮೆರಾ ಅನುಮತಿ ಅಗತ್ಯ.</string>
+    <string name="camera_error_init">ಕ್ಯಾಮೆರಾ ಪ್ರಾರಂಭಿಸಲಾಗಲಿಲ್ಲ.</string>
+    <string name="camera_error_capture">ಫೋಟೋ ತೆಗೆಯಲಾಗಲಿಲ್ಲ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
+    <string name="camera_error_record">ರೆಕಾರ್ಡಿಂಗ್ ಪ್ರಾರಂಭಿಸಲಾಗಲಿಲ್ಲ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
+    <string name="camera_error_save">ಮೀಡಿಯಾ ಉಳಿಸಲಿಲ್ಲ. ಸಂಗ್ರಹ ಪರಿಶೀಲಿಸಿ.</string>
+    <string name="camera_error_generic">ಕ್ಯಾಮೆರಾದಲ್ಲಿ ಸಮಸ್ಯೆ ಉಂಟಾಯಿತು.</string>
+    <string name="camera_error_snackbar">ದೋಷ: %1$s</string>
+
+    <string name="share_title">ಇವುಗಳ ಮೂಲಕ ಹಂಚಿ</string>
+    <string name="share_image">GeoSnap ಫೋಟೋ</string>
+    <string name="share_error">ಹಂಚಲು ಯಾವುದೇ ಅಪ್ ಇಲ್ಲ.</string>
+
+    <string name="gallery_title">ಗ್ಯಾಲರಿ</string>
+    <string name="gallery_empty">ಮೀಡಿಯಾ ಇಲ್ಲ.\nನಿಮ್ಮ ಶಾಟ್ಗಳು ಇಲ್ಲಿ ಕಾಣಿಸುತ್ತವೆ.</string>
+    <string name="gallery_error">ಮೀಡಿಯಾ ಲೋಡ್ ಆಗಲಿಲ್ಲ.</string>
+    <string name="retry">ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ</string>
+
+    <string name="geotag_fetching_location">ಸ್ಥಳ ಪಡೆಯುತ್ತಿದೆ…</string>
+    <string name="geotag_latitude">Lat</string>
+    <string name="geotag_longitude">Lng</string>
+    <string name="geotag_date">ದಿನಾಂಕ</string>
+    <string name="geotag_map">ನಕ್ಷೆ</string>
+    <string name="geotag_static_map">ನಕ್ಷೆ</string>
+    <string name="geotag_logo">ಲೋಗೋ</string>
+
+    <string name="error_generic">ಏನೋ ತಪ್ಪಾಗಿದೆ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
+</resources>

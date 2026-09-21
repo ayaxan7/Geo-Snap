@@ -33,6 +33,7 @@ import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -75,7 +76,7 @@ private fun LanguageContent(
     ) {
         Spacer(Modifier.height(24.dp))
         Text(
-            text = "Choose your language",
+            text = stringResource(R.string.language_title),
             style = MaterialTheme.typography.headlineMedium,
             color = Color.White,
             fontWeight = FontWeight.Bold,
@@ -84,7 +85,7 @@ private fun LanguageContent(
         )
         Spacer(Modifier.height(8.dp))
         Text(
-            text = "Select your preferred language to continue",
+            text = stringResource(R.string.language_subtitle),
             style = MaterialTheme.typography.bodyLarge,
             color = Color.LightGray,
             textAlign = TextAlign.Center,
@@ -122,7 +123,7 @@ private fun LanguageContent(
                 .height(56.dp)
         ) {
             Text(
-                text = "Select Language", fontSize = 18.sp, fontWeight = FontWeight.Bold
+                text = stringResource(R.string.language_continue), fontSize = 18.sp, fontWeight = FontWeight.Bold
             )
         }
         Spacer(Modifier.height(8.dp))
