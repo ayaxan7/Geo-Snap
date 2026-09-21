@@ -123,7 +123,7 @@ private fun LanguageContent(
                 .height(56.dp)
         ) {
             Text(
-                text = stringResource(R.string.language_continue), fontSize = 18.sp, fontWeight = FontWeight.Bold
+                text = stringResource(R.string.language_select), fontSize = 18.sp, fontWeight = FontWeight.Bold
             )
         }
         Spacer(Modifier.height(8.dp))

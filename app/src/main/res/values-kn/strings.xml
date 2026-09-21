@@ -4,61 +4,62 @@
     <string name="loading">ಲೋಡ್ ಆಗುತ್ತಿದೆ…</string>
 
     <string name="permissions_title">ಅಪ್ ಅನುಮತಿಗಳು</string>
-    <string name="permissions_subtitle_header">GeoSnapಗೆ ಬೇಕಾದ ಅನುಮತಿಗಳು</string>
-    <string name="permissions_subtitle">ಶಾಟ್ಗಳಿಗೆ ನಿಖರ ಸ್ಥಳ ಸೇರಿಸುತ್ತದೆ.</string>
+    <string name="permissions_subtitle_header">GeoSnap ಬಳಸಲು ನಮಗೆ ಈ ಕೆಳಗಿನ ಅನುಮತಿಗಳು ಬೇಕಾಗುತ್ತವೆ</string>
+    <string name="permissions_subtitle">ಈ ಅನುಮತಿಗಳು GeoSnap ನಿಖರವಾದ ಸ್ಥಳ ವಿವರಗಳೊಂದಿಗೆ ಫೋಟೋಗಳು ಮತ್ತು ವೀಡಿಯೋಗಳನ್ನು ಕ್ಯಾಪ್ಚರ್ ಮಾಡಲು ಸಹಾಯ ಮಾಡುತ್ತವೆ.</string>
     <string name="permissions_allow">ಅನುಮತಿಸು</string>
     <string name="permissions_open_settings">ಸೆಟ್ಟಿಂಗ್ಸ್ ತೆರೆಯಿರಿ</string>
     <string name="permissions_granted">ಅನುಮತಿ ನೀಡಲಾಗಿದೆ</string>
     <string name="permissions_denied">ನಿರಾಕರಿಸಲಾಗಿದೆ</string>
     <string name="permissions_status_needed">ಅಗತ್ಯ</string>
-    <string name="permissions_permanently_denied">ನಿರಾಕರಿಸಲಾಗಿದೆ — ಸೆಟ್ಟಿಂಗ್ಸ್ನಲ್ಲಿ ಆನ್ ಮಾಡಿ</string>
-    <string name="permissions_agree">ನಿಯಮಗಳು &amp; ಗೌಪ್ಯತಾ ನೀತಿಗೆ ಒಪ್ಪುತ್ತೇನೆ.</string>
-    <string name="permissions_get_started">ಪ್ರಾರಂಭಿಸಿ</string>
+    <string name="permissions_permanently_denied">ಶಾಶ್ವತವಾಗಿ ನಿರಾಕರಿಸಲಾಗಿದೆ — ಸೆಟ್ಟಿಂಗ್ಸ್ನಲ್ಲಿ ಇದನ್ನು ಆನ್ ಮಾಡಿ</string>
+    <string name="permissions_agree">ಅನುಮತಿಗಳು, ನಿಯಮಗಳು &amp; ಷರತ್ತುಗಳು ಮತ್ತು ಗೌಪ್ಯತಾ ನೀತಿಗೆ ನಾನು ಒಪ್ಪುತ್ತೇನೆ.</string>
+    <string name="permissions_get_started">ಪ್ರಾರಂಭಿಸೋಣ</string>
 
     <string name="permission_camera_label">ಕ್ಯಾಮೆರಾ</string>
-    <string name="permission_camera_description">ಫೋಟೋ, ವೀಡಿಯೋ ತೆಗೆಯಿರಿ.</string>
+    <string name="permission_camera_description">ಫೋಟೋಗಳನ್ನು ತೆಗೆಯಲು ಮತ್ತು ವೀಡಿಯೋಗಳನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲು GeoSnap ನಿಮ್ಮ ಕ್ಯಾಮೆರಾವನ್ನು ಬಳಸಲು ಅನುಮತಿಸುತ್ತದೆ. ಅಪ್‌ನ ಮುಖ್ಯ ಕ್ಯಾಮೆರಾ ವೈಶಿಷ್ಟ್ಯಗಳಿಗೆ ಈ ಅನುಮತಿ ಅಗತ್ಯ.</string>
     <string name="permission_microphone_label">ಮೈಕ್ರೊಫೋನ್</string>
-    <string name="permission_microphone_description">ವೀಡಿಯೋಗಳಿಗೆ ಧ್ವನಿ ರೆಕಾರ್ಡ್ ಮಾಡಿ.</string>
-    <string name="permission_location_label">ಸ್ಥಳ</string>
-    <string name="permission_location_description">ಶಾಟ್ಗಳಿಗೆ ವಿಳಾಸ, ನಿರ್ದೇಶಾಂಕ ಸೇರಿಸಿ.</string>
-    <string name="permission_coarse_location_label">ಸ್ಥಳ</string>
-    <string name="permission_coarse_location_description">ಶಾಟ್ಗಳಿಗೆ ವಿಳಾಸ, ನಿರ್ದೇಶಾಂಕ ಸೇರಿಸಿ.</string>
-    <string name="permission_storage_label">ಫೋಟೋ &amp; ಮೀಡಿಯಾ</string>
-    <string name="permission_storage_description">ಶಾಟ್ಗಳನ್ನು ಉಳಿಸಿ, ಆಯ್ಕೆಮಾಡಿ.</string>
+    <string name="permission_microphone_description">ನೀವು ವೀಡಿಯೋಗಳನ್ನು ಕ್ಯಾಪ್ಚರ್ ಮಾಡುವಾಗ GeoSnap ಆಡಿಯೋವನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲು ಅನುಮತಿಸುತ್ತದೆ. ಈ ಅನುಮತಿಯನ್ನು ಧ್ವನಿಯೊಂದಿಗೆ ವೀಡಿಯೋ ರೆಕಾರ್ಡ್ ಮಾಡುವಾಗ ಮಾತ್ರ ಬಳಸಲಾಗುತ್ತದೆ.</string>
+    <string name="permission_location_label">ಸ್ಥಳ ಪ್ರವೇಶ</string>
+    <string name="permission_location_description">ನಿಮ್ಮ ಪ್ರಸ್ತುತ ಸ್ಥಳವನ್ನು ಪತ್ತೆಹಚ್ಚಲು ಮತ್ತು ನಿಮ್ಮ ವಿಳಾಸ, ನಿರ್ದೇಶಾಂಕಗಳು ಮತ್ತು GPS ನಿಖರತೆಯಂತಹ ವಿವರಗಳನ್ನು ನಿಮ್ಮ ಫೋಟೋಗಳು ಮತ್ತು ವೀಡಿಯೋಗಳಿಗೆ ಸೇರಿಸಲು GeoSnapಗೆ ಅನುಮತಿಸುತ್ತದೆ.</string>
+    <string name="permission_coarse_location_label">ಸ್ಥಳ ಪ್ರವೇಶ</string>
+    <string name="permission_coarse_location_description">ನಿಮ್ಮ ಪ್ರಸ್ತುತ ಸ್ಥಳವನ್ನು ಪತ್ತೆಹಚ್ಚಲು ಮತ್ತು ನಿಮ್ಮ ವಿಳಾಸ, ನಿರ್ದೇಶಾಂಕಗಳು ಮತ್ತು GPS ನಿಖರತೆಯಂತಹ ವಿವರಗಳನ್ನು ನಿಮ್ಮ ಫೋಟೋಗಳು ಮತ್ತು ವೀಡಿಯೋಗಳಿಗೆ ಸೇರಿಸಲು GeoSnapಗೆ ಅನುಮತಿಸುತ್ತದೆ.</string>
+    <string name="permission_storage_label">ಫೋಟೋ &amp; ಮೀಡಿಯಾ ಪ್ರವೇಶ</string>
+    <string name="permission_storage_description">ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿದ ಫೋಟೋಗಳನ್ನು ಮತ್ತು ವೀಡಿಯೋಗಳನ್ನು ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಉಳಿಸಲು ಮತ್ತು ಎಡಿಟಿಂಗ್, ಸ್ಥಳ ನವೀಕರಣಗಳು ಅಥವಾ ಹಂಚಿಕೆಗಾಗಿ ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಫೋಟೋಗಳನ್ನು ಆಯ್ಕೆ ಮಾಡಲು ನಿಮಗೆ ಅನುಮತಿಸುತ್ತದೆ.</string>
     <string name="permission_notifications_label">ಅಧಿಸೂಚನೆಗಳು</string>
-    <string name="permission_notifications_description">ಅಪ್ಡೇಟ್, ಜ್ಞಾಪನೆಗಳನ್ನು ಕಳುಹಿಸಿ.</string>
+    <string name="permission_notifications_description">ಪ್ರಮುಖ ನವೀಕರಣಗಳು, ಜ್ಞಾಪನೆಗಳು ಮತ್ತು ಚಂದಾದಾರಿಕೆ ಮಾಹಿತಿಯನ್ನು ಕಳುಹಿಸಲು GeoSnap ಅನುಮತಿಸುತ್ತದೆ</string>
 
     <string name="location_dialog_title">ಸ್ಥಳ ಆಫ್ ಆಗಿದೆ</string>
-    <string name="location_dialog_message">GPS ಟ್ಯಾಗ್ಗೆ ಸ್ಥಳವನ್ನು ಆನ್ ಮಾಡಿ.</string>
+    <string name="location_dialog_message">ಫೋಟೋಗಳು ಮತ್ತು ವೀಡಿಯೋಗಳನ್ನು GPS ನಿರ್ದೇಶಾಂಕಗಳೊಂದಿಗೆ ಟ್ಯಾಗ್ ಮಾಡಲು GeoSnap ಗೆ ನಿಮ್ಮ ಸಾಧನದ ಸ್ಥಳ ಅಗತ್ಯವಿದೆ. ಮುಂದುವರಿಯಲು ಸ್ಥಳವನ್ನು ಆನ್ ಮಾಡಿ.</string>
     <string name="location_dialog_turn_on">ಆನ್ ಮಾಡಿ</string>
     <string name="location_dialog_not_now">ಈಗಲ್ಲ</string>
 
-    <string name="language_title">ನಿಮ್ಮ ಭಾಷೆ ಆಯ್ಕೆಮಾಡಿ</string>
-    <string name="language_subtitle">ಅಪ್ಪುದ್ದಕ್ಕೂ ಅನ್ವಯಿಸುತ್ತದೆ.</string>
+    <string name="language_title">ನಿಮ್ಮ ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ</string>
+    <string name="language_subtitle">ಮುಂದುವರಿಯಲು ನಿಮ್ಮ ಆದ್ಯತೆಯ ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ</string>
     <string name="language_continue">ಮುಂದುವರಿಸಿ</string>
+    <string name="language_select">ಭಾಷೆ ಆಯ್ಕೆಮಾಡಿ</string>
 
     <string name="home_tagline">ತೆಗೆದುಕೊಳ್ಳಿ. ಟ್ಯಾಗ್ ಮಾಡಿ. ಹಂಚಿಕೊಳ್ಳಿ.</string>
     <string name="home_take_photo">ಫೋಟೋ ತೆಗೆಯಿರಿ</string>
-    <string name="home_take_photo_desc">ಸ್ಥಳ ಜೊತೆ ತೆಗೆಯಿರಿ</string>
+    <string name="home_take_photo_desc">ಸ್ಥಳದೊಂದಿಗೆ ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿ</string>
     <string name="home_take_video">ವೀಡಿಯೋ ತೆಗೆಯಿರಿ</string>
-    <string name="home_take_video_desc">ಸ್ಥಳ ಜೊತೆ ರೆಕಾರ್ಡ್ ಮಾಡಿ</string>
+    <string name="home_take_video_desc">ಸ್ಥಳದೊಂದಿಗೆ ರೆಕಾರ್ಡ್ ಮಾಡಿ</string>
     <string name="home_quick_share">ಕ್ವಿಕ್ ಶೇರ್</string>
-    <string name="home_quick_share_desc">ಈಗಲೇ ತೆಗೆದು ಹಂಚಿ</string>
+    <string name="home_quick_share_desc">ಈಗಲೇ ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿ ಹಂಚಿ</string>
     <string name="home_gallery">ಗ್ಯಾಲರಿ</string>
     <string name="home_gallery_desc">ನಿಮ್ಮ ಶಾಟ್ ಕಸ್ಟಮೈಜ್ ಮಾಡಿ</string>
     <string name="home_logo">ಲೋಗೋ</string>
     <string name="home_settings">ಸೆಟ್ಟಿಂಗ್ಸ್</string>
-    <string name="home_india_map">ಭಾರತ ನಕ್ಷೆ</string>
+    <string name="home_india_map">ಇಂಡಿಯಾ ಮ್ಯಾಪ್</string>
 
     <string name="camera_back">ಹಿಂದೆ</string>
     <string name="camera_flip">ಕ್ಯಾಮೆರಾ ಬದಲಿಸಿ</string>
     <string name="camera_flash">ಫ್ಲ್ಯಾಷ್</string>
     <string name="camera_capture">ಕ್ಯಾಪ್ಚರ್</string>
-    <string name="camera_quick_share_hint">ತಕ್ಷಣ ಹಂಚಲು ಫೋಟೋ ತೆಗೆಯಿರಿ</string>
+    <string name="camera_quick_share_hint">ಅದನ್ನು ತಕ್ಷಣ ಹಂಚಿಕೊಳ್ಳಲು ಫೋಟೋವನ್ನು ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿ</string>
     <string name="camera_recording">ರೆಕಾರ್ಡಿಂಗ್</string>
-    <string name="camera_photo_saved">ಫೋಟೋ ಗ್ಯಾಲರಿಯಲ್ಲಿ ಉಳಿಸಲಾಗಿದೆ</string>
-    <string name="camera_video_saved">ವೀಡಿಯೋ ಗ್ಯಾಲರಿಯಲ್ಲಿ ಉಳಿಸಲಾಗಿದೆ</string>
-    <string name="camera_share_again">ಮತ್ತೆ ಹಂಚಿ</string>
+    <string name="camera_photo_saved">ಫೋಟೋ ಗ್ಯಾಲರಿಗೆ ಉಳಿಸಲಾಗಿದೆ</string>
+    <string name="camera_video_saved">ವೀಡಿಯೋ ಗ್ಯಾಲರಿಗೆ ಉಳಿಸಲಾಗಿದೆ</string>
+    <string name="camera_share_again">ಮತ್ತೊಂದನ್ನು ಹಂಚಿ</string>
     <string name="camera_mode_photo">ಫೋಟೋ</string>
     <string name="camera_mode_quick_share">ಕ್ವಿಕ್ ಶೇರ್</string>
     <string name="camera_mode_video">ವೀಡಿಯೋ</string>
@@ -66,31 +67,31 @@
     <string name="camera_grid">ಗ್ರಿಡ್</string>
     <string name="camera_gallery">ಗ್ಯಾಲರಿ</string>
 
-    <string name="camera_error_unavailable">ಈ ಸಾಧನದಲ್ಲಿ ಕ್ಯಾಮೆರಾ ಇಲ್ಲ.</string>
+    <string name="camera_error_unavailable">ಈ ಸಾಧನದಲ್ಲಿ ಕ್ಯಾಮೆರಾ ಲಭ್ಯವಿಲ್ಲ.</string>
     <string name="camera_error_permission">ಕ್ಯಾಮೆರಾ ಅನುಮತಿ ಅಗತ್ಯ.</string>
-    <string name="camera_error_init">ಕ್ಯಾಮೆರಾ ಪ್ರಾರಂಭಿಸಲಾಗಲಿಲ್ಲ.</string>
-    <string name="camera_error_capture">ಫೋಟೋ ತೆಗೆಯಲಾಗಲಿಲ್ಲ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
-    <string name="camera_error_record">ರೆಕಾರ್ಡಿಂಗ್ ಪ್ರಾರಂಭಿಸಲಾಗಲಿಲ್ಲ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
-    <string name="camera_error_save">ಮೀಡಿಯಾ ಉಳಿಸಲಿಲ್ಲ. ಸಂಗ್ರಹ ಪರಿಶೀಲಿಸಿ.</string>
-    <string name="camera_error_generic">ಕ್ಯಾಮೆರಾದಲ್ಲಿ ಸಮಸ್ಯೆ ಉಂಟಾಯಿತು.</string>
+    <string name="camera_error_init">ಕ್ಯಾಮೆರಾವನ್ನು ಪ್ರಾರಂಭಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.</string>
+    <string name="camera_error_capture">ಫೋಟೋವನ್ನು ಕ್ಯಾಪ್ಚರ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
+    <string name="camera_error_record">ರೆಕಾರ್ಡಿಂಗ್ ಪ್ರಾರಂಭಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
+    <string name="camera_error_save">ಮೀಡಿಯಾವನ್ನು ಉಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ನಿಮ್ಮ ಸಂಗ್ರಹವನ್ನು ಪರಿಶೀಲಿಸಿ.</string>
+    <string name="camera_error_generic">ಕ್ಯಾಮೆರಾದಲ್ಲಿ ಏನೋ ತಪ್ಪಾಗಿದೆ.</string>
     <string name="camera_error_snackbar">ದೋಷ: %1$s</string>
 
     <string name="share_title">ಇವುಗಳ ಮೂಲಕ ಹಂಚಿ</string>
     <string name="share_image">GeoSnap ಫೋಟೋ</string>
-    <string name="share_error">ಹಂಚಲು ಯಾವುದೇ ಅಪ್ ಇಲ್ಲ.</string>
+    <string name="share_error">ಫೋಟೋ ಹಂಚಲು ಯಾವುದೇ ಅಪ್ ಲಭ್ಯವಿಲ್ಲ.</string>
 
     <string name="gallery_title">ಗ್ಯಾಲರಿ</string>
-    <string name="gallery_empty">ಮೀಡಿಯಾ ಇಲ್ಲ.\nನಿಮ್ಮ ಶಾಟ್ಗಳು ಇಲ್ಲಿ ಕಾಣಿಸುತ್ತವೆ.</string>
-    <string name="gallery_error">ಮೀಡಿಯಾ ಲೋಡ್ ಆಗಲಿಲ್ಲ.</string>
+    <string name="gallery_empty">ಇನ್ನೂ ಯಾವುದೇ ಮೀಡಿಯಾ ಕ್ಯಾಪ್ಚರ್ ಆಗಿಲ್ಲ.\nನೀವು ಕ್ಯಾಪ್ಚರ್ ಮಾಡುವ ಫೋಟೋಗಳು ಮತ್ತು ವೀಡಿಯೋಗಳು ಇಲ್ಲಿ ಕಾಣಿಸುತ್ತವೆ.</string>
+    <string name="gallery_error">ನಿಮ್ಮ ಮೀಡಿಯಾವನ್ನು ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.</string>
     <string name="retry">ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ</string>
 
-    <string name="geotag_fetching_location">ಸ್ಥಳ ಪಡೆಯುತ್ತಿದೆ…</string>
-    <string name="geotag_latitude">Lat</string>
-    <string name="geotag_longitude">Lng</string>
+    <string name="geotag_fetching_location">ಸ್ಥಳ ಪಡೆಯಲಾಗುತ್ತಿದೆ…</string>
+    <string name="geotag_latitude">LAT</string>
+    <string name="geotag_longitude">LOG</string>
     <string name="geotag_date">ದಿನಾಂಕ</string>
     <string name="geotag_map">ನಕ್ಷೆ</string>
-    <string name="geotag_static_map">ನಕ್ಷೆ</string>
-    <string name="geotag_logo">ಲೋಗೋ</string>
+    <string name="geotag_static_map">ಸ್ಥಿರ ನಕ್ಷೆ</string>
+    <string name="geotag_logo">ನಮ್ಮ ಲೋಗೋ</string>
 
-    <string name="error_generic">ಏನೋ ತಪ್ಪಾಗಿದೆ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
+    <string name="error_generic">ಏನೋ ತಪ್ಪಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
 </resources>

@@ -6,40 +6,41 @@
 
     <!-- Permissions screen -->
     <string name="permissions_title">App Permissions</string>
-    <string name="permissions_subtitle_header">Permissions GeoSnap needs</string>
-    <string name="permissions_subtitle">Adds exact location to your shots.</string>
+    <string name="permissions_subtitle_header">We need the following permissions to use Geo Snap</string>
+    <string name="permissions_subtitle">These permissions help Geo Snap capture photos and videos with accurate location details.</string>
     <string name="permissions_allow">Allow</string>
     <string name="permissions_open_settings">Open Settings</string>
     <string name="permissions_granted">Granted</string>
     <string name="permissions_denied">Denied</string>
     <string name="permissions_status_needed">Needed</string>
-    <string name="permissions_permanently_denied">Denied — enable in Settings</string>
-    <string name="permissions_agree">I agree to Terms &amp; Privacy Policy.</string>
+    <string name="permissions_permanently_denied">Permanently denied — enable it in Settings</string>
+    <string name="permissions_agree">I agree to the Permissions, Terms &amp; Conditions, and Privacy Policy.</string>
     <string name="permissions_get_started">Get Started</string>
 
     <string name="permission_camera_label">Camera</string>
-    <string name="permission_camera_description">Capture photos and videos.</string>
+    <string name="permission_camera_description">Allows Geo Snap to use your camera to take photos and record videos. This permission is required for the main camera features of the app.</string>
     <string name="permission_microphone_label">Microphone</string>
-    <string name="permission_microphone_description">Record audio with videos.</string>
+    <string name="permission_microphone_description">Allows Geo Snap to record audio while you capture videos. This permission is only used when recording video with sound.</string>
     <string name="permission_location_label">Location access</string>
-    <string name="permission_location_description">Adds your address and coordinates.</string>
+    <string name="permission_location_description">Allows Geo Snap to detect your current location and add details such as your address, coordinates, and GPS accuracy to your photos and videos.</string>
     <string name="permission_coarse_location_label">Location access</string>
-    <string name="permission_coarse_location_description">Adds your address and coordinates.</string>
+    <string name="permission_coarse_location_description">Allows Geo Snap to detect your current location and add details such as your address, coordinates, and GPS accuracy to your photos and videos.</string>
     <string name="permission_storage_label">Photos &amp; media access</string>
-    <string name="permission_storage_description">Save shots and pick existing ones.</string>
+    <string name="permission_storage_description">Allows you to save captured photos and videos to your device and select existing photos for editing, location updates, or sharing.</string>
     <string name="permission_notifications_label">Notifications</string>
-    <string name="permission_notifications_description">Sends updates &amp; reminders.</string>
+    <string name="permission_notifications_description">Allows Geo Snap to send important updates, reminders, and subscription information</string>
 
     <!-- Location disabled dialog -->
     <string name="location_dialog_title">Location is turned off</string>
-    <string name="location_dialog_message">Turn on location to tag shots with GPS.</string>
+    <string name="location_dialog_message">GeoSnap needs your device location to tag photos and videos with GPS coordinates. Turn on location to continue.</string>
     <string name="location_dialog_turn_on">Turn On</string>
     <string name="location_dialog_not_now">Not Now</string>
 
     <!-- Language screen -->
     <string name="language_title">Choose your language</string>
-    <string name="language_subtitle">Used throughout the app.</string>
+    <string name="language_subtitle">Select your preferred language to continue</string>
     <string name="language_continue">Continue</string>
+    <string name="language_select">Select Language</string>
 
     <!-- Home screen -->
     <string name="home_tagline">Capture. Tag. Share.</string>
@@ -48,7 +49,7 @@
     <string name="home_take_video">Take Video</string>
     <string name="home_take_video_desc">Record with location</string>
     <string name="home_quick_share">Quick Share</string>
-    <string name="home_quick_share_desc">Capture &amp; share now</string>
+    <string name="home_quick_share_desc">Capture &amp; share instantly</string>
     <string name="home_gallery">Gallery</string>
     <string name="home_gallery_desc">Customize your shot</string>
     <string name="home_logo">Logo</string>
@@ -94,13 +95,13 @@
     <string name="retry">Retry</string>
 
     <!-- GeoTag card (live overlay + burnt into media) -->
-    <string name="geotag_fetching_location">Fetching location…</string>
-    <string name="geotag_latitude">Lat</string>
-    <string name="geotag_longitude">Lng</string>
+    <string name="geotag_fetching_location">Fetching location...</string>
+    <string name="geotag_latitude">LAT</string>
+    <string name="geotag_longitude">LOG</string>
     <string name="geotag_date">Date</string>
     <string name="geotag_map">Map</string>
     <string name="geotag_static_map">Static Map</string>
-    <string name="geotag_logo">Logo</string>
+    <string name="geotag_logo">Our Logo</string>
 
     <!-- Generic error -->
     <string name="error_generic">Something went wrong. Please try again.</string>

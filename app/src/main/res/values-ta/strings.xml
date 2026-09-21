@@ -4,46 +4,47 @@
     <string name="loading">ஏற்றுகிறது…</string>
 
     <string name="permissions_title">பயன்பாட்டு அனுமதிகள்</string>
-    <string name="permissions_subtitle_header">GeoSnapக்குத் தேவையான அனுமதிகள்</string>
-    <string name="permissions_subtitle">ஷாட்களில் துல்லிய இருப்பிடத்தைச் சேர்க்கும்.</string>
+    <string name="permissions_subtitle_header">GeoSnap-ஐப் பயன்படுத்த கீழ்க்கண்ட அனுமதிகள் தேவை</string>
+    <string name="permissions_subtitle">இந்த அனுமதிகள், GeoSnap புகைப்படங்கள் மற்றும் வீடியோக்களை துல்லியமான இருப்பிட விவரங்களுடன் எடுக்க உதவுகின்றன.</string>
     <string name="permissions_allow">அனுமதி</string>
     <string name="permissions_open_settings">அமைப்புகளைத் திற</string>
     <string name="permissions_granted">அனுமதி வழங்கப்பட்டது</string>
     <string name="permissions_denied">மறுக்கப்பட்டது</string>
     <string name="permissions_status_needed">தேவை</string>
-    <string name="permissions_permanently_denied">மறுக்கப்பட்டது — அமைப்புகளில் இயக்கு</string>
-    <string name="permissions_agree">விதிமுறைகள் &amp; தனியுரிமைக் கொள்கைக்கு ஒப்புக்கொள்கிறேன்.</string>
-    <string name="permissions_get_started">தொடங்கு</string>
+    <string name="permissions_permanently_denied">நிரந்தரமாக மறுக்கப்பட்டது — அமைப்புகளில் இயக்கவும்</string>
+    <string name="permissions_agree">அனுமதிகள், விதிமுறைகள் &amp; நிபந்தனைகள் மற்றும் தனியுரிமைக் கொள்கைக்கு நான் ஒப்புக்கொள்கிறேன்.</string>
+    <string name="permissions_get_started">தொடங்குவோம்</string>
 
     <string name="permission_camera_label">கேமரா</string>
-    <string name="permission_camera_description">புகைப்படங்கள், வீடியோக்களை எடு.</string>
+    <string name="permission_camera_description">புகைப்படங்களை எடுக்க மற்றும் வீடியோக்களைப் பதிவுசெய்ய GeoSnap உங்கள் கேமராவைப் பயன்படுத்த அனுமதிக்கிறது. பயன்பாட்டின் முக்கிய கேமரா அம்சங்களுக்கு இந்த அனுமதி தேவை.</string>
     <string name="permission_microphone_label">மைக்ரோஃபோன்</string>
-    <string name="permission_microphone_description">வீடியோக்களில் ஒலியை பதிவுசெய்.</string>
-    <string name="permission_location_label">இருப்பிடம்</string>
-    <string name="permission_location_description">ஷாட்களில் முகவரி, ஆயங்களைச் சேர்.</string>
-    <string name="permission_coarse_location_label">இருப்பிடம்</string>
-    <string name="permission_coarse_location_description">ஷாட்களில் முகவரி, ஆயங்களைச் சேர்.</string>
-    <string name="permission_storage_label">புகைப்படங்கள் &amp; மீடியா</string>
-    <string name="permission_storage_description">ஷாட்களைச் சேமி, தேர்ந்தெடு.</string>
+    <string name="permission_microphone_description">வீடியோக்களைப் பதிவு செய்யும்போது GeoSnap ஒலியைப் பதிவுசெய்ய அனுமதிக்கிறது. இந்த அனுமதி ஒலியுடன் வீடியோ பதிவுசெய்யும்போது மட்டுமே பயன்படுத்தப்படுகிறது.</string>
+    <string name="permission_location_label">இருப்பிட அணுகல்</string>
+    <string name="permission_location_description">உங்கள் தற்போதைய இருப்பிடத்தைக் கண்டறிந்து, உங்கள் முகவரி, ஆயங்கள் மற்றும் GPS துல்லியம் போன்ற விவரங்களை உங்கள் புகைப்படங்கள் மற்றும் வீடியோக்களில் சேர்க்க GeoSnap-க்கு அனுமதிக்கிறது.</string>
+    <string name="permission_coarse_location_label">இருப்பிட அணுகல்</string>
+    <string name="permission_coarse_location_description">உங்கள் தற்போதைய இருப்பிடத்தைக் கண்டறிந்து, உங்கள் முகவரி, ஆயங்கள் மற்றும் GPS துல்லியம் போன்ற விவரங்களை உங்கள் புகைப்படங்கள் மற்றும் வீடியோக்களில் சேர்க்க GeoSnap-க்கு அனுமதிக்கிறது.</string>
+    <string name="permission_storage_label">புகைப்படங்கள் &amp; மீடியா அணுகல்</string>
+    <string name="permission_storage_description">எடுக்கப்பட்ட புகைப்படங்கள் மற்றும் வீடியோக்களை உங்கள் சாதனத்தில் சேமிக்கவும், எடிட்டிங், இருப்பிட புதுப்பிப்புகள் அல்லது பகிர்வுக்குப் பயன்படுத்த ஏற்கனவே உள்ள புகைப்படங்களைத் தேர்ந்தெடுக்கவும் இது உங்களை அனுமதிக்கிறது.</string>
     <string name="permission_notifications_label">அறிவிப்புகள்</string>
-    <string name="permission_notifications_description">புதுப்பிப்புகள், நினைவூட்டல்களை அனுப்பு.</string>
+    <string name="permission_notifications_description">முக்கியமான புதுப்பிப்புகள், நினைவூட்டல்கள் மற்றும் சந்தாதார் தகவல்களை GeoSnap அனுப்ப அனுமதிக்கிறது</string>
 
     <string name="location_dialog_title">இருப்பிடம் அணைக்கப்பட்டுள்ளது</string>
-    <string name="location_dialog_message">GPS குறிப்பிற்காக இருப்பிடத்தை இயக்கவும்.</string>
+    <string name="location_dialog_message">புகைப்படங்கள் மற்றும் வீடியோக்களை GPS ஆயங்களுடன் குறியிட GeoSnap-க்கு உங்கள் சாதன இருப்பிடம் தேவை. தொடர இருப்பிடத்தை இயக்கவும்.</string>
     <string name="location_dialog_turn_on">இயக்கு</string>
     <string name="location_dialog_not_now">இப்போதில்லை</string>
 
     <string name="language_title">உங்கள் மொழியைத் தேர்ந்தெடுக்கவும்</string>
-    <string name="language_subtitle">முழு பயன்பாட்டிலும் பொருந்தும்.</string>
+    <string name="language_subtitle">தொடர, உங்களுக்கு விருப்பமான மொழியைத் தேர்ந்தெடுக்கவும்</string>
     <string name="language_continue">தொடரவும்</string>
+    <string name="language_select">மொழியைத் தேர்ந்தெடுக்கவும்</string>
 
     <string name="home_tagline">எடு. குறியிடு. பகிர்.</string>
     <string name="home_take_photo">புகைப்படம் எடு</string>
-    <string name="home_take_photo_desc">இருப்பிடத்துடன் எடு</string>
+    <string name="home_take_photo_desc">இருப்பிடத்துடன் கைப்பற்று</string>
     <string name="home_take_video">வீடியோ எடு</string>
     <string name="home_take_video_desc">இருப்பிடத்துடன் பதிவுசெய்</string>
     <string name="home_quick_share">விரைவுப் பகிர்வு</string>
-    <string name="home_quick_share_desc">இப்போதே எடுத்துப் பகிர்</string>
+    <string name="home_quick_share_desc">உடனே கைப்பற்றிப் பகிர்</string>
     <string name="home_gallery">கேலரி</string>
     <string name="home_gallery_desc">உங்கள் ஷாட்டைத் தனிப்பயனாக்கு</string>
     <string name="home_logo">லோகோ</string>
@@ -54,11 +55,11 @@
     <string name="camera_flip">கேமராவை மாற்று</string>
     <string name="camera_flash">ஃபிளாஷ்</string>
     <string name="camera_capture">கைப்பற்று</string>
-    <string name="camera_quick_share_hint">உடனே பகிர புகைப்படம் எடு</string>
+    <string name="camera_quick_share_hint">அதை உடனடியாகப் பகிர ஒரு புகைப்படத்தை கைப்பற்றவும்</string>
     <string name="camera_recording">பதிவு</string>
-    <string name="camera_photo_saved">கேலரியில் புகைப்படம் சேமிக்கப்பட்டது</string>
-    <string name="camera_video_saved">கேலரியில் வீடியோ சேமிக்கப்பட்டது</string>
-    <string name="camera_share_again">மீண்டும் பகிர்</string>
+    <string name="camera_photo_saved">புகைப்படம் கேலரியில் சேமிக்கப்பட்டது</string>
+    <string name="camera_video_saved">வீடியோ கேலரியில் சேமிக்கப்பட்டது</string>
+    <string name="camera_share_again">மேலும் பகிர்</string>
     <string name="camera_mode_photo">புகைப்படம்</string>
     <string name="camera_mode_quick_share">விரைவுப் பகிர்வு</string>
     <string name="camera_mode_video">வீடியோ</string>
@@ -66,31 +67,31 @@
     <string name="camera_grid">கிரிட்</string>
     <string name="camera_gallery">கேலரி</string>
 
-    <string name="camera_error_unavailable">இந்த சாதனத்தில் கேமரா இல்லை.</string>
+    <string name="camera_error_unavailable">இந்தச் சாதனத்தில் கேமரா கிடைக்கவில்லை.</string>
     <string name="camera_error_permission">கேமரா அனுமதி தேவை.</string>
     <string name="camera_error_init">கேமராவைத் தொடங்க முடியவில்லை.</string>
-    <string name="camera_error_capture">புகைப்படம் எடுக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.</string>
+    <string name="camera_error_capture">புகைப்படத்தை கைப்பற்ற முடியவில்லை. மீண்டும் முயற்சிக்கவும்.</string>
     <string name="camera_error_record">பதிவைத் தொடங்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.</string>
-    <string name="camera_error_save">மீடியா சேமிக்கப்படவில்லை. சேமிப்பைச் சரிபார்க்கவும்.</string>
-    <string name="camera_error_generic">கேமராவில் சிக்கல் ஏற்பட்டது.</string>
+    <string name="camera_error_save">மீடியாவைச் சேமிக்க முடியவில்லை. உங்கள் சேமிப்பகத்தைச் சரிபார்க்கவும்.</string>
+    <string name="camera_error_generic">கேமராவில் ஏதோ தவறு ஏற்பட்டது.</string>
     <string name="camera_error_snackbar">பிழை: %1$s</string>
 
     <string name="share_title">வழியாகப் பகிர்</string>
     <string name="share_image">GeoSnap புகைப்படம்</string>
-    <string name="share_error">பகிர பயன்பாடு கிடைக்கவில்லை.</string>
+    <string name="share_error">புகைப்படத்தைப் பகிர எந்தப் பயன்பாடும் இல்லை.</string>
 
     <string name="gallery_title">கேலரி</string>
-    <string name="gallery_empty">மீடியா இல்லை.\nஉங்கள் ஷாட்கள் இங்கே தோன்றும்.</string>
-    <string name="gallery_error">மீடியாவை ஏற்ற முடியவில்லை.</string>
+    <string name="gallery_empty">இன்னும் எந்த மீடியாவும் எடுக்கப்படவில்லை.\nநீங்கள் எடுக்கும் புகைப்படங்களும் வீடியோக்களும் இங்கே தோன்றும்.</string>
+    <string name="gallery_error">உங்கள் மீடியாவை ஏற்ற முடியவில்லை.</string>
     <string name="retry">மீண்டும் முயற்சிக்கவும்</string>
 
-    <string name="geotag_fetching_location">இருப்பிடம் பெறுகிறது…</string>
-    <string name="geotag_latitude">Lat</string>
-    <string name="geotag_longitude">Lng</string>
+    <string name="geotag_fetching_location">இருப்பிடம் பெறப்படுகிறது…</string>
+    <string name="geotag_latitude">LAT</string>
+    <string name="geotag_longitude">LOG</string>
     <string name="geotag_date">தேதி</string>
     <string name="geotag_map">வரைபடம்</string>
-    <string name="geotag_static_map">வரைபடம்</string>
-    <string name="geotag_logo">லோகோ</string>
+    <string name="geotag_static_map">நிலையான வரைபடம்</string>
+    <string name="geotag_logo">எங்கள் லோகோ</string>
 
-    <string name="error_generic">ஏதோ தவறு. மீண்டும் முயற்சிக்கவும்.</string>
+    <string name="error_generic">ஏதோ தவறு ஏற்பட்டது. மீண்டும் முயற்சிக்கவும்.</string>
 </resources>
