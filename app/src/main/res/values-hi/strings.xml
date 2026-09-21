@@ -85,13 +85,5 @@
     <string name="gallery_error">आपका मीडिया लोड नहीं हो सका।</string>
     <string name="retry">फिर प्रयास करें</string>
 
-    <string name="geotag_fetching_location">लोकेशन प्राप्त हो रही है…</string>
-    <string name="geotag_latitude">LAT</string>
-    <string name="geotag_longitude">LOG</string>
-    <string name="geotag_date">दिनांक</string>
-    <string name="geotag_map">नक्शा</string>
-    <string name="geotag_static_map">स्थिर नक्शा</string>
-    <string name="geotag_logo">हमारा लोगो</string>
-
     <string name="error_generic">कुछ गड़बड़ हो गई। कृपया फिर प्रयास करें।</string>
 </resources>

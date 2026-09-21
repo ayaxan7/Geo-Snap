@@ -19,14 +19,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -34,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.chirag.geosnap.BuildConfig
 import com.chirag.geosnap.R
+import com.chirag.geosnap.core.LocaleHelper
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -58,7 +60,17 @@ fun GeoTagCard(
         "API Key: ${BuildConfig.MAPS_API_KEY}, Lat: ${content.latitude}, Lng: ${content.longitude}," +
             " city: ${content.cityString}, Address: ${content.fullAddress}"
     )
-    val fetchingText = stringResource(R.string.geotag_fetching_location)
+    // The geotag card is intentionally always in English, independent of the
+    // selected app language, so resolve all card copy from an English context.
+    val context = LocalContext.current
+    val englishContext = remember(context) { LocaleHelper.englishContext(context) }
+    val fetchingText = englishContext.getString(R.string.geotag_fetching_location)
+    val latLabel = englishContext.getString(R.string.geotag_latitude)
+    val lngLabel = englishContext.getString(R.string.geotag_longitude)
+    val dateLabel = englishContext.getString(R.string.geotag_date)
+    val staticMapLabel = englishContext.getString(R.string.geotag_static_map)
+    val mapLabel = englishContext.getString(R.string.geotag_map)
+    val logoLabel = englishContext.getString(R.string.geotag_logo)
     val cityText = content.cityString ?: fetchingText
     val fullAddressText = content.fullAddress ?: content.cityString ?: fetchingText
 
@@ -71,7 +83,7 @@ fun GeoTagCard(
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Map Image
-        MapThumbnail(mapBitmap ?: content.staticMapUrl)
+        MapThumbnail(mapBitmap ?: content.staticMapUrl, staticMapLabel, mapLabel)
 
         Spacer(modifier = Modifier.width(12.dp))
 
@@ -104,9 +116,9 @@ fun GeoTagCard(
             }
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = stringResource(R.string.geotag_latitude) + ": " +
+                text = latLabel + ": " +
                     "${content.latitude?.let { "%.4f°".format(it) } ?: "--"} / " +
-                    stringResource(R.string.geotag_longitude) + ": " +
+                    lngLabel + ": " +
                     "${content.longitude?.let { "%.4f°".format(it) } ?: "--"}",
                 color = Color.White,
                 fontSize = 11.sp
@@ -115,12 +127,12 @@ fun GeoTagCard(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     painter = painterResource(android.R.drawable.ic_menu_today),
-                    contentDescription = stringResource(R.string.geotag_date),
+                    contentDescription = dateLabel,
                     tint = Color.White,
                     modifier = Modifier.size(12.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                val dateFormat = SimpleDateFormat("EEEE , dd/MM/yyyy - h:mm a", Locale.getDefault())
+                val dateFormat = SimpleDateFormat("EEEE , dd/MM/yyyy - h:mm a", Locale.ENGLISH)
                 val currentDateTime = dateFormat.format(Date(content.timestamp))
                 Text(
                     text = currentDateTime,
@@ -141,7 +153,7 @@ fun GeoTagCard(
         ) {
             Image(
                 painter = painterResource(R.drawable.geo_snap_icon),
-                contentDescription = stringResource(R.string.geotag_logo),
+                contentDescription = logoLabel,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.FillBounds
             )
@@ -150,7 +162,7 @@ fun GeoTagCard(
 }
 
 @Composable
-private fun MapThumbnail(image: Any?) {
+private fun MapThumbnail(image: Any?, staticMapLabel: String, mapLabel: String) {
     Box(
         modifier = Modifier
             .size(80.dp)
@@ -160,18 +172,18 @@ private fun MapThumbnail(image: Any?) {
         when (image) {
             is Bitmap -> Image(
                 bitmap = image.asImageBitmap(),
-                contentDescription = stringResource(R.string.geotag_static_map),
+                contentDescription = staticMapLabel,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
             is String -> AsyncImage(
                 model = image,
-                contentDescription = stringResource(R.string.geotag_static_map),
+                contentDescription = staticMapLabel,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
             else -> Text(
-                text = stringResource(R.string.geotag_map),
+                text = mapLabel,
                 modifier = Modifier.align(Alignment.Center),
                 color = Color.White
             )

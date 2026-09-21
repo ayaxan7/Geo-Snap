@@ -85,13 +85,5 @@
     <string name="gallery_error">మీ మీడియాను లోడ్ చేయలేకపోయాము.</string>
     <string name="retry">మళ్లీ ప్రయత్నించండి</string>
 
-    <string name="geotag_fetching_location">లొకేషన్ పొందబడుతోంది…</string>
-    <string name="geotag_latitude">LAT</string>
-    <string name="geotag_longitude">LOG</string>
-    <string name="geotag_date">తేదీ</string>
-    <string name="geotag_map">మ్యాప్</string>
-    <string name="geotag_static_map">స్టాటిక్ మ్యాప్</string>
-    <string name="geotag_logo">మా లోగో</string>
-
     <string name="error_generic">ఏదో తప్పు జరిగింది. దయచేసి మళ్లీ ప్రయత్నించండి.</string>
 </resources>

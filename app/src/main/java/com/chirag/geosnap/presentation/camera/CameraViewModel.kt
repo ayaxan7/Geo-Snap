@@ -305,7 +305,7 @@ class CameraViewModel @Inject constructor(
 
     private fun reverseGeocode(coord: GeoCoordinate): ResolvedAddress? {
         return try {
-            val geocoder = Geocoder(context, Locale.getDefault())
+            val geocoder = Geocoder(context, Locale.ENGLISH)
             val addresses = geocoder.getFromLocation(coord.latitude, coord.longitude, 1)
             val address = addresses?.firstOrNull() ?: return null
             val city = address.locality ?: address.subAdminArea ?: address.adminArea ?: ""
@@ -339,6 +339,7 @@ class CameraViewModel @Inject constructor(
                 val url = URL(
                     "https://maps.googleapis.com/maps/api/geocode/json" +
                         "?latlng=${coord.latitude},${coord.longitude}" +
+                        "&language=en" +
                         "&key=$apiKey"
                 )
                 val connection = (url.openConnection() as HttpURLConnection).apply {

@@ -15,8 +15,7 @@ import kotlinx.coroutines.runBlocking
  * DataStore because the Application already exists by then. The Application
  * itself must use [wrapApplicationContext] instead: at its `attachBaseContext`
  * moment `applicationContext` is still null and the DataStore singleton would
- * NPE. Services that only have the app context (the burn renderer) resolve
- * strings via [localizedContext].
+ * NPE.
  */
 object LocaleHelper {
 
@@ -48,6 +47,10 @@ object LocaleHelper {
     /** A context whose resources resolve against the stored language. */
     fun localizedContext(context: Context): Context =
         wrapWithLocale(context, localeFor(activeLanguageCode ?: defaultFromSystem()))
+
+    /** A context whose resources always resolve to English (geotag card copy). */
+    fun englishContext(context: Context): Context =
+        wrapWithLocale(context, Locale.ENGLISH)
 
     /** Refreshes the in-process language after the Application is fully created. */
     suspend fun refreshLanguage(context: Context) {

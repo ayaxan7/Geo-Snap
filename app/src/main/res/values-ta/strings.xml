@@ -85,13 +85,5 @@
     <string name="gallery_error">உங்கள் மீடியாவை ஏற்ற முடியவில்லை.</string>
     <string name="retry">மீண்டும் முயற்சிக்கவும்</string>
 
-    <string name="geotag_fetching_location">இருப்பிடம் பெறப்படுகிறது…</string>
-    <string name="geotag_latitude">LAT</string>
-    <string name="geotag_longitude">LOG</string>
-    <string name="geotag_date">தேதி</string>
-    <string name="geotag_map">வரைபடம்</string>
-    <string name="geotag_static_map">நிலையான வரைபடம்</string>
-    <string name="geotag_logo">எங்கள் லோகோ</string>
-
     <string name="error_generic">ஏதோ தவறு ஏற்பட்டது. மீண்டும் முயற்சிக்கவும்.</string>
 </resources>

@@ -44,9 +44,9 @@ class CanvasGeoTagOverlayRenderer @Inject constructor(
     }
 
     private fun renderCardToBitmap(content: GeoTagCardContent, mapBitmap: Bitmap?): Bitmap {
-        // The injected app context keeps its early system-locale resources, so
-        // resolve card copy against a context configured with the stored language.
-        val localizedContext = LocaleHelper.localizedContext(context)
+        // The geotag card is intentionally always in English, independent of
+        // the app language, so resolve card copy against an English context.
+        val englishContext = LocaleHelper.englishContext(context)
         val density = context.resources.displayMetrics.density * DENSITY_SCALE
         fun dp(value: Float) = (value * density).toInt()
         fun sp(value: Float) = (value * density).toInt()
@@ -66,9 +66,9 @@ class CanvasGeoTagOverlayRenderer @Inject constructor(
         val cardText = "EEEE , dd/MM/yyyy - h:mm a"
         val dateText = SafeDateFormat.get(cardText).format(Date(content.timestamp))
 
-        val latLabel = localizedContext.getString(R.string.geotag_latitude)
-        val lngLabel = localizedContext.getString(R.string.geotag_longitude)
-        val fetchingLocation = localizedContext.getString(R.string.geotag_fetching_location)
+        val latLabel = englishContext.getString(R.string.geotag_latitude)
+        val lngLabel = englishContext.getString(R.string.geotag_longitude)
+        val fetchingLocation = englishContext.getString(R.string.geotag_fetching_location)
         val coordinateText = "$latLabel: ${content.latitude?.let { "%.4f\u00B0".format(it) } ?: "--"} / " +
             "$lngLabel: ${content.longitude?.let { "%.4f\u00B0".format(it) } ?: "--"}"
 
@@ -141,7 +141,7 @@ class CanvasGeoTagOverlayRenderer @Inject constructor(
             mapRect,
             mapBitmap,
             density,
-            localizedContext.getString(R.string.geotag_map)
+            englishContext.getString(R.string.geotag_map)
         )
 
         val textLeft = (padding + mapSize + rowGap).toFloat()
@@ -246,7 +246,7 @@ class CanvasGeoTagOverlayRenderer @Inject constructor(
 
     private object SafeDateFormat {
         fun get(pattern: String): SimpleDateFormat =
-            SimpleDateFormat(pattern, Locale.getDefault())
+            SimpleDateFormat(pattern, Locale.ENGLISH)
     }
 
     private companion object {

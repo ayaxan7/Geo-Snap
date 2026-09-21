@@ -85,13 +85,5 @@
     <string name="gallery_error">ನಿಮ್ಮ ಮೀಡಿಯಾವನ್ನು ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.</string>
     <string name="retry">ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ</string>
 
-    <string name="geotag_fetching_location">ಸ್ಥಳ ಪಡೆಯಲಾಗುತ್ತಿದೆ…</string>
-    <string name="geotag_latitude">LAT</string>
-    <string name="geotag_longitude">LOG</string>
-    <string name="geotag_date">ದಿನಾಂಕ</string>
-    <string name="geotag_map">ನಕ್ಷೆ</string>
-    <string name="geotag_static_map">ಸ್ಥಿರ ನಕ್ಷೆ</string>
-    <string name="geotag_logo">ನಮ್ಮ ಲೋಗೋ</string>
-
     <string name="error_generic">ಏನೋ ತಪ್ಪಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
 </resources>
