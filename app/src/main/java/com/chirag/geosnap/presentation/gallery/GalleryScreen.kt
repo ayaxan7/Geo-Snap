@@ -65,6 +65,7 @@ import com.chirag.geosnap.domain.model.GeoMedia
 import com.chirag.geosnap.domain.model.MediaType
 import com.chirag.geosnap.presentation.sharing.shareMediaChooser
 import com.chirag.geosnap.ui.theme.PrimaryGreen
+import kotlinx.coroutines.withTimeoutOrNull
 
 private const val LONG_HOLD_MILLIS = 3000L
 
@@ -309,24 +310,20 @@ private fun MediaThumbnail(
             .aspectRatio(1f)
             .pointerInput(Unit) {
                 awaitEachGesture {
-                    val down = awaitFirstDown(requireUnconsumed = false)
-                    val startTime = down.uptimeMillis
-                    while (true) {
-                        val event = awaitPointerEvent()
-                        val released = event.changes.any { !it.pressed }
-                        val consumed = event.changes.any { it.isConsumed }
-                        if (released || consumed) {
-                            if (released && !consumed) {
-                                val elapsed =
-                                    event.changes.first().uptimeMillis - startTime
-                                if (elapsed >= LONG_HOLD_MILLIS) {
-                                    currentOnLongHold()
-                                } else {
-                                    currentOnTap()
-                                }
-                            }
-                            break
+                    awaitFirstDown(requireUnconsumed = false)
+                    val outcome = withTimeoutOrNull(LONG_HOLD_MILLIS.toLong()) {
+                        while (true) {
+                            val event = awaitPointerEvent()
+                            val released = event.changes.any { !it.pressed }
+                            val consumed = event.changes.any { it.isConsumed }
+                            if (!released && !consumed) continue
+                            return@withTimeoutOrNull released && !consumed
                         }
+                    }
+                    when (outcome) {
+                        null -> currentOnLongHold()
+                        true -> currentOnTap()
+                        false -> Unit
                     }
                 }
             }
