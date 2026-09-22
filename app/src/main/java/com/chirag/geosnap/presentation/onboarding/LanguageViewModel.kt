@@ -38,15 +38,17 @@ class LanguageViewModel @Inject constructor(
         val saving: Boolean = false
     )
 
-    private val _uiState = MutableStateFlow(UiState())
+    private val _uiState = MutableStateFlow(UiState(selectedCode = initialLanguageCode()))
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
     init {
+        // Override the synchronous default with whatever is actually persisted.
         viewModelScope.launch {
-            getSelectedLanguage()
-                .collect { existing ->
-                    setSelected(existing ?: defaultLanguageCode())
+            getSelectedLanguage().collect { existing ->
+                if (existing != null) {
+                    setSelected(existing)
                 }
+            }
         }
     }
 
@@ -77,9 +79,15 @@ class LanguageViewModel @Inject constructor(
         _uiState.update { it.copy(selectedCode = code) }
     }
 
-    private fun defaultLanguageCode(): String {
+    /**
+     * First-frame default so a radio button is always pre-selected the moment
+     * the screen opens: the device language when it is one we support, English
+     * otherwise. The persisted selection (if any) replaces it as soon as
+     * DataStore emits.
+     */
+    private fun initialLanguageCode(): String {
         val systemLanguage = Locale.getDefault().language.lowercase()
-        return _uiState.value.languages
+        return supportedLanguages()
             .firstOrNull { it.code == systemLanguage }?.code
             ?: DEFAULT_LANGUAGE
     }

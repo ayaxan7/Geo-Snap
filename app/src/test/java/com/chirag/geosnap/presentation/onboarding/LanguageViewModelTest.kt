@@ -36,6 +36,20 @@ class LanguageViewModelTest {
     }
 
     @Test
+    fun `a radio button is pre-selected as soon as the screen opens`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val repository = FakePreferencesRepository()
+            val vm = createViewModel(repository)
+
+            // No advanceUntilIdle: the selection must exist before any async emission.
+            val selected = vm.uiState.value.selectedCode
+            assertTrue(
+                "expected a pre-selected language but was: $selected",
+                LanguageViewModel.supportedLanguages().any { it.code == selected }
+            )
+        }
+
+    @Test
     fun `restores previously selected language`() = runTest(mainDispatcherRule.scheduler) {
         val repository = FakePreferencesRepository(initialLanguage = "gu")
         val vm = createViewModel(repository)
