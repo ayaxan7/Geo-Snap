@@ -91,6 +91,17 @@
     <string name="gallery_delete_confirm">ಅಳಿಸಿ</string>
     <string name="gallery_delete_cancel">ರದ್ದುಮಾಡಿ</string>
     <string name="gallery_delete_error">ಈ ಮೀಡಿಯಾವನ್ನು ಅಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.</string>
+    <string name="gallery_selected_count">ಆಯ್ಕೆ ಮಾಡಲಾಗಿದೆ: %1$d</string>
+    <string name="gallery_section_today">ಇಂದು</string>
+    <string name="gallery_section_this_week">ಈ ವಾರ</string>
+    <string name="gallery_section_last_week">ಕಳೆದ ವಾರ</string>
+    <string name="gallery_section_this_month">ಈ ತಿಂಗಳು</string>
+    <string name="gallery_section_last_month">ಕಳೆದ ತಿಂಗಳು</string>
+    <string name="gallery_section_older">ಹಳೆಯದು</string>
+    <plurals name="gallery_delete_items_message">
+        <item quantity="one">ಇದನ್ನು GeoSnap ಗ್ಯಾಲರಿಯಿಂದ ತೆಗೆದುಹಾಕುವುದೇ? ಫೈಲ್ ನಿಮ್ಮ ಡಿವೈಸ್ ಗ್ಯಾಲರಿಯಲ್ಲಿ ಉಳಿಯುತ್ತದೆ.</item>
+        <item quantity="other">%1$d ಐಟಂಗಳನ್ನು GeoSnap ಗ್ಯಾಲರಿಯಿಂದ ತೆಗೆದುಹಾಕುವುದೇ? ಫೈಲ್ಗಳು ನಿಮ್ಮ ಡಿವೈಸ್ ಗ್ಯಾಲರಿಯಲ್ಲಿ ಉಳಿಯುತ್ತವೆ.</item>
+    </plurals>
 
     <string name="error_generic">ಏನೋ ತಪ್ಪಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
 </resources>

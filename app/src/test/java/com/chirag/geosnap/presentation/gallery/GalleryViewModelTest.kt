@@ -5,6 +5,8 @@ import com.chirag.geosnap.domain.model.GeoMedia
 import com.chirag.geosnap.domain.model.MediaType
 import com.chirag.geosnap.testutils.FakeMediaRepository
 import com.chirag.geosnap.testutils.MainDispatcherRule
+import java.time.LocalDate
+import java.time.ZoneId
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -75,5 +77,175 @@ class GalleryViewModelTest {
         val state = vm.uiState.first()
         assertFalse(state.loadingError)
         assertEquals(1, state.media.size)
+    }
+
+    @Test
+    fun `groupMediaByDate buckets media newest first`() {
+        val now = LocalDate.of(2026, 9, 22)
+
+        fun at(daysAgo: Long): Long =
+            now.minusDays(daysAgo)
+                .atStartOfDay(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli()
+
+        val media = listOf(
+            media("content://geosnap.test/older", timestamp = at(100)),
+            media("content://geosnap.test/today", timestamp = at(0)),
+            media("content://geosnap.test/last-week", timestamp = at(10)),
+            media("content://geosnap.test/this-month", timestamp = at(20)),
+            media("content://geosnap.test/this-week", timestamp = at(5)),
+            media("content://geosnap.test/last-month", timestamp = at(45))
+        )
+
+        val sections = groupMediaByDate(media, now = now)
+
+        assertEquals(
+            listOf(
+                GallerySection.TODAY,
+                GallerySection.THIS_WEEK,
+                GallerySection.LAST_WEEK,
+                GallerySection.THIS_MONTH,
+                GallerySection.LAST_MONTH,
+                GallerySection.OLDER
+            ),
+            sections.map { it.section }
+        )
+        assertEquals(listOf("content://geosnap.test/today"), sections[0].items.map { it.displayName })
+        assertEquals(listOf("content://geosnap.test/this-week"), sections[1].items.map { it.displayName })
+        assertEquals(listOf("content://geosnap.test/last-week"), sections[2].items.map { it.displayName })
+        assertEquals(listOf("content://geosnap.test/this-month"), sections[3].items.map { it.displayName })
+        assertEquals(listOf("content://geosnap.test/last-month"), sections[4].items.map { it.displayName })
+        assertEquals(listOf("content://geosnap.test/older"), sections[5].items.map { it.displayName })
+    }
+
+    @Test
+    fun `groupMediaByDate keeps newest item first within a section`() {
+        val now = LocalDate.of(2026, 9, 22)
+        fun at(hoursAgo: Long): Long = now.atStartOfDay(ZoneId.systemDefault())
+            .plusHours(12)
+            .minusHours(hoursAgo)
+            .toInstant()
+            .toEpochMilli()
+
+        val media = listOf(
+            media("content://geosnap.test/older-today", timestamp = at(5)),
+            media("content://geosnap.test/newer-today", timestamp = at(1))
+        )
+
+        val sections = groupMediaByDate(media, now = now)
+        assertEquals(1, sections.size)
+        assertEquals(GallerySection.TODAY, sections[0].section)
+        assertEquals(
+            listOf("content://geosnap.test/newer-today", "content://geosnap.test/older-today"),
+            sections[0].items.map { it.displayName }
+        )
+    }
+
+    @Test
+    fun `enterSelection and toggling tracks selected uris`() = runTest(mainDispatcherRule.scheduler) {
+        val repo = FakeMediaRepository().apply {
+            media = mutableListOf(
+                media("content://geosnap.test/a", timestamp = 100),
+                media("content://geosnap.test/b", timestamp = 200)
+            )
+        }
+        val vm = GalleryViewModel(mediaRepository = repo)
+        advanceUntilIdle()
+
+        vm.enterSelection()
+        assertTrue(vm.uiState.first().selectionMode)
+
+        vm.toggleSelection("content://geosnap.test/a")
+        vm.toggleSelection("content://geosnap.test/b")
+        assertEquals(
+            setOf("content://geosnap.test/a", "content://geosnap.test/b"),
+            vm.uiState.first().selection
+        )
+
+        vm.toggleSelection("content://geosnap.test/a")
+        assertEquals(setOf("content://geosnap.test/b"), vm.uiState.first().selection)
+
+        vm.exitSelection()
+        assertFalse(vm.uiState.first().selectionMode)
+        assertTrue(vm.uiState.first().selection.isEmpty())
+    }
+
+    @Test
+    fun `toggleSelection is ignored outside selection mode`() = runTest(mainDispatcherRule.scheduler) {
+        val repo = FakeMediaRepository().apply {
+            media = mutableListOf(media("content://geosnap.test/a", timestamp = 1))
+        }
+        val vm = GalleryViewModel(mediaRepository = repo)
+        advanceUntilIdle()
+
+        vm.toggleSelection("content://geosnap.test/a")
+
+        assertTrue(vm.uiState.first().selection.isEmpty())
+    }
+
+    @Test
+    fun `deleteSelection softly deletes selected items and refreshes`() = runTest(mainDispatcherRule.scheduler) {
+        val repo = FakeMediaRepository().apply {
+            media = mutableListOf(
+                media("content://geosnap.test/a", timestamp = 100),
+                media("content://geosnap.test/b", timestamp = 200),
+                media("content://geosnap.test/c", timestamp = 300)
+            )
+        }
+        val vm = GalleryViewModel(mediaRepository = repo)
+        advanceUntilIdle()
+
+        vm.enterSelection()
+        vm.toggleSelection("content://geosnap.test/a")
+        vm.toggleSelection("content://geosnap.test/b")
+        vm.deleteSelection()
+        advanceUntilIdle()
+
+        assertEquals(
+            listOf("content://geosnap.test/a", "content://geosnap.test/b"),
+            repo.deletedUris
+        )
+        assertEquals(
+            listOf("content://geosnap.test/c"),
+            vm.uiState.first().media.map { it.uri.toString() }
+        )
+        assertFalse(vm.uiState.first().selectionMode)
+        assertTrue(vm.uiState.first().selection.isEmpty())
+    }
+
+    @Test
+    fun `deleteSelection surfaces error when every deletion fails`() = runTest(mainDispatcherRule.scheduler) {
+        val repo = FakeMediaRepository().apply {
+            media = mutableListOf(media("content://geosnap.test/a", timestamp = 1))
+            failDelete = true
+        }
+        val vm = GalleryViewModel(mediaRepository = repo)
+        advanceUntilIdle()
+
+        vm.enterSelection()
+        vm.toggleSelection("content://geosnap.test/a")
+        vm.deleteSelection()
+        advanceUntilIdle()
+
+        assertTrue(vm.uiState.first().deleteSelectionFailed)
+        assertTrue(vm.uiState.first().selectionMode)
+        assertEquals(1, vm.uiState.first().media.size)
+        assertTrue(repo.deletedUris.isEmpty())
+    }
+
+    @Test
+    fun `deleteSelection is a no-op without a selection`() = runTest(mainDispatcherRule.scheduler) {
+        val repo = FakeMediaRepository().apply {
+            media = mutableListOf(media("content://geosnap.test/a", timestamp = 1))
+        }
+        val vm = GalleryViewModel(mediaRepository = repo)
+        advanceUntilIdle()
+
+        vm.deleteSelection()
+        advanceUntilIdle()
+
+        assertTrue(repo.deletedUris.isEmpty())
+        assertFalse(vm.uiState.first().deleteSelectionFailed)
     }
 }

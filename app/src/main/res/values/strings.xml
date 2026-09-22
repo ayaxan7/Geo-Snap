@@ -102,6 +102,21 @@
     <string name="gallery_delete_confirm">Delete</string>
     <string name="gallery_delete_cancel">Cancel</string>
     <string name="gallery_delete_error">Could not delete this media.</string>
+    <string name="gallery_selected_count">%1$d selected</string>
+
+    <!-- Gallery date sections -->
+    <string name="gallery_section_today">Today</string>
+    <string name="gallery_section_this_week">This week</string>
+    <string name="gallery_section_last_week">Last week</string>
+    <string name="gallery_section_this_month">This month</string>
+    <string name="gallery_section_last_month">Last month</string>
+    <string name="gallery_section_older">Older</string>
+
+    <!-- Gallery delete confirmation (single or bulk) -->
+    <plurals name="gallery_delete_items_message">
+        <item quantity="one">Remove this from the GeoSnap gallery? The file itself will stay in your device gallery.</item>
+        <item quantity="other">Remove %1$d items from the GeoSnap gallery? The files themselves will stay in your device gallery.</item>
+    </plurals>
 
     <!-- GeoTag card (live overlay + burnt into media) -->
     <string name="geotag_fetching_location">Fetching location...</string>

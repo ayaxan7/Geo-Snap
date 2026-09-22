@@ -91,6 +91,17 @@
     <string name="gallery_delete_confirm">हटाएँ</string>
     <string name="gallery_delete_cancel">रद्द करें</string>
     <string name="gallery_delete_error">यह मीडिया हटाया नहीं जा सका।</string>
+    <string name="gallery_selected_count">चयनित: %1$d</string>
+    <string name="gallery_section_today">आज</string>
+    <string name="gallery_section_this_week">इस सप्ताह</string>
+    <string name="gallery_section_last_week">पिछला सप्ताह</string>
+    <string name="gallery_section_this_month">इस महीने</string>
+    <string name="gallery_section_last_month">पिछला महीना</string>
+    <string name="gallery_section_older">पुराना</string>
+    <plurals name="gallery_delete_items_message">
+        <item quantity="one">इसे GeoSnap गैलरी से निकालें? फ़ाइल आपके डिवाइस की गैलरी में यथावत रहेगी।</item>
+        <item quantity="other">%1$d आइटम GeoSnap गैलरी से निकालें? फ़ाइलें आपके डिवाइस की गैलरी में यथावत रहेंगी।</item>
+    </plurals>
 
     <string name="error_generic">कुछ गड़बड़ हो गई। कृपया फिर प्रयास करें।</string>
 </resources>
