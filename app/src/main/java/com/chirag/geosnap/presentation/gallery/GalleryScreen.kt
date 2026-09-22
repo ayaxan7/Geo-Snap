@@ -3,7 +3,8 @@ package com.chirag.geosnap.presentation.gallery
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,11 +40,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -62,6 +65,8 @@ import com.chirag.geosnap.domain.model.GeoMedia
 import com.chirag.geosnap.domain.model.MediaType
 import com.chirag.geosnap.presentation.sharing.shareMediaChooser
 import com.chirag.geosnap.ui.theme.PrimaryGreen
+
+private const val LONG_HOLD_MILLIS = 3000L
 
 @Composable
 fun GalleryScreen(
@@ -131,7 +136,8 @@ fun GalleryScreen(
                     selectionMode = uiState.selectionMode,
                     selectedUris = uiState.selection,
                     onItemClick = onItemClick,
-                    onToggleSelection = viewModel::toggleSelection
+                    onToggleSelection = viewModel::toggleSelection,
+                    onStartSelection = viewModel::startSelectionAt
                 )
             }
 
@@ -231,7 +237,8 @@ private fun GalleryGrid(
     selectionMode: Boolean,
     selectedUris: Set<String>,
     onItemClick: (Int) -> Unit,
-    onToggleSelection: (String) -> Unit
+    onToggleSelection: (String) -> Unit,
+    onStartSelection: (String) -> Unit
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -249,13 +256,14 @@ private fun GalleryGrid(
                     media = media,
                     selectionMode = selectionMode,
                     selected = uri in selectedUris,
-                    onClick = {
+                    onTap = {
                         if (selectionMode) {
                             onToggleSelection(uri)
                         } else {
                             flatIndexByUri[uri]?.let(onItemClick)
                         }
-                    }
+                    },
+                    onLongHold = { onStartSelection(uri) }
                 )
             }
         }
@@ -290,13 +298,38 @@ private fun MediaThumbnail(
     media: GeoMedia,
     selectionMode: Boolean,
     selected: Boolean,
-    onClick: () -> Unit
+    onTap: () -> Unit,
+    onLongHold: () -> Unit
 ) {
+    val currentOnTap by rememberUpdatedState(onTap)
+    val currentOnLongHold by rememberUpdatedState(onLongHold)
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(1f)
-            .clickable(onClick = onClick)
+            .pointerInput(Unit) {
+                awaitEachGesture {
+                    val down = awaitFirstDown(requireUnconsumed = false)
+                    val startTime = down.uptimeMillis
+                    while (true) {
+                        val event = awaitPointerEvent()
+                        val released = event.changes.any { !it.pressed }
+                        val consumed = event.changes.any { it.isConsumed }
+                        if (released || consumed) {
+                            if (released && !consumed) {
+                                val elapsed =
+                                    event.changes.first().uptimeMillis - startTime
+                                if (elapsed >= LONG_HOLD_MILLIS) {
+                                    currentOnLongHold()
+                                } else {
+                                    currentOnTap()
+                                }
+                            }
+                            break
+                        }
+                    }
+                }
+            }
     ) {
         AsyncImage(
             model = media.uri,
@@ -340,7 +373,7 @@ private fun MediaThumbnail(
             }
             Checkbox(
                 checked = selected,
-                onCheckedChange = { onClick() },
+                onCheckedChange = null,
                 colors = CheckboxDefaults.colors(
                     checkedColor = PrimaryGreen,
                     checkmarkColor = Color.White,

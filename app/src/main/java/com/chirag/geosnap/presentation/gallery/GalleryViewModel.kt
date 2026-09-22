@@ -113,6 +113,14 @@ class GalleryViewModel @Inject constructor(
         _uiState.update { it.copy(selectionMode = true) }
     }
 
+    /**
+     * Enter selection mode with [uri] pre-selected, used when the user holds a
+     * thumbnail so it is picked up by the bulk share/delete actions immediately.
+     */
+    fun startSelectionAt(uri: String) {
+        _uiState.update { it.copy(selectionMode = true, selection = setOf(uri)) }
+    }
+
     fun exitSelection() {
         _uiState.update { it.copy(selectionMode = false, selection = emptySet()) }
     }

@@ -185,6 +185,25 @@ class GalleryViewModelTest {
     }
 
     @Test
+    fun `startSelectionAt enters selection mode with the given uri selected`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val repo = FakeMediaRepository().apply {
+                media = mutableListOf(
+                    media("content://geosnap.test/a", timestamp = 1),
+                    media("content://geosnap.test/b", timestamp = 2)
+                )
+            }
+            val vm = GalleryViewModel(mediaRepository = repo)
+            advanceUntilIdle()
+
+            vm.startSelectionAt("content://geosnap.test/b")
+
+            val state = vm.uiState.first()
+            assertTrue(state.selectionMode)
+            assertEquals(setOf("content://geosnap.test/b"), state.selection)
+        }
+
+    @Test
     fun `deleteSelection softly deletes selected items and refreshes`() = runTest(mainDispatcherRule.scheduler) {
         val repo = FakeMediaRepository().apply {
             media = mutableListOf(
