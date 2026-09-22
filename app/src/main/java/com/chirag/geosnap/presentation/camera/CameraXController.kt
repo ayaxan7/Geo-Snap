@@ -155,29 +155,19 @@ class CameraXController(
         if (!cam.cameraInfo.hasFlashUnit()) return@withContext false
 
         val next = !_flashEnabled.value
-        // The torch is the user-visible flashlight: it lights the preview in both
-        // photo and video modes. Await the result so the icon only flips if the
-        // hardware actually obeyed.
-        if (!awaitTorch(cam, next)) return@withContext false
-
-        boundImageCapture?.flashMode =
-            if (next) ImageCapture.FLASH_MODE_ON else ImageCapture.FLASH_MODE_OFF
+        val imageCapture = boundImageCapture
+        if (imageCapture != null) {
+            imageCapture.flashMode =
+                if (next) ImageCapture.FLASH_MODE_ON else ImageCapture.FLASH_MODE_OFF
+            if (!next) {
+                runCatching { cam.cameraControl.enableTorch(false) }
+            }
+        } else {
+            runCatching { cam.cameraControl.enableTorch(next).get() }
+        }
         _flashEnabled.value = next
         next
     }
-
-    /** Enables/disables the torch without blocking the main thread. */
-    private suspend fun awaitTorch(cam: Camera, enable: Boolean): Boolean =
-        suspendCancellableCoroutine { continuation ->
-            val future = cam.cameraControl.enableTorch(enable)
-            future.addListener(
-                {
-                    if (continuation.isCancelled) return@addListener
-                    continuation.resume(runCatching { future.get() }.isSuccess)
-                },
-                ContextCompat.getMainExecutor(appContext)
-            )
-        }
 
     override suspend fun capturePhoto(): File = withContext(Dispatchers.Main.immediate) {
         val imageCapture = boundImageCapture
