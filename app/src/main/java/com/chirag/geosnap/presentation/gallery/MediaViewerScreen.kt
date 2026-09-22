@@ -5,8 +5,11 @@ import android.view.ViewGroup
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.calculatePan
+import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -53,6 +56,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastAll
+import androidx.compose.ui.util.fastAny
+import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -301,6 +307,10 @@ private fun VideoPage(uri: Uri, player: ExoPlayer) {
 /**
  * Full-screen photo with pinch-zoom, pan while zoomed, and double-tap to toggle
  * between 1x and max zoom.
+ *
+ * Gestures are only consumed while pinching or when already zoomed, so at 1x a
+ * horizontal swipe passes through to the pager (swipe to navigate works); once
+ * zoomed in, drags pan the photo instead of flipping pages.
  */
 @Composable
 private fun ZoomablePhoto(uri: Uri) {
@@ -323,10 +333,25 @@ private fun ZoomablePhoto(uri: Uri) {
                 })
             }
             .pointerInput(Unit) {
-                detectTransformGestures { _, pan, zoom, _ ->
-                    val newScale = (scale * zoom).coerceIn(1f, MAX_ZOOM)
-                    scale = newScale
-                    offset = if (newScale > 1f) clampOffset(offset + pan, newScale, size) else Offset.Zero
+                awaitEachGesture {
+                    awaitFirstDown(requireUnconsumed = false)
+                    do {
+                        val event = awaitPointerEvent()
+                        val zoomChange = event.calculateZoom()
+                        val panChange = event.calculatePan()
+                        val zoomed = scale > 1f
+                        if (event.changes.fastAll { it.pressed } && (zoomed || zoomChange != 1f)) {
+                            val newScale = (scale * zoomChange).coerceIn(1f, MAX_ZOOM)
+                            if (newScale > 1f) {
+                                scale = newScale
+                                offset = clampOffset(offset + panChange, newScale, size)
+                            } else {
+                                scale = 1f
+                                offset = Offset.Zero
+                            }
+                            event.changes.fastForEach { it.consume() }
+                        }
+                    } while (event.changes.fastAny { it.pressed })
                 }
             }
             .graphicsLayer {
