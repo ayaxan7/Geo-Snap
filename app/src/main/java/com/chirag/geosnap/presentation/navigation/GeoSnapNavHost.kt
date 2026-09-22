@@ -33,6 +33,7 @@ import com.chirag.geosnap.R
 import com.chirag.geosnap.presentation.camera.CameraMode
 import com.chirag.geosnap.presentation.camera.CameraScreen
 import com.chirag.geosnap.presentation.gallery.GalleryScreen
+import com.chirag.geosnap.presentation.gallery.MediaViewerScreen
 import com.chirag.geosnap.presentation.home.HomeScreen
 import com.chirag.geosnap.presentation.main.MainViewModel
 import com.chirag.geosnap.presentation.onboarding.LanguageScreen
@@ -129,7 +130,23 @@ internal fun GeoSnapNavHost(startDestination: String, isAlreadyOnboarded: Boolea
         }
 
         composable(Destination.Gallery.route) {
-            GalleryScreen(onBack = navController::popBackStack)
+            GalleryScreen(
+                onBack = navController::popBackStack,
+                onItemClick = navController::navigateToViewer
+            )
+        }
+
+        composable(
+            route = Destination.GalleryViewer.ROUTE_PATTERN,
+            arguments = listOf(
+                navArgument(Destination.GalleryViewer.ARGUMENT_INDEX) { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val index = backStackEntry.arguments
+                ?.getInt(Destination.GalleryViewer.ARGUMENT_INDEX)
+                ?.coerceAtLeast(0)
+                ?: 0
+            MediaViewerScreen(initialIndex = index, onBack = navController::popBackStack)
         }
 
         composable(
@@ -141,7 +158,11 @@ internal fun GeoSnapNavHost(startDestination: String, isAlreadyOnboarded: Boolea
             val mode = CameraMode.fromRoute(
                 backStackEntry.arguments?.getString(Destination.Camera.ARGUMENT_MODE)
             ) ?: CameraMode.PHOTO
-            CameraScreen(mode = mode, onBack = navController::popBackStack)
+            CameraScreen(
+                mode = mode,
+                onBack = navController::popBackStack,
+                onGallery = navController::navigateToGallery
+            )
         }
     }
 }

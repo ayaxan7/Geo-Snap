@@ -61,7 +61,8 @@ import kotlinx.coroutines.withContext
 @androidx.annotation.OptIn(UnstableApi::class)
 @Singleton
 class MediaRepositoryImpl @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val capturedMediaDao: CapturedMediaDao
 ) : MediaRepository {
 
     override suspend fun saveCapturedImage(
@@ -85,15 +86,27 @@ class MediaRepositoryImpl @Inject constructor(
             sourceFile
         }
         try {
-            persist(
+            val displayName = "${FILE_PREFIX}_${timestampText(now)}.jpg"
+            val uri = persist(
                 sourceFile = toPersist,
-                displayName = "${FILE_PREFIX}_${timestampText(now)}.jpg",
+                displayName = displayName,
                 mimeType = "image/jpeg",
                 relativeFolder = "Pictures",
                 publicDirectory = Environment.DIRECTORY_PICTURES,
                 collection = MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                 now = now
             ).toString()
+            capturedMediaDao.upsert(
+                CapturedMediaEntity(
+                    contentUri = uri,
+                    type = MediaType.IMAGE,
+                    timestamp = now,
+                    latitude = coordinate?.latitude,
+                    longitude = coordinate?.longitude,
+                    displayName = displayName
+                )
+            )
+            uri
         } finally {
             if (toPersist !== sourceFile) toPersist.delete()
         }
@@ -119,21 +132,51 @@ class MediaRepositoryImpl @Inject constructor(
         }
         try {
             val now = System.currentTimeMillis()
-            persist(
+            val displayName = "${FILE_PREFIX}_${timestampText(now)}.mp4"
+            val uri = persist(
                 sourceFile = toPersist,
-                displayName = "${FILE_PREFIX}_${timestampText(now)}.mp4",
+                displayName = displayName,
                 mimeType = "video/mp4",
                 relativeFolder = "Movies",
                 publicDirectory = Environment.DIRECTORY_MOVIES,
                 collection = MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
                 now = now
             ).toString()
+            capturedMediaDao.upsert(
+                CapturedMediaEntity(
+                    contentUri = uri,
+                    type = MediaType.VIDEO,
+                    timestamp = now,
+                    latitude = coordinate?.latitude,
+                    longitude = coordinate?.longitude,
+                    displayName = displayName
+                )
+            )
+            uri
         } finally {
             if (toPersist !== sourceFile) toPersist.delete()
         }
     }
 
     override suspend fun getAppMedia(): List<GeoMedia> = withContext(Dispatchers.IO) {
+        backfillFromMediaStore()
+        capturedMediaDao.listActive()
+            .map(::toGeoMedia)
+            .sortedByDescending { it.timestamp }
+    }
+
+    override suspend fun deleteMedia(contentUri: String): Boolean = withContext(Dispatchers.IO) {
+        runCatching { capturedMediaDao.markDeleted(contentUri) }.isSuccess
+    }
+
+    /**
+     * One-way sync from MediaStore into Room so captures made before this
+     * feature (or any file that is on the device but not yet indexed) appear in
+     * the app gallery. Media the user soft-deleted is never re-imported because
+     * its uri is already present in Room (upsert is a no-op for the unique
+     * contentUri index, and `deleted` is never flipped back).
+     */
+    private suspend fun backfillFromMediaStore() {
         val images = queryCollection(
             collection = MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
             type = MediaType.IMAGE,
@@ -146,8 +189,33 @@ class MediaRepositoryImpl @Inject constructor(
             latitudeColumn = MediaStore.Video.VideoColumns.LATITUDE,
             longitudeColumn = MediaStore.Video.VideoColumns.LONGITUDE
         )
-        (images + videos).sortedByDescending { it.timestamp }
+        val mediaStore = images + videos
+        val known = capturedMediaDao.allUris().toSet()
+        val missing = mediaStore.filter { it.uri.toString() !in known }
+        if (missing.isNotEmpty()) {
+            capturedMediaDao.upsertAll(missing.map(::toEntity))
+        }
     }
+
+    private fun toEntity(media: GeoMedia): CapturedMediaEntity =
+        CapturedMediaEntity(
+            contentUri = media.uri.toString(),
+            type = media.type,
+            timestamp = media.timestamp,
+            latitude = media.latitude,
+            longitude = media.longitude,
+            displayName = media.displayName
+        )
+
+    private fun toGeoMedia(entity: CapturedMediaEntity): GeoMedia =
+        GeoMedia(
+            uri = Uri.parse(entity.contentUri),
+            type = entity.type,
+            timestamp = entity.timestamp,
+            latitude = entity.latitude,
+            longitude = entity.longitude,
+            displayName = entity.displayName
+        )
 
     private fun persist(
         sourceFile: File,

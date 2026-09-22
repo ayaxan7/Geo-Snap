@@ -19,6 +19,29 @@ sealed class Destination(val route: String) {
     data object Home : Destination(route = HomeRoute)
     data object Gallery : Destination(route = GalleryRoute)
 
+    /** Full-screen media viewer, opened at the tapped gallery [index]. */
+    data class GalleryViewer(val index: Int) : Destination(
+        route = "$GalleryViewerBaseRoute/${index}"
+    ) {
+        companion object {
+            const val GalleryViewerBaseRoute = "gallery/viewer"
+            const val ARGUMENT_INDEX = "index"
+
+            /** Registered in the NavHost; runtime navigation uses [GalleryViewer.route]. */
+            const val ROUTE_PATTERN = "$GalleryViewerBaseRoute/{$ARGUMENT_INDEX}"
+
+            /** Resolves a navigated route string back to a [GalleryViewer] destination. */
+            fun fromRoute(route: String?): GalleryViewer? {
+                val prefix = "$GalleryViewerBaseRoute/"
+                val indexValue = route
+                    ?.takeIf { it.startsWith(prefix) }
+                    ?.removePrefix(prefix)
+                val index = indexValue?.toIntOrNull() ?: return null
+                return GalleryViewer(index)
+            }
+        }
+    }
+
     /** The single reusable camera screen, parameterised by [mode]. */
     data class Camera(val mode: CameraMode) : Destination(
         route = "$CameraBaseRoute/${mode.routeName}"
@@ -70,6 +93,10 @@ fun NavController.navigateToHome() {
 
 fun NavController.navigateToGallery() {
     navigateTo(Destination.Gallery) { launchSingleTop = true }
+}
+
+fun NavController.navigateToViewer(index: Int) {
+    navigateTo(Destination.GalleryViewer(index)) { launchSingleTop = true }
 }
 
 fun NavController.navigateToCamera(mode: CameraMode) {

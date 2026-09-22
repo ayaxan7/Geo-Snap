@@ -89,14 +89,23 @@ dependencies {
     // Image loading (gallery)
     implementation(libs.coil.compose)
     implementation(libs.coil)
+    implementation(libs.coil.video)
 
     // EXIF geotagging
     implementation(libs.androidx.exifinterface)
 
-    // Media3 (Transformer for burning the location card into videos)
+    // Media3 (Transformer for burning the location card into videos,
+    // ExoPlayer + PlayerView for full-screen video playback)
     implementation(libs.androidx.media3.common)
     implementation(libs.androidx.media3.effect)
+    implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.transformer)
+    implementation(libs.androidx.media3.ui)
+
+    // Room (app-gallery persistence)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)

@@ -37,6 +37,14 @@ interface MediaRepository {
         overlay: Bitmap? = null
     ): String
 
-    /** Queries the media the app created, newest first. */
+    /** Queries the app gallery (Room-backed), newest first. */
     suspend fun getAppMedia(): List<GeoMedia>
+
+    /**
+     * Removes [contentUri] from the app gallery (Room) only. The file itself
+     * stays in the device MediaStore.
+     *
+     * @return true when the media was removed successfully.
+     */
+    suspend fun deleteMedia(contentUri: String): Boolean
 }

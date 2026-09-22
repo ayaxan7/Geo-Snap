@@ -1,7 +1,6 @@
 package com.chirag.geosnap.presentation.camera
 
 import android.Manifest
-import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -54,11 +53,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.chirag.geosnap.R
 import com.chirag.geosnap.presentation.camera.components.CameraBottomControls
 import com.chirag.geosnap.presentation.camera.components.CameraTopBar
+import com.chirag.geosnap.presentation.sharing.shareMediaChooser
 
 @Composable
 fun CameraScreen(
     mode: CameraMode,
     onBack: () -> Unit,
+    onGallery: () -> Unit = {},
     viewModel: CameraViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -122,7 +123,9 @@ fun CameraScreen(
                     )
                 }
                 is CameraEvent.QuickShareRequested -> {
-                    launchShareChooser(context, event.uri)?.let(shareLauncher::launch)
+                    Uri.parse(event.uri)?.let {
+                        shareMediaChooser(context, it, isVideo = false)?.let(shareLauncher::launch)
+                    }
                 }
             }
         }
@@ -212,9 +215,7 @@ fun CameraScreen(
                         }
                     },
                     onFlip = viewModel::flipLensFacing,
-                    onGallery = {
-                        // Navigate to gallery (not passed directly to CameraScreen right now, so we placeholder)
-                    }
+                    onGallery = onGallery
                 )
             }
         }
@@ -264,23 +265,4 @@ private fun LocationDisabledDialog(
 
 private fun openLocationSettings(context: Context) {
     context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
-}
-
-private fun launchShareChooser(
-    context: Context,
-    uri: String
-): Intent? {
-    val nestedUri = Uri.parse(uri) ?: return null
-    val send = Intent(Intent.ACTION_SEND).apply {
-        type = "image/jpeg"
-        putExtra(Intent.EXTRA_STREAM, nestedUri)
-        clipData = ClipData.newUri(context.contentResolver, "GeoSnap", nestedUri)
-        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-    }
-    return Intent.createChooser(
-        send,
-        context.getString(R.string.share_title)
-    ).apply {
-        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-    }
 }

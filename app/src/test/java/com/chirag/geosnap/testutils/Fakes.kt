@@ -89,8 +89,12 @@ data class SavedMedia(val file: File, val coordinate: GeoCoordinate?, val overla
 class FakeMediaRepository : MediaRepository {
 
     var failSave = false
+    var failGetAppMedia = false
+    var failDelete = false
     val savedImages = mutableListOf<SavedMedia>()
     val savedVideos = mutableListOf<SavedMedia>()
+    val deletedUris = mutableListOf<String>()
+    var media = mutableListOf<GeoMedia>()
     private var nextId = 0
 
     override suspend fun saveCapturedImage(
@@ -113,7 +117,17 @@ class FakeMediaRepository : MediaRepository {
         return "content://geosnap.test/videos/${nextId++}"
     }
 
-    override suspend fun getAppMedia(): List<GeoMedia> = emptyList()
+    override suspend fun getAppMedia(): List<GeoMedia> {
+        if (failGetAppMedia) throw IOException("simulated query failure")
+        return media.sortedByDescending { it.timestamp }
+    }
+
+    override suspend fun deleteMedia(contentUri: String): Boolean {
+        if (failDelete) return false
+        deletedUris += contentUri
+        media.removeAll { it.uri.toString() == contentUri }
+        return true
+    }
 
     private fun failSaveOnce() {
         if (failSave) throw IOException("simulated storage failure")

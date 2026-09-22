@@ -1,5 +1,6 @@
 package com.chirag.geosnap.presentation.gallery
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,7 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,6 +33,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.chirag.geosnap.R
@@ -41,9 +44,14 @@ import com.chirag.geosnap.domain.model.MediaType
 @Composable
 fun GalleryScreen(
     onBack: () -> Unit,
+    onItemClick: (Int) -> Unit = {},
     viewModel: GalleryViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        viewModel.refresh()
+    }
 
     Column(
         modifier = Modifier
@@ -56,7 +64,7 @@ fun GalleryScreen(
             uiState.loading -> LoadingContent()
             uiState.loadingError -> ErrorContent(onRetry = viewModel::refresh)
             uiState.media.isEmpty() -> EmptyContent()
-            else -> GalleryGrid(media = uiState.media)
+            else -> GalleryGrid(media = uiState.media, onItemClick = onItemClick)
         }
     }
 }
@@ -83,23 +91,24 @@ private fun GalleryTopBar(onBack: () -> Unit) {
 }
 
 @Composable
-private fun GalleryGrid(media: List<GeoMedia>) {
+private fun GalleryGrid(media: List<GeoMedia>, onItemClick: (Int) -> Unit) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         modifier = Modifier.fillMaxSize(),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        items(media) { item -> MediaThumbnail(item) }
+        itemsIndexed(media) { index, item -> MediaThumbnail(media = item, onClick = { onItemClick(index) }) }
     }
 }
 
 @Composable
-private fun MediaThumbnail(media: GeoMedia) {
+private fun MediaThumbnail(media: GeoMedia, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(1f)
+            .clickable(onClick = onClick)
     ) {
         AsyncImage(
             model = media.uri,

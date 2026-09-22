@@ -84,6 +84,13 @@
     <string name="gallery_empty">ఇంకా ఏ మీడియా క్యాప్చర్ కాలేదు.\nమీరు క్యాప్చర్ చేసిన ఫోటోలు మరియు వీడియోలు ఇక్కడ కనిపిస్తాయి.</string>
     <string name="gallery_error">మీ మీడియాను లోడ్ చేయలేకపోయాము.</string>
     <string name="retry">మళ్లీ ప్రయత్నించండి</string>
+    <string name="gallery_viewer_counter">%1$d / %2$d</string>
+    <string name="gallery_share">భాగస్వామ్యం చేయండి</string>
+    <string name="gallery_delete_title">గ్యాలరీ నుండి తొలగించండి</string>
+    <string name="gallery_delete_message">దీన్ని GeoSnap గ్యాలరీ నుండి తీసేయాలా? ఫైల్ మీ పరికర గ్యాలరీలోనే ఉంటుంది.</string>
+    <string name="gallery_delete_confirm">తొలగించండి</string>
+    <string name="gallery_delete_cancel">రద్దు చేయండి</string>
+    <string name="gallery_delete_error">ఈ మీడియాను తొలగించలేకపోయాము.</string>
 
     <string name="error_generic">ఏదో తప్పు జరిగింది. దయచేసి మళ్లీ ప్రయత్నించండి.</string>
 </resources>

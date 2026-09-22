@@ -84,6 +84,13 @@
     <string name="gallery_empty">ಇನ್ನೂ ಯಾವುದೇ ಮೀಡಿಯಾ ಕ್ಯಾಪ್ಚರ್ ಆಗಿಲ್ಲ.\nನೀವು ಕ್ಯಾಪ್ಚರ್ ಮಾಡುವ ಫೋಟೋಗಳು ಮತ್ತು ವೀಡಿಯೋಗಳು ಇಲ್ಲಿ ಕಾಣಿಸುತ್ತವೆ.</string>
     <string name="gallery_error">ನಿಮ್ಮ ಮೀಡಿಯಾವನ್ನು ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.</string>
     <string name="retry">ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ</string>
+    <string name="gallery_viewer_counter">%1$d / %2$d</string>
+    <string name="gallery_share">ಹಂಚಿಕೊಳ್ಳಿ</string>
+    <string name="gallery_delete_title">ಗ್ಯಾಲರಿಯಿಂದ ಅಳಿಸಿ</string>
+    <string name="gallery_delete_message">ಇದನ್ನು GeoSnap ಗ್ಯಾಲರಿಯಿಂದ ತೆಗೆದುಹಾಕುವುದೇ? ಫೈಲ್ ನಿಮ್ಮ ಡಿವೈಸ್ ಗ್ಯಾಲರಿಯಲ್ಲಿ ಉಳಿಯುತ್ತದೆ.</string>
+    <string name="gallery_delete_confirm">ಅಳಿಸಿ</string>
+    <string name="gallery_delete_cancel">ರದ್ದುಮಾಡಿ</string>
+    <string name="gallery_delete_error">ಈ ಮೀಡಿಯಾವನ್ನು ಅಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.</string>
 
     <string name="error_generic">ಏನೋ ತಪ್ಪಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
 </resources>
