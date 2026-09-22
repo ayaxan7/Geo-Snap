@@ -17,8 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -47,6 +45,7 @@ fun HomeScreen(
     onTakeVideo: () -> Unit,
     onQuickShare: () -> Unit,
     onOpenGallery: () -> Unit,
+    onOpenSettings: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     fun onAction(action: HomeAction) {
@@ -86,7 +85,7 @@ fun HomeScreen(
                     fontSize = 16.sp
                 )
             }
-            IconButton(onClick = { /* TODO: Open settings */ }) {
+            IconButton(onClick = { onOpenSettings() }) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_settings),
                     contentDescription = stringResource(R.string.home_settings),

@@ -125,7 +125,8 @@ internal fun GeoSnapNavHost(startDestination: String, isAlreadyOnboarded: Boolea
                 onTakePhoto = { navController.navigateToCamera(CameraMode.PHOTO) },
                 onTakeVideo = { navController.navigateToCamera(CameraMode.VIDEO) },
                 onQuickShare = { navController.navigateToCamera(CameraMode.QUICK_SHARE) },
-                onOpenGallery = navController::navigateToGallery
+                onOpenGallery = navController::navigateToGallery,
+                onOpenSettings=navController::navigateToLanguage
             )
         }
 
