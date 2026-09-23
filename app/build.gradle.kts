@@ -90,6 +90,16 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil)
     implementation(libs.coil.video)
+    implementation(libs.coil.network.okhttp)
+
+    // Maps HTTP (Retrofit + OkHttp + Moshi)
+    implementation(libs.retrofit.core)
+    implementation(libs.retrofit.converter.moshi)
+    implementation(libs.okhttp.core)
+    implementation(libs.okhttp.logging)
+    implementation(libs.moshi)
+    implementation(libs.moshi.kotlin)
+    ksp(libs.moshi.kotlin.codegen)
 
     // EXIF geotagging
     implementation(libs.androidx.exifinterface)

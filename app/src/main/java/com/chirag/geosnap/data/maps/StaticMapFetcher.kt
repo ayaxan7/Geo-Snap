@@ -2,8 +2,6 @@ package com.chirag.geosnap.data.maps
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import java.net.HttpURLConnection
-import java.net.URL
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
@@ -16,7 +14,9 @@ import kotlinx.coroutines.withContext
  * same spot reuse the bitmap instead of re-hitting the network.
  */
 @Singleton
-class StaticMapFetcher @Inject constructor() {
+class StaticMapFetcher @Inject constructor(
+    private val mapsApi: MapsApi
+) {
 
     private var cachedUrl: String? = null
     private var cachedBitmap: Bitmap? = null
@@ -26,15 +26,8 @@ class StaticMapFetcher @Inject constructor() {
         if (url == cachedUrl) return cachedBitmap
         val bitmap = withContext(Dispatchers.IO) {
             runCatching {
-                val connection = (URL(url).openConnection() as HttpURLConnection).apply {
-                    requestMethod = "GET"
-                    connectTimeout = 5000
-                    readTimeout = 5000
-                }
-                try {
-                    connection.inputStream.use { BitmapFactory.decodeStream(it) }
-                } finally {
-                    connection.disconnect()
+                mapsApi.staticMap(url).use { body ->
+                    BitmapFactory.decodeStream(body.byteStream())
                 }
             }.getOrNull()
         }

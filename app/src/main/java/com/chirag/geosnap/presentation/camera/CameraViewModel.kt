@@ -9,6 +9,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.chirag.geosnap.BuildConfig
+import com.chirag.geosnap.data.maps.MapsApi
 import com.chirag.geosnap.domain.model.GeoCoordinate
 import com.chirag.geosnap.domain.repository.MediaRepository
 import com.chirag.geosnap.domain.usecase.GetCurrentLocationUseCase
@@ -17,11 +18,8 @@ import com.chirag.geosnap.presentation.navigation.Destination
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
-import java.net.HttpURLConnection
-import java.net.URL
 import java.util.Locale
 import javax.inject.Inject
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.channels.BufferOverflow
@@ -34,7 +32,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
@@ -49,7 +46,8 @@ class CameraViewModel @Inject constructor(
     private val mediaRepository: MediaRepository,
     private val getCurrentLocation: GetCurrentLocationUseCase,
     private val isLocationEnabled: IsLocationEnabledUseCase,
-    private val geoTagOverlayRenderer: GeoTagOverlayRenderer
+    private val geoTagOverlayRenderer: GeoTagOverlayRenderer,
+    private val mapsApi: MapsApi
 ) : ViewModel() {
 
     var mode: CameraMode = CameraMode.fromRoute(
@@ -78,6 +76,7 @@ class CameraViewModel @Inject constructor(
     val events: SharedFlow<CameraEvent> = _events.asSharedFlow()
 
     private var recordingElapsedJob: Job? = null
+    private var locationUpdatesJob: Job? = null
     private var pendingRecordingFile: File? = null
     private var pendingCoordinate: GeoCoordinate? = null
 
@@ -90,6 +89,8 @@ class CameraViewModel @Inject constructor(
 
     fun detachEngine() {
         attachedEngine = null
+        locationUpdatesJob?.cancel()
+        locationUpdatesJob = null
         _uiState.update {
             it.copy(isReady = false, isRecording = false, recordingElapsedMs = 0L)
         }
@@ -272,7 +273,8 @@ class CameraViewModel @Inject constructor(
     }
 
     private fun startLocationUpdates() {
-        viewModelScope.launch {
+        locationUpdatesJob?.cancel()
+        locationUpdatesJob = viewModelScope.launch {
             while (true) {
                 val coord = fetchCoordinateForTagging()
                 if (coord != null) {
@@ -334,32 +336,17 @@ class CameraViewModel @Inject constructor(
     private suspend fun fetchGoogleFormattedAddress(coord: GeoCoordinate): String? {
         val apiKey = BuildConfig.MAPS_API_KEY
         if (apiKey.isBlank()) return null
-        return withContext(Dispatchers.IO) {
-            runCatching {
-                val url = URL(
-                    "https://maps.googleapis.com/maps/api/geocode/json" +
-                        "?latlng=${coord.latitude},${coord.longitude}" +
-                        "&language=en" +
-                        "&key=$apiKey"
-                )
-                val connection = (url.openConnection() as HttpURLConnection).apply {
-                    requestMethod = "GET"
-                    connectTimeout = 5000
-                    readTimeout = 5000
-                }
-                try {
-                    val body = connection.inputStream.bufferedReader().use { it.readText() }
-                    extractFormattedAddress(body)
-                } finally {
-                    connection.disconnect()
-                }
-            }.getOrNull()
-        }
-    }
-
-    private fun extractFormattedAddress(body: String): String? {
-        val formattedRegex = Regex("\"formatted_address\"\\s*:\\s*\"((?:[^\"\\\\]|\\\\.)*)\"")
-        return formattedRegex.find(body)?.groupValues?.get(1)
+        return runCatching {
+            val response = mapsApi.reverseGeocode(
+                latLng = "${coord.latitude},${coord.longitude}",
+                language = "en",
+                apiKey = apiKey
+            )
+            response.results
+                ?.firstOrNull()
+                ?.formattedAddress
+                ?.takeIf { it.isNotBlank() }
+        }.getOrNull()
     }
 
     private fun startRecordingTimer() {

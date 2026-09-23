@@ -3,6 +3,7 @@ package com.chirag.geosnap.presentation.camera
 import android.content.ContextWrapper
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.chirag.geosnap.data.maps.MapsApi
 import com.chirag.geosnap.domain.model.GeoCoordinate
 import com.chirag.geosnap.domain.usecase.GetCurrentLocationUseCase
 import com.chirag.geosnap.domain.usecase.IsLocationEnabledUseCase
@@ -10,6 +11,7 @@ import com.chirag.geosnap.presentation.navigation.Destination
 import com.chirag.geosnap.testutils.FakeCameraEngine
 import com.chirag.geosnap.testutils.FakeGeoTagOverlayRenderer
 import com.chirag.geosnap.testutils.FakeLocationRepository
+import com.chirag.geosnap.testutils.FakeMapsApi
 import com.chirag.geosnap.testutils.FakeMediaRepository
 import com.chirag.geosnap.testutils.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -39,7 +41,8 @@ class CameraViewModelTest {
         engine: FakeCameraEngine = FakeCameraEngine(),
         media: FakeMediaRepository = FakeMediaRepository(),
         location: FakeLocationRepository = FakeLocationRepository(coordinate),
-        renderer: FakeGeoTagOverlayRenderer = FakeGeoTagOverlayRenderer()
+        renderer: FakeGeoTagOverlayRenderer = FakeGeoTagOverlayRenderer(),
+        mapsApi: MapsApi = FakeMapsApi()
     ): CameraViewModel {
         val viewModel = CameraViewModel(
             context = ContextWrapper(null),
@@ -47,7 +50,8 @@ class CameraViewModelTest {
             mediaRepository = media,
             getCurrentLocation = GetCurrentLocationUseCase(location),
             isLocationEnabled = IsLocationEnabledUseCase(location),
-            geoTagOverlayRenderer = renderer
+            geoTagOverlayRenderer = renderer,
+            mapsApi = mapsApi
         )
         viewModel.attachEngine(engine)
         return viewModel
@@ -295,4 +299,22 @@ class CameraViewModelTest {
         assertEquals(1, media.savedVideos.size)
         assertEquals(null, media.savedVideos.first().overlay)
     }
+
+    @Test
+    fun `surfaces Google formatted address from maps api`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val mapsApi = FakeMapsApi().apply {
+                formattedAddress = "1 Example Street, Testville"
+            }
+            val vm = createViewModel(mapsApi = mapsApi)
+
+            vm.onCameraReady()
+            runCurrent()
+
+            assertEquals("1 Example Street, Testville", vm.uiState.value.fullAddress)
+            assertEquals(1, mapsApi.reverseGeocodeCalls.size)
+            assertEquals("23.033863,72.585022", mapsApi.reverseGeocodeCalls.first())
+
+            vm.detachEngine()
+        }
 }

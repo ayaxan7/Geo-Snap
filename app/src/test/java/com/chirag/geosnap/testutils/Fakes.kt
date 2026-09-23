@@ -17,11 +17,16 @@ import com.chirag.geosnap.presentation.camera.GeoTagCardContent
 import com.chirag.geosnap.presentation.camera.GeoTagOverlayRenderer
 import androidx.camera.view.PreviewView
 import androidx.lifecycle.LifecycleOwner
+import com.chirag.geosnap.data.maps.GeocodeResponse
+import com.chirag.geosnap.data.maps.GeocodeResult
+import com.chirag.geosnap.data.maps.MapsApi
 import java.io.File
 import java.io.IOException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import okhttp3.ResponseBody
+import okhttp3.ResponseBody.Companion.toResponseBody
 
 /** Fully in-memory DataStore<Preferences> so repository logic runs on the JVM. */
 class InMemoryPreferencesDataStore(
@@ -134,8 +139,7 @@ class FakeMediaRepository : MediaRepository {
     }
 }
 
-/**
- * Scripted GeoTagOverlayRenderer. Bitmaps cannot be constructed on the JVM, so
+/** Scripted GeoTagOverlayRenderer. Bitmaps cannot be constructed on the JVM, so
  * [result] is left null by default; tests assert the card content that was
  * requested for rendering rather than the pixels.
  */
@@ -148,6 +152,35 @@ class FakeGeoTagOverlayRenderer(
     override suspend fun render(content: GeoTagCardContent): Bitmap? {
         rendered += content
         return result
+    }
+}
+
+/** Scripted MapsApi: canned reverse-geocode results, no network calls. */
+class FakeMapsApi : MapsApi {
+
+    var formattedAddress: String? = null
+    var failNext = false
+    val reverseGeocodeCalls = mutableListOf<String>()
+    val staticMapRequests = mutableListOf<String>()
+
+    override suspend fun reverseGeocode(
+        latLng: String,
+        language: String,
+        apiKey: String
+    ): GeocodeResponse {
+        reverseGeocodeCalls += latLng
+        if (failNext) throw IOException("simulated geocode failure")
+        val address = formattedAddress
+        return GeocodeResponse(
+            status = "OK",
+            results = address?.let { listOf(GeocodeResult(formattedAddress = it)) }.orEmpty()
+        )
+    }
+
+    override suspend fun staticMap(url: String): ResponseBody {
+        staticMapRequests += url
+        if (failNext) throw IOException("simulated static map failure")
+        return ByteArray(0).toResponseBody(null)
     }
 }
 
