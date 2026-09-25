@@ -295,6 +295,7 @@ class MediaRepositoryImpl @Inject constructor(
      * bottom-center of [sourceFile] and returns a new JPEG. The source is decoded
      * with `inSampleSize` so the long edge is capped at [MAX_DECODE_EDGE], any
      * EXIF rotation is baked upright, and GPS tags are copied onto the output.
+     * EXIF rotation is baked upright, and GPS tags are copied onto the output.
      */
     private fun burnOverlayIntoImage(
         sourceFile: File,
@@ -324,11 +325,11 @@ class MediaRepositoryImpl @Inject constructor(
             base = upright
         }
 
-        val cardWidth = (base.width * IMAGE_CARD_WIDTH_FRACTION).toInt().coerceAtLeast(1)
+        val cardWidth = (base.width * CARD_WIDTH_FRACTION).toInt().coerceAtLeast(1)
         val cardHeight =
             (cardWidth.toFloat() * overlay.height / overlay.width).toInt().coerceAtLeast(1)
-        val marginX = (base.width * IMAGE_CARD_MARGIN_FRACTION_X).toInt()
-        val marginBottom = (base.height * IMAGE_CARD_MARGIN_FRACTION_BOTTOM).toInt()
+        val marginX = (base.width - cardWidth) / 2
+        val marginBottom = (base.height * CARD_MARGIN_BOTTOM_FRACTION).toInt()
         val canvas = Canvas(base)
         canvas.drawBitmap(
             overlay,
@@ -399,15 +400,24 @@ class MediaRepositoryImpl @Inject constructor(
                 })
                 .build()
 
-            val (frameWidth, frameHeight) = videoFrameSize(sourceFile)
+            // Media3 composits BitmapOverlays in the output (post-rotation/display)
+            // frame space, so size the card against the rotation-aware display
+            // width so it occupies the same ~90% as the on-screen preview.
+            val (frameWidth, _) = videoFrameSize(sourceFile)
             val cardWidthPx =
-                (frameWidth * VIDEO_CARD_WIDTH_FRACTION).toInt().coerceAtLeast(1)
+                (frameWidth * CARD_WIDTH_FRACTION).toInt().coerceAtLeast(1)
             val cardHeightPx =
                 (cardWidthPx.toFloat() * overlay.height / overlay.width).toInt().coerceAtLeast(1)
+            // Bottom margin keeps the card just above the frame edge (~5%).
+            // NDC y=-1 is the frame bottom, so 5% up is -1 + 2*0.05.
+            val bottomAnchor = -1f + 2f * CARD_MARGIN_BOTTOM_FRACTION
             val settings = StaticOverlaySettings.Builder()
-                .setBackgroundFrameAnchor(0f, -1f)
+                .setBackgroundFrameAnchor(0f, bottomAnchor)
                 .setOverlayFrameAnchor(0f, -1f)
-                .setScale(cardWidthPx.toFloat() / frameWidth, cardHeightPx.toFloat() / frameHeight)
+                .setScale(
+                    cardWidthPx.toFloat() / overlay.width,
+                    cardHeightPx.toFloat() / overlay.height
+                )
                 .build()
             val effect = OverlayEffect(
                 listOf(BitmapOverlay.createStaticBitmapOverlay(overlay, settings))
@@ -428,19 +438,32 @@ class MediaRepositoryImpl @Inject constructor(
             output
         }
 
+    /**
+     * Returns the DISPLAYED (rotation-aware) frame size of the video. Portrait
+     * recordings are often stored with landscape pixel dimensions plus a 90/270
+     * degree rotation matrix, so raw metadata width/height are swapped to match
+     * what the user actually sees.
+     */
     private fun videoFrameSize(file: File): Pair<Int, Int> {
         val retriever = MediaMetadataRetriever()
-        return try {
+        try {
             retriever.setDataSource(file.absolutePath)
-            val width = retriever
+            val rawWidth = retriever
                 .extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)
                 ?.toIntOrNull() ?: DEFAULT_VIDEO_WIDTH
-            val height = retriever
+            val rawHeight = retriever
                 .extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)
                 ?.toIntOrNull() ?: DEFAULT_VIDEO_HEIGHT
-            width to height
+            val rotation = retriever
+                .extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)
+                ?.toIntOrNull() ?: 0
+            return if (rotation == 90 || rotation == 270) {
+                rawHeight to rawWidth
+            } else {
+                rawWidth to rawHeight
+            }
         } catch (e: Exception) {
-            DEFAULT_VIDEO_WIDTH to DEFAULT_VIDEO_HEIGHT
+            return DEFAULT_VIDEO_WIDTH to DEFAULT_VIDEO_HEIGHT
         } finally {
             runCatching { retriever.release() }
         }
@@ -514,10 +537,8 @@ class MediaRepositoryImpl @Inject constructor(
         const val DIRECTORY_NAME = "GeoSnap"
         const val FILE_PREFIX = "GeoSnap"
         const val MAX_DECODE_EDGE = 4096
-        const val IMAGE_CARD_WIDTH_FRACTION = 0.7f
-        const val IMAGE_CARD_MARGIN_FRACTION_X = 0.04f
-        const val IMAGE_CARD_MARGIN_FRACTION_BOTTOM = 0.05f
-        const val VIDEO_CARD_WIDTH_FRACTION = 0.55f
+        const val CARD_WIDTH_FRACTION = 0.9f
+        const val CARD_MARGIN_BOTTOM_FRACTION = 0.05f
         const val DEFAULT_VIDEO_WIDTH = 1920
         const val DEFAULT_VIDEO_HEIGHT = 1080
         val SMOOTH_PAINT = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
