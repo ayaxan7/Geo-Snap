@@ -27,6 +27,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CameraViewModelTest {
@@ -68,7 +69,7 @@ class CameraViewModelTest {
 
             assertEquals(1, media.savedImages.size)
             assertEquals(coordinate, media.savedImages.first().coordinate)
-            val event = withTimeoutOrNull(1000) { vm.events.first() }
+            val event = withTimeoutOrNull(1000.milliseconds) { vm.events.first() }
             assertTrue(event is CameraEvent.MediaSaved)
             assertTrue((event as CameraEvent.MediaSaved).isVideo.not())
             assertNull(vm.uiState.value.error)
@@ -82,7 +83,7 @@ class CameraViewModelTest {
         vm.capturePhoto()
         advanceUntilIdle()
 
-        val event = withTimeoutOrNull(1000) { vm.events.first() }
+        val event = withTimeoutOrNull(1000.milliseconds) { vm.events.first() }
         assertTrue(event is CameraEvent.QuickShareRequested)
         assertTrue(media.savedImages.isNotEmpty())
     }
@@ -94,7 +95,7 @@ class CameraViewModelTest {
             vm.setMode(CameraMode.QUICK_SHARE)
             vm.capturePhoto()
             advanceUntilIdle()
-            val event = withTimeoutOrNull(1000) { vm.events.first() }
+            val event = withTimeoutOrNull(1000.milliseconds) { vm.events.first() }
             assertTrue(event is CameraEvent.QuickShareRequested)
         }
 

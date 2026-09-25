@@ -138,12 +138,11 @@ fun GeoTagCard(
             Row(
                 verticalAlignment = Alignment.Top
             ) {
-                Icon(
+                Image(
                     painter = painterResource(
-                        android.R.drawable.ic_menu_mylocation
+                        R.drawable.ic_map
                     ),
-                    contentDescription = null,
-                    tint = Color(GeoTagCardSpec.ICON_RED),
+                    contentDescription = mapLabel,
                     modifier = Modifier.size(GeoTagCardSpec.ICON_SIZE_DP.dp)
                 )
 
@@ -188,12 +187,11 @@ fun GeoTagCard(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
+                Image(
                     painter = painterResource(
-                        android.R.drawable.ic_menu_today
+                        R.drawable.ic_calendar
                     ),
                     contentDescription = dateLabel,
-                    tint = Color(GeoTagCardSpec.TEXT_COLOR),
                     modifier = Modifier.size(GeoTagCardSpec.ICON_SIZE_DP.dp)
                 )
 

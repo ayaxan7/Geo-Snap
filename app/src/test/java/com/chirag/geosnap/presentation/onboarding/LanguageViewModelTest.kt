@@ -5,6 +5,7 @@ import com.chirag.geosnap.domain.usecase.GetSelectedLanguageUseCase
 import com.chirag.geosnap.domain.usecase.SetSelectedLanguageUseCase
 import com.chirag.geosnap.testutils.FakePreferencesRepository
 import com.chirag.geosnap.testutils.MainDispatcherRule
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -25,6 +26,7 @@ class LanguageViewModelTest {
             completeOnboarding = CompleteOnboardingUseCase(repository)
         )
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `defaults to English when nothing stored`() = runTest(mainDispatcherRule.scheduler) {
         val repository = FakePreferencesRepository()
@@ -35,6 +37,7 @@ class LanguageViewModelTest {
         assertEquals(LanguageViewModel.DEFAULT_LANGUAGE, vm.uiState.value.selectedCode)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `a radio button is pre-selected as soon as the screen opens`() =
         runTest(mainDispatcherRule.scheduler) {
@@ -49,6 +52,7 @@ class LanguageViewModelTest {
             )
         }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `restores previously selected language`() = runTest(mainDispatcherRule.scheduler) {
         val repository = FakePreferencesRepository(initialLanguage = "gu")
@@ -59,6 +63,7 @@ class LanguageViewModelTest {
         assertEquals("gu", vm.uiState.value.selectedCode)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `selecting a language persists it`() = runTest(mainDispatcherRule.scheduler) {
         val repository = FakePreferencesRepository()
@@ -72,6 +77,7 @@ class LanguageViewModelTest {
         assertEquals("hi", vm.uiState.value.selectedCode)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `confirm completes onboarding once and invokes callback`() =
         runTest(mainDispatcherRule.scheduler) {
@@ -88,6 +94,7 @@ class LanguageViewModelTest {
             assertEquals(1, completed)
         }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `confirm persists the selected language before completing`() =
         runTest(mainDispatcherRule.scheduler) {

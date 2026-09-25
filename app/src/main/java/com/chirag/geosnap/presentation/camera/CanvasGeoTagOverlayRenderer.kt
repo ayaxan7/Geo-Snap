@@ -24,6 +24,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import androidx.core.graphics.withClip
 
 /**
  * Draws the location card ([GeoTagCardContent]) into a [Bitmap] on a plain
@@ -258,20 +259,19 @@ class CanvasGeoTagOverlayRenderer @Inject constructor(
         val drawable = runCatching { context.getDrawable(R.drawable.geo_snap_icon) }
             .getOrNull()
         if (drawable != null) {
-            canvas.save()
-            canvas.clipPath(
+            canvas.withClip(
                 android.graphics.Path().apply {
                     addRoundRect(rect, corner, corner, android.graphics.Path.Direction.CW)
                 }
-            )
-            drawable.setBounds(
-                rect.left.toInt(),
-                rect.top.toInt(),
-                rect.right.toInt(),
-                rect.bottom.toInt()
-            )
-            drawable.draw(canvas)
-            canvas.restore()
+            ) {
+                drawable.setBounds(
+                    rect.left.toInt(),
+                    rect.top.toInt(),
+                    rect.right.toInt(),
+                    rect.bottom.toInt()
+                )
+                drawable.draw(this)
+            }
         }
     }
 
