@@ -72,7 +72,7 @@ class FakePreferencesRepository(
 
 /** Scripted LocationRepository returning a fixed result (or failing). */
 class FakeLocationRepository(
-    private val result: GeoCoordinate? = null
+    var result: GeoCoordinate? = null
 ) : LocationRepository {
 
     var calls = 0

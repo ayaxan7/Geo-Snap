@@ -317,4 +317,45 @@ class CameraViewModelTest {
 
             vm.detachEngine()
         }
+
+    @Test
+    fun `location polls do not re-resolve address while device is stationary`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val mapsApi = FakeMapsApi().apply {
+                formattedAddress = "1 Example Street, Testville"
+            }
+            val vm = createViewModel(mapsApi = mapsApi)
+            vm.onCameraReady()
+            runCurrent()
+            assertEquals(1, mapsApi.reverseGeocodeCalls.size)
+
+            mainDispatcherRule.scheduler.advanceTimeBy(30_000)
+            runCurrent()
+
+            // Three further polls with the same fix must not hit the Maps API.
+            assertEquals(1, mapsApi.reverseGeocodeCalls.size)
+            vm.detachEngine()
+        }
+
+    @Test
+    fun `location update after significant movement re-resolves address`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val mapsApi = FakeMapsApi().apply {
+                formattedAddress = "1 Example Street, Testville"
+            }
+            val location = FakeLocationRepository(coordinate)
+            val vm = createViewModel(mapsApi = mapsApi, location = location)
+            vm.onCameraReady()
+            runCurrent()
+            assertEquals(1, mapsApi.reverseGeocodeCalls.size)
+
+            // ~200m north — beyond the 30m threshold.
+            location.result = coordinate.copy(latitude = coordinate.latitude + 0.002)
+            mainDispatcherRule.scheduler.advanceTimeBy(10_000)
+            runCurrent()
+
+            assertEquals(2, mapsApi.reverseGeocodeCalls.size)
+            assertEquals("23.035863,72.585022", mapsApi.reverseGeocodeCalls.last())
+            vm.detachEngine()
+        }
 }

@@ -20,6 +20,10 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import java.util.Locale
 import javax.inject.Inject
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.channels.BufferOverflow
@@ -79,6 +83,7 @@ class CameraViewModel @Inject constructor(
     private var locationUpdatesJob: Job? = null
     private var pendingRecordingFile: File? = null
     private var pendingCoordinate: GeoCoordinate? = null
+    private var lastLocatedCoordinate: GeoCoordinate? = null
 
     /** Gives this ViewModel a reference to the composable-owned engine. */
     fun attachEngine(engine: CameraEngine) {
@@ -278,18 +283,42 @@ class CameraViewModel @Inject constructor(
             while (true) {
                 val coord = fetchCoordinateForTagging()
                 if (coord != null) {
-                    val address = resolveAddressForUi(coord)
-                    _uiState.update {
-                        it.copy(
-                            currentLocation = coord,
-                            cityString = address.city.ifBlank { null },
-                            fullAddress = address.full
-                        )
+                    val previous = lastLocatedCoordinate
+                    // Reverse geocoding (Maps API) and the static-map URL are only
+                    // refreshed once the device has actually moved, so a sitting
+                    // phone does not hammer the Maps API every poll.
+                    val moved = previous == null ||
+                        distanceMeters(previous.latitude, previous.longitude, coord.latitude, coord.longitude) >=
+                        MOVEMENT_THRESHOLD_METERS
+                    if (moved) {
+                        val address = resolveAddressForUi(coord)
+                        lastLocatedCoordinate = coord
+                        _uiState.update {
+                            it.copy(
+                                currentLocation = coord,
+                                cityString = address.city.ifBlank { null },
+                                fullAddress = address.full
+                            )
+                        }
                     }
                 }
-                delay(10000L.milliseconds) // fetch every 10s
+                delay(10000L.milliseconds) // poll every 10s
             }
         }
+    }
+
+    private fun distanceMeters(
+        lat1: Double,
+        lon1: Double,
+        lat2: Double,
+        lon2: Double
+    ): Double {
+        val dLat = Math.toRadians(lat2 - lat1)
+        val dLon = Math.toRadians(lon2 - lon1)
+        val a = sin(dLat / 2) * sin(dLat / 2) +
+            cos(Math.toRadians(lat1)) * cos(Math.toRadians(lat2)) *
+            sin(dLon / 2) * sin(dLon / 2)
+        return 6371000.0 * 2 * atan2(sqrt(a), sqrt(1 - a))
     }
 
     private data class ResolvedAddress(val city: String, val full: String?)
@@ -373,5 +402,9 @@ class CameraViewModel @Inject constructor(
         /** Static map thumbnail size used on the burnt card (pages the URL). */
         const val BURN_MAP_SIZE_PX = 320
         const val TAG = "CameraViewModel"
+
+        /** Minimum device movement (meters) before re-resolving the address and
+         *  regenerating the static map, so the Maps API is not polled endlessly. */
+        const val MOVEMENT_THRESHOLD_METERS = 30.0
     }
 }
