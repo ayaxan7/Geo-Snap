@@ -1,7 +1,6 @@
 package com.chirag.geosnap.presentation.camera
 
 import android.net.Uri
-import androidx.annotation.OptIn
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -48,9 +47,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
-import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import coil3.compose.rememberAsyncImagePainter
 import com.chirag.geosnap.R
@@ -223,7 +220,6 @@ private fun PreviewTopBar(
     }
 }
 
-@OptIn(UnstableApi::class)
 @Composable
 private fun PreviewVideo(uri: Uri, isMuted: Boolean) {
     val context = LocalContext.current
@@ -245,13 +241,13 @@ private fun PreviewVideo(uri: Uri, isMuted: Boolean) {
         onDispose { exoPlayer.release() }
     }
 
+    // PlayerView already defaults to RESIZE_MODE_FIT, so the video letterboxes
+    // like the photo branch without touching its unstable resize-mode API.
     AndroidView(
         factory = { ctx ->
             PlayerView(ctx).apply {
                 player = exoPlayer
                 useController = false
-                // Letterbox like the photo branch instead of cropping the frame.
-                resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
             }
         },
         modifier = Modifier.fillMaxSize()
