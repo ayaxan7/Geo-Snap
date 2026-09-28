@@ -1,6 +1,7 @@
 package com.chirag.geosnap.presentation.camera
 
 import android.net.Uri
+import androidx.annotation.OptIn
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -47,6 +48,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
@@ -60,7 +62,7 @@ import com.chirag.geosnap.ui.theme.PrimaryGreen
  * Laid out as three stacked regions rather than a full-bleed image with floating
  * controls: a top bar, the media itself, and a solid black bottom bar. The media
  * is drawn only inside its own region, so it can never run underneath the bars
- * and the black around it is structural (letterbox) rather than a scrim.
+ * and the surrounding black is structural (letterbox) rather than a scrim.
  *
  * [mediaOverlay] is drawn on top of the media region — the caller uses it for the
  * location card, which floats above the bottom bar.
@@ -221,6 +223,7 @@ private fun PreviewTopBar(
     }
 }
 
+@OptIn(UnstableApi::class)
 @Composable
 private fun PreviewVideo(uri: Uri, isMuted: Boolean) {
     val context = LocalContext.current
