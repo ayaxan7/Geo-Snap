@@ -21,7 +21,8 @@ interface MediaRepository {
     suspend fun saveCapturedImage(
         sourceFile: File,
         coordinate: GeoCoordinate?,
-        overlay: Bitmap? = null
+        overlay: Bitmap? = null,
+        saveToMediaStore: Boolean = true
     ): String
 
     /**
@@ -34,7 +35,8 @@ interface MediaRepository {
     suspend fun saveCapturedVideo(
         sourceFile: File,
         coordinate: GeoCoordinate?,
-        overlay: Bitmap? = null
+        overlay: Bitmap? = null,
+        saveToMediaStore: Boolean = true
     ): String
 
     /** Queries the app gallery (Room-backed), newest first. */

@@ -80,6 +80,7 @@
     <string name="camera_error_capture">Could not capture the photo. Please try again.</string>
     <string name="camera_error_record">Could not start recording. Please try again.</string>
     <string name="camera_error_save">Could not save the media. Please check your storage.</string>
+    <string name="camera_error_share">Could not share this capture.</string>
     <string name="camera_error_generic">Something went wrong with the camera.</string>
     <string name="camera_error_snackbar">Error: %1$s</string>
 
@@ -117,6 +118,17 @@
         <item quantity="one">Remove this from the GeoSnap gallery? The file itself will stay in your device gallery.</item>
         <item quantity="other">Remove %1$d items from the GeoSnap gallery? The files themselves will stay in your device gallery.</item>
     </plurals>
+
+    <!-- Capture preview screen -->
+    <string name="preview_back">Back</string>
+    <string name="preview_share">Share</string>
+    <string name="preview_unmute">Unmute</string>
+    <string name="preview_mute">Mute</string>
+    <string name="preview_delete">Delete</string>
+    <string name="preview_retake">Retake</string>
+    <string name="preview_edit">Edit</string>
+    <string name="preview_save_to_gallery">Save to Gallery</string>
+    <string name="preview_image">Image Preview</string>
 
     <!-- GeoTag card (live overlay + burnt into media) -->
     <string name="geotag_fetching_location">Fetching location...</string>

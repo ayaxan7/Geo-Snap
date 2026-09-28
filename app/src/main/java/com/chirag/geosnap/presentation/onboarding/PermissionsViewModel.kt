@@ -17,7 +17,8 @@ class PermissionsViewModel @Inject constructor() : ViewModel() {
         val permission: String,
         @StringRes val label: Int,
         @StringRes val description: Int,
-        val iconRes: Int
+        val iconRes: Int,
+        val isOptional: Boolean = false
     )
 
     data class PermissionItemState(
@@ -26,7 +27,8 @@ class PermissionsViewModel @Inject constructor() : ViewModel() {
         @StringRes val description: Int,
         val iconRes: Int,
         val granted: Boolean = false,
-        val permanentlyDenied: Boolean = false
+        val permanentlyDenied: Boolean = false,
+        val isOptional: Boolean = false
     )
 
     data class UiState(
@@ -49,7 +51,8 @@ class PermissionsViewModel @Inject constructor() : ViewModel() {
                 label = requirement.label,
                 description = requirement.description,
                 iconRes = requirement.iconRes,
-                granted = currentGrants[requirement.permission] == true
+                granted = currentGrants[requirement.permission] == true,
+                isOptional = requirement.isOptional
             )
         }
         _uiState.update { it.copy(items = items) }

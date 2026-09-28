@@ -12,6 +12,9 @@ import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -74,6 +77,10 @@ fun requiredRuntimePermissions(): List<String> = buildList {
     add(Manifest.permission.CAMERA)
     add(Manifest.permission.ACCESS_FINE_LOCATION)
     add(Manifest.permission.ACCESS_COARSE_LOCATION)
+    add(Manifest.permission.RECORD_AUDIO)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        add(Manifest.permission.POST_NOTIFICATIONS)
+    }
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         add(Manifest.permission.READ_MEDIA_IMAGES)
         add(Manifest.permission.READ_MEDIA_VIDEO)
@@ -82,10 +89,6 @@ fun requiredRuntimePermissions(): List<String> = buildList {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
         }
-    }
-    add(Manifest.permission.RECORD_AUDIO)
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        add(Manifest.permission.POST_NOTIFICATIONS)
     }
 }
 
@@ -132,14 +135,16 @@ private fun permissionsCopy(permissions: List<String>): List<PermissionsViewMode
                 permission,
                 R.string.permission_storage_label,
                 R.string.permission_storage_description,
-                R.drawable.ic_media
+                R.drawable.ic_media,
+                isOptional = true
             )
 
             else -> PermissionsViewModel.PermissionRequirement(
                 permission,
                 R.string.permission_storage_label, // Fallback
                 R.string.permission_storage_description,
-                R.drawable.ic_media
+                R.drawable.ic_media,
+                isOptional = true
             )
         }
     }.distinctBy { it.label } // Group permissions with the same label so we only show one row
@@ -367,7 +372,7 @@ private fun PermissionsContent(
 }
 
 private fun viewModelRequestable(uiState: PermissionsViewModel.UiState): List<String> =
-    uiState.items.filter { !it.granted && !it.permanentlyDenied }.map { it.permission }
+    uiState.items.filter { !it.granted && !it.permanentlyDenied && !it.isOptional }.map { it.permission }
 
 @Composable
 private fun PermissionRow(
@@ -393,7 +398,14 @@ private fun PermissionRow(
                 .padding(horizontal = 16.dp)
         ) {
             Text(
-                text = stringResource(item.label),
+                text = buildAnnotatedString {
+                    append(stringResource(item.label))
+                    if (!item.isOptional) {
+                        withStyle(style = SpanStyle(color = Color.Red)) {
+                            append(" *")
+                        }
+                    }
+                },
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )

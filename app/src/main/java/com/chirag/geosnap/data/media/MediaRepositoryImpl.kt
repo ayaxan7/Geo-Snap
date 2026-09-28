@@ -43,6 +43,7 @@ import javax.inject.Singleton
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import androidx.core.net.toUri
 
 /**
  * MediaStore-backed media persistence.
@@ -68,7 +69,8 @@ class MediaRepositoryImpl @Inject constructor(
     override suspend fun saveCapturedImage(
         sourceFile: File,
         coordinate: GeoCoordinate?,
-        overlay: Bitmap?
+        overlay: Bitmap?,
+        saveToMediaStore: Boolean
     ): String = withContext(Dispatchers.IO) {
         val now = System.currentTimeMillis()
         val toPersist = if (overlay != null) {
@@ -87,15 +89,19 @@ class MediaRepositoryImpl @Inject constructor(
         }
         try {
             val displayName = "${FILE_PREFIX}_${timestampText(now)}.jpg"
-            val uri = persist(
-                sourceFile = toPersist,
-                displayName = displayName,
-                mimeType = "image/jpeg",
-                relativeFolder = "Pictures",
-                publicDirectory = Environment.DIRECTORY_PICTURES,
-                collection = MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                now = now
-            ).toString()
+            val uri = if (saveToMediaStore) {
+                persist(
+                    sourceFile = toPersist,
+                    displayName = displayName,
+                    mimeType = "image/jpeg",
+                    relativeFolder = "Pictures",
+                    publicDirectory = Environment.DIRECTORY_PICTURES,
+                    collection = MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                    now = now
+                ).toString()
+            } else {
+                persistInternal(toPersist, displayName).toString()
+            }
             capturedMediaDao.upsert(
                 CapturedMediaEntity(
                     contentUri = uri,
@@ -115,7 +121,8 @@ class MediaRepositoryImpl @Inject constructor(
     override suspend fun saveCapturedVideo(
         sourceFile: File,
         coordinate: GeoCoordinate?,
-        overlay: Bitmap?
+        overlay: Bitmap?,
+        saveToMediaStore: Boolean
     ): String = withContext(Dispatchers.IO) {
         // MP4 EXIF container support is inconsistent across devices; GPS is kept
         // in the GeoMedia model for videos so it can be written once an MP4 GPS
@@ -133,15 +140,19 @@ class MediaRepositoryImpl @Inject constructor(
         try {
             val now = System.currentTimeMillis()
             val displayName = "${FILE_PREFIX}_${timestampText(now)}.mp4"
-            val uri = persist(
-                sourceFile = toPersist,
-                displayName = displayName,
-                mimeType = "video/mp4",
-                relativeFolder = "Movies",
-                publicDirectory = Environment.DIRECTORY_MOVIES,
-                collection = MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-                now = now
-            ).toString()
+            val uri = if (saveToMediaStore) {
+                persist(
+                    sourceFile = toPersist,
+                    displayName = displayName,
+                    mimeType = "video/mp4",
+                    relativeFolder = "Movies",
+                    publicDirectory = Environment.DIRECTORY_MOVIES,
+                    collection = MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                    now = now
+                ).toString()
+            } else {
+                persistInternal(toPersist, displayName).toString()
+            }
             capturedMediaDao.upsert(
                 CapturedMediaEntity(
                     contentUri = uri,
@@ -209,7 +220,7 @@ class MediaRepositoryImpl @Inject constructor(
 
     private fun toGeoMedia(entity: CapturedMediaEntity): GeoMedia =
         GeoMedia(
-            uri = Uri.parse(entity.contentUri),
+            uri = entity.contentUri.toUri(),
             type = entity.type,
             timestamp = entity.timestamp,
             latitude = entity.latitude,
@@ -271,6 +282,13 @@ class MediaRepositoryImpl @Inject constructor(
         }
 
         return uri
+    }
+
+    private fun persistInternal(sourceFile: File, displayName: String): Uri {
+        val targetDir = File(context.filesDir, DIRECTORY_NAME).apply { mkdirs() }
+        val destFile = File(targetDir, displayName)
+        sourceFile.copyTo(destFile, overwrite = true)
+        return Uri.fromFile(destFile)
     }
 
     private fun writeGpsExifTo(file: File, coordinate: GeoCoordinate) {

@@ -36,7 +36,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.withTimeoutOrNull
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Orchestrates camera captures: owns the temp-file pipeline, geotagging data
@@ -84,6 +85,8 @@ class CameraViewModel @Inject constructor(
     private var pendingRecordingFile: File? = null
     private var pendingCoordinate: GeoCoordinate? = null
     private var lastLocatedCoordinate: GeoCoordinate? = null
+    private var lastFailedCoordinate: GeoCoordinate? = null
+    private var geocodeBackoffPolls: Int = 0
 
     /** Gives this ViewModel a reference to the composable-owned engine. */
     fun attachEngine(engine: CameraEngine) {
@@ -180,20 +183,31 @@ class CameraViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val coordinate = fetchCoordinateForTagging()
-                val overlay = buildOverlay(coordinate)
                 val file = engine.capturePhoto()
-                val uri = try {
-                    mediaRepository.saveCapturedImage(file, coordinate, overlay)
-                } catch (e: Exception) {
-                    Log.e(TAG, "Photo save failed", e)
-                    throw CaptureException(CameraError.SAVE_FAILED)
-                }
-                file.delete()
-                _uiState.update { it.copy(isProcessing = false) }
+                val cardContent = resolveCardContent(coordinate)
+
                 if (mode == CameraMode.QUICK_SHARE) {
+                    val uri = try {
+                        mediaRepository.saveCapturedImage(
+                            sourceFile = file,
+                            coordinate = coordinate,
+                            overlay = renderOverlay(cardContent),
+                            saveToMediaStore = false
+                        )
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Photo save failed", e)
+                        throw CaptureException(CameraError.SAVE_FAILED)
+                    }
+                    file.delete()
+                    _uiState.update { it.copy(isProcessing = false) }
                     _events.tryEmit(CameraEvent.QuickShareRequested(uri))
                 } else {
-                    _events.tryEmit(CameraEvent.MediaSaved(uri, isVideo = false))
+                    _uiState.update {
+                        it.copy(
+                            isProcessing = false,
+                            pendingPreview = PreviewData(file, coordinate, false, cardContent)
+                        )
+                    }
                 }
             } catch (e: CaptureException) {
                 _uiState.update { it.copy(isProcessing = false, error = e.error) }
@@ -231,20 +245,60 @@ class CameraViewModel @Inject constructor(
                 val file = engine.stopRecording()
                 val coordinate = pendingCoordinate
                 pendingCoordinate = null
-                val overlay = buildOverlay(coordinate)
-                val uri = try {
-                    mediaRepository.saveCapturedVideo(file, coordinate, overlay)
-                } catch (e: Exception) {
-                    Log.e(TAG, "Video save failed", e)
-                    throw CaptureException(CameraError.SAVE_FAILED)
-                }
-                file.delete()
                 pendingRecordingFile = null
-                _events.tryEmit(CameraEvent.MediaSaved(uri, isVideo = true))
-            } catch (e: CaptureException) {
-                _uiState.update { it.copy(isProcessing = false, error = e.error) }
+                val cardContent = resolveCardContent(coordinate)
+                _uiState.update {
+                    it.copy(
+                        isProcessing = false,
+                        pendingPreview = PreviewData(file, coordinate, true, cardContent)
+                    )
+                }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isProcessing = false, error = CameraError.RECORD_FAILED) }
+            }
+        }
+    }
+    
+    fun discardPreview() {
+        _uiState.value.pendingPreview?.file?.delete()
+        _uiState.update { it.copy(pendingPreview = null) }
+    }
+    
+    fun savePreviewToGallery() {
+        val preview = _uiState.value.pendingPreview ?: return
+        
+        // Check for media permissions
+        val hasMediaPermission = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.READ_MEDIA_IMAGES) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        } else {
+            androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.READ_EXTERNAL_STORAGE) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        }
+
+        _uiState.update { it.copy(isProcessing = true) }
+        viewModelScope.launch {
+            try {
+                // The card the user reviewed is what gets burnt in, re-resolving
+                // from live state here could tag the capture with a later address.
+                val overlay = renderOverlay(
+                    preview.cardContent.copy(
+                        staticMapUrl = staticMapUrl(
+                            latitude = preview.cardContent.latitude,
+                            longitude = preview.cardContent.longitude,
+                            sizePx = BURN_MAP_SIZE_PX
+                        )
+                    )
+                )
+                val uri = if (preview.isVideo) {
+                    mediaRepository.saveCapturedVideo(preview.file, preview.coordinate, overlay, saveToMediaStore = hasMediaPermission)
+                } else {
+                    mediaRepository.saveCapturedImage(preview.file, preview.coordinate, overlay, saveToMediaStore = hasMediaPermission)
+                }
+                preview.file.delete()
+                _uiState.update { it.copy(isProcessing = false, pendingPreview = null) }
+                _events.tryEmit(CameraEvent.MediaSaved(uri, isVideo = preview.isVideo))
+            } catch (e: Exception) {
+                Log.e(TAG, "Media save failed", e)
+                _uiState.update { it.copy(isProcessing = false, error = CameraError.SAVE_FAILED) }
             }
         }
     }
@@ -265,17 +319,54 @@ class CameraViewModel @Inject constructor(
     }
 
     /**
-     * Snapshots the current UI state into a burnable [GeoTagCardContent] and
-     * renders it off-screen. Rendering is best-effort: a null result simply
-     * means the capture is saved without the burnt card.
+     * Snapshots the location card for [coordinate], resolving the address first
+     * when the camera has not managed to resolve one yet. Without this a capture
+     * taken before the first poll lands is tagged "Fetching location..." forever,
+     * because the poll only refreshes once the device moves.
+     *
+     * The lookup is bounded so a slow network cannot stall the shutter-to-preview
+     * transition; on timeout the snapshot keeps the unresolved title and a later
+     * poll fills it in.
      */
-    private suspend fun buildOverlay(coordinate: GeoCoordinate?): Bitmap? {
-        val content = uiState.value.toGeoTagCardContent(
+    private suspend fun resolveCardContent(coordinate: GeoCoordinate?): GeoTagCardContent {
+        val state = _uiState.value
+        if (coordinate != null && (state.cityString == null || state.fullAddress == null)) {
+            withTimeoutOrNull(CAPTURE_GEOCODE_TIMEOUT) {
+                publishLocation(coordinate, resolveAddressForUi(coordinate))
+            }
+        }
+        return _uiState.value.toGeoTagCardContent(
             coordinate = coordinate,
-            mapSizePx = BURN_MAP_SIZE_PX
+            mapSizePx = PREVIEW_MAP_SIZE_PX
         )
-        return runCatching { geoTagOverlayRenderer.render(content) }.getOrNull()
     }
+
+    /**
+     * Writes a resolved address onto the UI state. A blank result never erases a
+     * good one, and nothing is written while a preview is open so the card being
+     * reviewed cannot change under the user.
+     */
+    private fun publishLocation(coord: GeoCoordinate, address: ResolvedAddress) {
+        val city = address.city.ifBlank { null }
+        _uiState.update {
+            if (it.pendingPreview != null) {
+                it
+            } else {
+                it.copy(
+                    currentLocation = coord,
+                    cityString = city ?: it.cityString,
+                    fullAddress = address.full ?: it.fullAddress
+                )
+            }
+        }
+    }
+
+    /**
+     * Renders the card off-screen for burning into media. Best-effort: a null
+     * result simply means the capture is saved without the burnt card.
+     */
+    private suspend fun renderOverlay(content: GeoTagCardContent): Bitmap? =
+        runCatching { geoTagOverlayRenderer.render(content) }.getOrNull()
 
     private fun startLocationUpdates() {
         locationUpdatesJob?.cancel()
@@ -283,28 +374,54 @@ class CameraViewModel @Inject constructor(
             while (true) {
                 val coord = fetchCoordinateForTagging()
                 if (coord != null) {
-                    val previous = lastLocatedCoordinate
-                    // Reverse geocoding (Maps API) and the static-map URL are only
-                    // refreshed once the device has actually moved, so a sitting
-                    // phone does not hammer the Maps API every poll.
-                    val moved = previous == null ||
-                        distanceMeters(previous.latitude, previous.longitude, coord.latitude, coord.longitude) >=
-                        MOVEMENT_THRESHOLD_METERS
-                    if (moved) {
+                    if (shouldResolveAddress(coord)) {
+                        geocodeBackoffPolls = 0
                         val address = resolveAddressForUi(coord)
-                        lastLocatedCoordinate = coord
-                        _uiState.update {
-                            it.copy(
-                                currentLocation = coord,
-                                cityString = address.city.ifBlank { null },
-                                fullAddress = address.full
-                            )
+                        if (address.city.isNotBlank() || address.full != null) {
+                            lastLocatedCoordinate = coord
+                            lastFailedCoordinate = null
+                        } else {
+                            // A failed lookup must never be recorded as "already
+                            // located", or the movement gate would suppress every
+                            // retry for the rest of the camera session.
+                            lastFailedCoordinate = coord
+                            geocodeBackoffPolls = GEOCODE_RETRY_POLL_BACKOFF
                         }
+                        publishLocation(coord, address)
+                    } else if (geocodeBackoffPolls > 0) {
+                        geocodeBackoffPolls--
                     }
                 }
-                delay(10000L.milliseconds) // poll every 10s
+                delay(POLL_INTERVAL)
             }
         }
+    }
+
+    /**
+     * Reverse geocoding (Maps API) and the static-map URL are only refreshed once
+     * the device has actually moved, so a sitting phone does not hammer the Maps
+     * API every poll. A lookup that resolved nothing is retried after
+     * [GEOCODE_RETRY_POLL_BACKOFF] idle polls rather than being cached as a
+     * permanent failure, so a transient outage does not pin the card title to
+     * "Fetching location..." for the rest of the session.
+     */
+    private fun shouldResolveAddress(coord: GeoCoordinate): Boolean {
+        val lastSuccess = lastLocatedCoordinate
+        if (lastSuccess != null &&
+            distanceMeters(
+                lastSuccess.latitude,
+                lastSuccess.longitude,
+                coord.latitude,
+                coord.longitude
+            ) < MOVEMENT_THRESHOLD_METERS
+        ) {
+            return false
+        }
+        val lastFailure = lastFailedCoordinate ?: return true
+        if (lastFailure.latitude != coord.latitude || lastFailure.longitude != coord.longitude) {
+            return true
+        }
+        return geocodeBackoffPolls <= 0
     }
 
     private fun distanceMeters(
@@ -403,8 +520,18 @@ class CameraViewModel @Inject constructor(
         const val BURN_MAP_SIZE_PX = 320
         const val TAG = "CameraViewModel"
 
+        /** How often the camera asks for a fresh fix. */
+        val POLL_INTERVAL = 10.seconds
+
+        /** Upper bound on the capture-time address lookup before the preview opens. */
+        val CAPTURE_GEOCODE_TIMEOUT = 3.seconds
+
         /** Minimum device movement (meters) before re-resolving the address and
          *  regenerating the static map, so the Maps API is not polled endlessly. */
         const val MOVEMENT_THRESHOLD_METERS = 30.0
+
+        /** Idle polls to wait before retrying a reverse geocode that resolved
+         *  nothing, so a failing lookup is not retried every single poll. */
+        const val GEOCODE_RETRY_POLL_BACKOFF = 2
     }
 }

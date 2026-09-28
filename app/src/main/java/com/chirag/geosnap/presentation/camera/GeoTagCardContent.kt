@@ -17,11 +17,14 @@ data class GeoTagCardContent(
     val staticMapUrl: String?
 )
 
+/** Static map thumbnail size for the on-screen card, as opposed to the burnt one. */
+const val PREVIEW_MAP_SIZE_PX = 200
+
 /**
  * Builds the Google Static Maps URL shown in the card thumbnail.
  * Returns null when there are no coordinates or no API key configured.
  */
-fun staticMapUrl(latitude: Double?, longitude: Double?, sizePx: Int = 200): String? {
+fun staticMapUrl(latitude: Double?, longitude: Double?, sizePx: Int = PREVIEW_MAP_SIZE_PX): String? {
     val apiKey = BuildConfig.MAPS_API_KEY
     if (latitude == null || longitude == null || apiKey.isBlank()) return null
     return "https://maps.googleapis.com/maps/api/staticmap" +
@@ -36,7 +39,7 @@ fun staticMapUrl(latitude: Double?, longitude: Double?, sizePx: Int = 200): Stri
  */
 fun CameraUiState.toGeoTagCardContent(
     coordinate: GeoCoordinate? = null,
-    mapSizePx: Int = 200
+    mapSizePx: Int = PREVIEW_MAP_SIZE_PX
 ): GeoTagCardContent {
     val lat = coordinate?.latitude ?: currentLocation?.latitude
     val lng = coordinate?.longitude ?: currentLocation?.longitude

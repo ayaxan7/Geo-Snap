@@ -8,6 +8,7 @@ enum class CameraError {
     CAPTURE_FAILED,
     RECORD_FAILED,
     SAVE_FAILED,
+    SHARE_FAILED,
     GENERIC
 }
 
@@ -18,5 +19,6 @@ fun CameraError.stringRes(): Int = when (this) {
     CameraError.CAPTURE_FAILED -> com.chirag.geosnap.R.string.camera_error_capture
     CameraError.RECORD_FAILED -> com.chirag.geosnap.R.string.camera_error_record
     CameraError.SAVE_FAILED -> com.chirag.geosnap.R.string.camera_error_save
+    CameraError.SHARE_FAILED -> com.chirag.geosnap.R.string.camera_error_share
     CameraError.GENERIC -> com.chirag.geosnap.R.string.camera_error_generic
 }

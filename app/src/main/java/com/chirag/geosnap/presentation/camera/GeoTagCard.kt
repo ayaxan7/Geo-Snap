@@ -1,7 +1,6 @@
 package com.chirag.geosnap.presentation.camera
 
 import android.graphics.Bitmap
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -34,7 +33,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import com.chirag.geosnap.BuildConfig
 import com.chirag.geosnap.R
 import com.chirag.geosnap.core.LocaleHelper
 import java.text.SimpleDateFormat
@@ -56,12 +54,6 @@ fun GeoTagCard(
     modifier: Modifier = Modifier,
     mapBitmap: Bitmap? = null
 ) {
-    Log.d(
-        "LocationCard",
-        "API Key: ${BuildConfig.MAPS_API_KEY}, Lat: ${content.latitude}, Lng: ${content.longitude}," +
-                " city: ${content.cityString}, Address: ${content.fullAddress}"
-    )
-
     val context = LocalContext.current
     val englishContext = remember(context) {
         LocaleHelper.englishContext(context)
@@ -82,7 +74,9 @@ fun GeoTagCard(
     val logoLabel =
         englishContext.getString(R.string.geotag_logo)
 
-    val cityText = content.cityString ?: fetchingText
+    // The title degrades through progressively coarser location data so that a
+    // known address is never reported as "still fetching".
+    val cityText = content.cityString ?: content.fullAddress ?: fetchingText
     val fullAddressText =
         content.fullAddress ?: content.cityString ?: fetchingText
 

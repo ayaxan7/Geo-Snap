@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.view.PreviewView
@@ -21,6 +22,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -45,6 +47,7 @@ import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -88,6 +91,16 @@ fun CameraScreen(
         ActivityResultContracts.StartActivityForResult()
     ) {
         onBack() // Or whatever post-share behavior you want
+    }
+
+    // Separate launcher for the preview so returning from the chooser leaves the
+    // pending capture on screen instead of discarding it.
+    val previewShareLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { }
+
+    BackHandler(enabled = uiState.pendingPreview != null) {
+        viewModel.discardPreview()
     }
 
     LaunchedEffect(previewView, lifecycleOwner, currentMode) {
@@ -159,64 +172,113 @@ fun CameraScreen(
         contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { _ ->
         Box(modifier = Modifier.fillMaxSize()) {
-            // Full-bleed camera preview
-            AndroidView(
-                factory = { previewView },
-                modifier = Modifier.fillMaxSize()
-            )
-
-            val bannerError = currentError
-            if (!uiState.isReady && bannerError != null) {
-                CameraUnavailableBanner(
-                    text = bannerError,
-                    modifier = Modifier.align(Alignment.TopCenter).padding(16.dp)
-                )
-            }
-
-            // Top bar overlay
-            CameraTopBar(
-                mode = currentMode,
-                flashEnabled = uiState.flashEnabled,
-                hasFlash = uiState.hasFlash,
-                onBack = onBack,
-                onFlash = viewModel::toggleFlash,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.TopCenter)
-                    .windowInsetsPadding(WindowInsets.systemBars)
-            )
-
-            // Bottom overlays: location card above the controls
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.BottomCenter)
-                    .windowInsetsPadding(WindowInsets.systemBars)
-            ) {
-                GeoTagCard(
-                    content = uiState.toGeoTagCardContent(),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                )
-
-                CameraBottomControls(
-                    uiState = uiState,
-                    mode = currentMode,
-                    onModeSelected = { newMode -> currentMode = newMode; viewModel.setMode(newMode) },
-                    onCapture = {
-                        when (currentMode) {
-                            CameraMode.PHOTO, CameraMode.QUICK_SHARE -> viewModel.capturePhoto()
-                            CameraMode.VIDEO -> if (uiState.isRecording) {
-                                viewModel.stopRecording()
-                            } else {
-                                viewModel.startRecording()
-                            }
+            val pendingPreview = uiState.pendingPreview
+            if (pendingPreview != null) {
+                PreviewScreen(
+                    uri = Uri.fromFile(pendingPreview.file),
+                    isVideo = pendingPreview.isVideo,
+                    onDelete = viewModel::discardPreview,
+                    onRetake = viewModel::discardPreview,
+                    onEdit = { /* placeholder for edit */ },
+                    onSaveToGallery = viewModel::savePreviewToGallery,
+                    onShare = {
+                        // The pending capture is still a cache file, so it needs a
+                        // provider-backed uri; a raw file:// would be rejected.
+                        val uri = runCatching {
+                            FileProvider.getUriForFile(
+                                context,
+                                "${context.packageName}.fileprovider",
+                                pendingPreview.file
+                            )
+                        }.getOrNull()
+                        if (uri == null) {
+                            viewModel.reportError(CameraError.SHARE_FAILED)
+                        } else {
+                            shareMediaChooser(context, uri, isVideo = pendingPreview.isVideo)
+                                ?.let(previewShareLauncher::launch)
                         }
                     },
-                    onFlip = viewModel::flipLensFacing,
-                    onGallery = onGallery
+                    onBack = viewModel::discardPreview,
+                    modifier = Modifier.fillMaxSize(),
+                    mediaOverlay = {
+                        // Floats over the media, clear of the solid black bar below.
+                        GeoTagCard(
+                            content = pendingPreview.cardContent,
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .padding(horizontal = 16.dp, vertical = 12.dp)
+                        )
+                    }
                 )
+
+                if (uiState.isProcessing) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+            } else {
+                // Full-bleed camera preview
+                AndroidView(
+                    factory = { previewView },
+                    modifier = Modifier.fillMaxSize()
+                )
+
+                val bannerError = currentError
+                if (!uiState.isReady && bannerError != null) {
+                    CameraUnavailableBanner(
+                        text = bannerError,
+                        modifier = Modifier.align(Alignment.TopCenter).padding(16.dp)
+                    )
+                }
+
+                // Top bar overlay
+                CameraTopBar(
+                    mode = currentMode,
+                    flashEnabled = uiState.flashEnabled,
+                    hasFlash = uiState.hasFlash,
+                    onBack = onBack,
+                    onFlash = viewModel::toggleFlash,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.TopCenter)
+                        .windowInsetsPadding(WindowInsets.systemBars)
+                )
+
+                // Bottom overlays: location card above the controls
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter)
+                        .windowInsetsPadding(WindowInsets.systemBars)
+                ) {
+                    GeoTagCard(
+                        content = uiState.toGeoTagCardContent(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+
+                    CameraBottomControls(
+                        uiState = uiState,
+                        mode = currentMode,
+                        onModeSelected = { newMode ->
+                            currentMode = newMode
+                            viewModel.setMode(newMode)
+                        },
+                        onCapture = {
+                            when (currentMode) {
+                                CameraMode.PHOTO, CameraMode.QUICK_SHARE -> viewModel.capturePhoto()
+                                CameraMode.VIDEO -> if (uiState.isRecording) {
+                                    viewModel.stopRecording()
+                                } else {
+                                    viewModel.startRecording()
+                                }
+                            }
+                        },
+                        onFlip = viewModel::flipLensFacing,
+                        onGallery = onGallery
+                    )
+                }
             }
         }
     }

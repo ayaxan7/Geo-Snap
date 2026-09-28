@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Pending captures awaiting preview/save (see CameraXController.TEMP_DIR). -->
+    <cache-path
+        name="camera_temp"
+        path="geosnap_camera/" />
+    <!-- Internal media copies (see MediaRepositoryImpl.persistInternal). -->
+    <files-path
+        name="app_media"
+        path="GeoSnap/" />
+</paths>

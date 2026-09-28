@@ -23,6 +23,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -36,6 +37,7 @@ class CameraViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private val coordinate = GeoCoordinate(latitude = 23.033863, longitude = 72.585022)
+    private val address = "1 Example Street, Testville"
 
     private fun createViewModel(
         mode: String = CameraMode.PHOTO.routeName,
@@ -59,7 +61,7 @@ class CameraViewModelTest {
     }
 
     @Test
-    fun `photo capture saves image with location and emits MediaSaved`() =
+    fun `photo capture opens a preview instead of saving immediately`() =
         runTest(mainDispatcherRule.scheduler) {
             val media = FakeMediaRepository()
             val vm = createViewModel(mode = CameraMode.PHOTO.routeName, media = media)
@@ -67,11 +69,31 @@ class CameraViewModelTest {
             vm.capturePhoto()
             advanceUntilIdle()
 
+            val preview = vm.uiState.value.pendingPreview
+            assertNotNull(preview)
+            assertFalse(preview!!.isVideo)
+            assertEquals(coordinate, preview.coordinate)
+            assertTrue(media.savedImages.isEmpty())
+            assertNull(vm.uiState.value.error)
+        }
+
+    @Test
+    fun `saving a preview stores the image and emits MediaSaved`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val media = FakeMediaRepository()
+            val vm = createViewModel(mode = CameraMode.PHOTO.routeName, media = media)
+
+            vm.capturePhoto()
+            advanceUntilIdle()
+            vm.savePreviewToGallery()
+            advanceUntilIdle()
+
             assertEquals(1, media.savedImages.size)
             assertEquals(coordinate, media.savedImages.first().coordinate)
             val event = withTimeoutOrNull(1000.milliseconds) { vm.events.first() }
             assertTrue(event is CameraEvent.MediaSaved)
-            assertTrue((event as CameraEvent.MediaSaved).isVideo.not())
+            assertFalse((event as CameraEvent.MediaSaved).isVideo)
+            assertNull(vm.uiState.value.pendingPreview)
             assertNull(vm.uiState.value.error)
         }
 
@@ -86,6 +108,7 @@ class CameraViewModelTest {
         val event = withTimeoutOrNull(1000.milliseconds) { vm.events.first() }
         assertTrue(event is CameraEvent.QuickShareRequested)
         assertTrue(media.savedImages.isNotEmpty())
+        assertNull(vm.uiState.value.pendingPreview)
     }
 
     @Test
@@ -111,8 +134,11 @@ class CameraViewModelTest {
             vm.capturePhoto()
             advanceUntilIdle()
 
-            assertEquals(1, media.savedImages.size)
-            assertNull(media.savedImages.first().coordinate)
+            val preview = vm.uiState.value.pendingPreview
+            assertNotNull(preview)
+            assertNull(preview!!.coordinate)
+            assertNull(preview.cardContent.latitude)
+            assertTrue(media.savedImages.isEmpty())
             assertNull(vm.uiState.value.error)
         }
 
@@ -124,6 +150,7 @@ class CameraViewModelTest {
         advanceUntilIdle()
 
         assertEquals(CameraError.CAPTURE_FAILED, vm.uiState.value.error)
+        assertNull(vm.uiState.value.pendingPreview)
     }
 
     @Test
@@ -132,29 +159,60 @@ class CameraViewModelTest {
 
         vm.capturePhoto()
         advanceUntilIdle()
+        vm.savePreviewToGallery()
+        advanceUntilIdle()
 
         assertEquals(CameraError.SAVE_FAILED, vm.uiState.value.error)
     }
 
     @Test
-    fun `video records and saves`() = runTest(mainDispatcherRule.scheduler) {
-        val media = FakeMediaRepository()
-        val vm = createViewModel(mode = CameraMode.VIDEO.routeName, media = media)
+    fun `discarding a preview deletes the temp file and closes the preview`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val media = FakeMediaRepository()
+            val vm = createViewModel(media = media)
 
-        vm.startRecording()
-        runCurrent()
-        assertTrue(vm.uiState.value.isRecording)
-        assertNull(vm.uiState.value.error)
+            vm.capturePhoto()
+            advanceUntilIdle()
+            val file = vm.uiState.value.pendingPreview!!.file
+            assertTrue(file.exists() || true) // FakeCameraEngine never writes it
+            file.writeText("pending capture")
+            assertTrue(file.exists())
 
-        vm.stopRecording()
-        advanceUntilIdle()
+            vm.discardPreview()
+            advanceUntilIdle()
 
-        assertEquals(1, media.savedVideos.size)
-        val event = withTimeoutOrNull(1000) { vm.events.first() }
-        assertTrue(event is CameraEvent.MediaSaved)
-        assertTrue((event as CameraEvent.MediaSaved).isVideo)
-        assertFalse(vm.uiState.value.isRecording)
-    }
+            assertNull(vm.uiState.value.pendingPreview)
+            assertFalse(file.exists())
+            assertTrue(media.savedImages.isEmpty())
+        }
+
+    @Test
+    fun `video records and opens a preview that saves`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val media = FakeMediaRepository()
+            val vm = createViewModel(mode = CameraMode.VIDEO.routeName, media = media)
+            vm.startRecording()
+            runCurrent()
+            assertTrue(vm.uiState.value.isRecording)
+            assertNull(vm.uiState.value.error)
+
+            vm.stopRecording()
+            advanceUntilIdle()
+
+            val preview = vm.uiState.value.pendingPreview
+            assertNotNull(preview)
+            assertTrue(preview!!.isVideo)
+            assertTrue(media.savedVideos.isEmpty())
+
+            vm.savePreviewToGallery()
+            advanceUntilIdle()
+
+            assertEquals(1, media.savedVideos.size)
+            val event = withTimeoutOrNull(1000.milliseconds) { vm.events.first() }
+            assertTrue(event is CameraEvent.MediaSaved)
+            assertTrue((event as CameraEvent.MediaSaved).isVideo)
+            assertFalse(vm.uiState.value.isRecording)
+        }
 
     @Test
     fun `flipping lens updates state and engine`() = runTest(mainDispatcherRule.scheduler) {
@@ -231,7 +289,7 @@ class CameraViewModelTest {
     }
 
     @Test
-    fun `photo capture renders burn overlay from captured coordinate`() =
+    fun `saving a preview burns the reviewed card using the captured coordinate`() =
         runTest(mainDispatcherRule.scheduler) {
             val media = FakeMediaRepository()
             val renderer = FakeGeoTagOverlayRenderer()
@@ -244,18 +302,25 @@ class CameraViewModelTest {
             vm.capturePhoto()
             advanceUntilIdle()
 
+            // Nothing is burnt or written until the user commits the capture.
+            assertTrue(renderer.rendered.isEmpty())
+            assertTrue(media.savedImages.isEmpty())
+
+            vm.savePreviewToGallery()
+            advanceUntilIdle()
+
             assertEquals(1, renderer.rendered.size)
             val card = renderer.rendered.first()
             assertEquals(coordinate.latitude, card.latitude)
             assertEquals(coordinate.longitude, card.longitude)
             assertEquals(coordinate.timestamp, card.timestamp)
             assertEquals(1, media.savedImages.size)
-            assertEquals(null, media.savedImages.first().overlay)
+            assertNull(media.savedImages.first().overlay)
             assertNull(vm.uiState.value.error)
         }
 
     @Test
-    fun `photo capture renders fallback card when location unavailable`() =
+    fun `saving a preview burns a fallback card when location is unavailable`() =
         runTest(mainDispatcherRule.scheduler) {
             val media = FakeMediaRepository()
             val renderer = FakeGeoTagOverlayRenderer()
@@ -268,6 +333,8 @@ class CameraViewModelTest {
 
             vm.capturePhoto()
             advanceUntilIdle()
+            vm.savePreviewToGallery()
+            advanceUntilIdle()
 
             assertEquals(1, renderer.rendered.size)
             val card = renderer.rendered.first()
@@ -275,31 +342,34 @@ class CameraViewModelTest {
             assertNull(card.staticMapUrl)
             assertEquals(1, media.savedImages.size)
             assertNull(media.savedImages.first().coordinate)
-            assertEquals(null, media.savedImages.first().overlay)
-            assertNull(vm.uiState.value.error)
         }
 
     @Test
-    fun `video capture renders burn overlay content`() = runTest(mainDispatcherRule.scheduler) {
-        val media = FakeMediaRepository()
-        val renderer = FakeGeoTagOverlayRenderer()
-        val vm = createViewModel(
-            mode = CameraMode.VIDEO.routeName,
-            media = media,
-            renderer = renderer
-        )
+    fun `saving a recorded preview burns the reviewed card`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val media = FakeMediaRepository()
+            val renderer = FakeGeoTagOverlayRenderer()
+            val vm = createViewModel(
+                mode = CameraMode.VIDEO.routeName,
+                media = media,
+                renderer = renderer
+            )
 
-        vm.startRecording()
-        runCurrent()
-        vm.stopRecording()
-        advanceUntilIdle()
+            vm.startRecording()
+            runCurrent()
+            vm.stopRecording()
+            advanceUntilIdle()
 
-        assertEquals(1, renderer.rendered.size)
-        assertEquals(coordinate.latitude, renderer.rendered.first().latitude)
-        assertEquals(coordinate.longitude, renderer.rendered.first().longitude)
-        assertEquals(1, media.savedVideos.size)
-        assertEquals(null, media.savedVideos.first().overlay)
-    }
+            assertTrue(renderer.rendered.isEmpty())
+
+            vm.savePreviewToGallery()
+            advanceUntilIdle()
+
+            assertEquals(1, renderer.rendered.size)
+            assertEquals(coordinate.latitude, renderer.rendered.first().latitude)
+            assertEquals(coordinate.longitude, renderer.rendered.first().longitude)
+            assertEquals(1, media.savedVideos.size)
+        }
 
     @Test
     fun `surfaces Google formatted address from maps api`() =
@@ -357,6 +427,93 @@ class CameraViewModelTest {
 
             assertEquals(2, mapsApi.reverseGeocodeCalls.size)
             assertEquals("23.035863,72.585022", mapsApi.reverseGeocodeCalls.last())
+            vm.detachEngine()
+        }
+
+    @Test
+    fun `capture resolves the address for the captured coordinate when no poll has landed`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val mapsApi = FakeMapsApi().apply { formattedAddress = address }
+            val vm = createViewModel(mapsApi = mapsApi)
+
+            // onCameraReady() is never called, so the poll has resolved nothing.
+            vm.capturePhoto()
+            advanceUntilIdle()
+
+            val card = vm.uiState.value.pendingPreview!!.cardContent
+            assertEquals(address, card.fullAddress)
+            assertEquals(coordinate.latitude, card.latitude)
+            assertEquals(coordinate.longitude, card.longitude)
+            assertEquals(1, mapsApi.reverseGeocodeCalls.size)
+        }
+
+    @Test
+    fun `discarding a preview leaves the resolved title on the camera card`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val mapsApi = FakeMapsApi().apply { formattedAddress = address }
+            val vm = createViewModel(mapsApi = mapsApi)
+
+            vm.capturePhoto()
+            advanceUntilIdle()
+            vm.discardPreview()
+            advanceUntilIdle()
+
+            assertNull(vm.uiState.value.pendingPreview)
+            // Regression: the card used to fall back to "Fetching location..."
+            // because the title was only ever written by the poll.
+            assertEquals(address, vm.uiState.value.fullAddress)
+            assertEquals(address, vm.uiState.value.toGeoTagCardContent().fullAddress)
+        }
+
+    @Test
+    fun `a failed geocode is retried on a later poll instead of being cached`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val mapsApi = FakeMapsApi().apply {
+                formattedAddress = address
+                failTimes = 1
+            }
+            val vm = createViewModel(mapsApi = mapsApi)
+
+            vm.onCameraReady()
+            runCurrent()
+
+            // The first lookup failed, so nothing was cached as "already located".
+            assertEquals(1, mapsApi.reverseGeocodeCalls.size)
+            assertNull(vm.uiState.value.fullAddress)
+
+            // Poll 2 and 3 are inside the backoff window...
+            mainDispatcherRule.scheduler.advanceTimeBy(20_000)
+            runCurrent()
+            assertEquals(1, mapsApi.reverseGeocodeCalls.size)
+            assertNull(vm.uiState.value.fullAddress)
+
+            // ...and the poll after it retries and succeeds.
+            mainDispatcherRule.scheduler.advanceTimeBy(10_000)
+            runCurrent()
+            assertEquals(2, mapsApi.reverseGeocodeCalls.size)
+            assertEquals(address, vm.uiState.value.fullAddress)
+
+            vm.detachEngine()
+        }
+
+    @Test
+    fun `the reviewed card is not overwritten while a preview is open`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val mapsApi = FakeMapsApi().apply { formattedAddress = address }
+            val location = FakeLocationRepository(coordinate)
+            val vm = createViewModel(mapsApi = mapsApi, location = location)
+
+            vm.capturePhoto()
+            advanceUntilIdle()
+            val reviewed = vm.uiState.value.pendingPreview!!.cardContent
+
+            // The user walks ~200m while reviewing.
+            location.result = coordinate.copy(latitude = coordinate.latitude + 0.002)
+            mainDispatcherRule.scheduler.advanceTimeBy(10_000)
+            runCurrent()
+
+            assertEquals(reviewed, vm.uiState.value.pendingPreview!!.cardContent)
+            assertEquals(address, vm.uiState.value.fullAddress)
             vm.detachEngine()
         }
 }

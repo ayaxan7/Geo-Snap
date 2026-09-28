@@ -88,7 +88,12 @@ class FakeLocationRepository(
     override suspend fun isLocationEnabled(): Boolean = locationEnabled
 }
 
-data class SavedMedia(val file: File, val coordinate: GeoCoordinate?, val overlay: Bitmap? = null)
+data class SavedMedia(
+    val file: File,
+    val coordinate: GeoCoordinate?,
+    val overlay: Bitmap? = null,
+    val saveToMediaStore: Boolean = true
+)
 
 /** Scripted MediaRepository that records calls instead of touching MediaStore. */
 class FakeMediaRepository : MediaRepository {
@@ -105,20 +110,22 @@ class FakeMediaRepository : MediaRepository {
     override suspend fun saveCapturedImage(
         sourceFile: File,
         coordinate: GeoCoordinate?,
-        overlay: Bitmap?
+        overlay: Bitmap?,
+        saveToMediaStore: Boolean
     ): String {
         failSaveOnce()
-        savedImages += SavedMedia(sourceFile, coordinate, overlay)
+        savedImages += SavedMedia(sourceFile, coordinate, overlay, saveToMediaStore)
         return "content://geosnap.test/images/${nextId++}"
     }
 
     override suspend fun saveCapturedVideo(
         sourceFile: File,
         coordinate: GeoCoordinate?,
-        overlay: Bitmap?
+        overlay: Bitmap?,
+        saveToMediaStore: Boolean
     ): String {
         failSaveOnce()
-        savedVideos += SavedMedia(sourceFile, coordinate, overlay)
+        savedVideos += SavedMedia(sourceFile, coordinate, overlay, saveToMediaStore)
         return "content://geosnap.test/videos/${nextId++}"
     }
 
@@ -159,7 +166,9 @@ class FakeGeoTagOverlayRenderer(
 class FakeMapsApi : MapsApi {
 
     var formattedAddress: String? = null
-    var failNext = false
+
+    /** Number of upcoming calls that should fail before [formattedAddress] is served. */
+    var failTimes = 0
     val reverseGeocodeCalls = mutableListOf<String>()
     val staticMapRequests = mutableListOf<String>()
 
@@ -169,7 +178,10 @@ class FakeMapsApi : MapsApi {
         apiKey: String
     ): GeocodeResponse {
         reverseGeocodeCalls += latLng
-        if (failNext) throw IOException("simulated geocode failure")
+        if (failTimes > 0) {
+            failTimes--
+            throw IOException("simulated geocode failure")
+        }
         val address = formattedAddress
         return GeocodeResponse(
             status = "OK",
@@ -179,7 +191,10 @@ class FakeMapsApi : MapsApi {
 
     override suspend fun staticMap(url: String): ResponseBody {
         staticMapRequests += url
-        if (failNext) throw IOException("simulated static map failure")
+        if (failTimes > 0) {
+            failTimes--
+            throw IOException("simulated static map failure")
+        }
         return ByteArray(0).toResponseBody(null)
     }
 }

@@ -17,5 +17,6 @@ data class CameraUiState(
     val cityString: String? = null,
     val fullAddress: String? = null,
     val isLocationEnabled: Boolean = false,
-    val showLocationDialog: Boolean = false
+    val showLocationDialog: Boolean = false,
+    val pendingPreview: PreviewData? = null
 )
