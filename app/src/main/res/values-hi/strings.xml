@@ -104,4 +104,51 @@
     </plurals>
 
     <string name="error_generic">कुछ गड़बड़ हो गई। कृपया फिर प्रयास करें।</string>
+
+    <string name="camera_error_share">यह कैप्चर साझा नहीं किया जा सका।</string>
+
+    <string name="preview_back">वापस</string>
+    <string name="preview_share">साझा करें</string>
+    <string name="preview_unmute">अनम्यूट</string>
+    <string name="preview_mute">म्यूट</string>
+    <string name="preview_delete">हटाएँ</string>
+    <string name="preview_retake">फिर से लें</string>
+    <string name="preview_edit">संपादित करें</string>
+    <string name="preview_save_to_gallery">गैलरी में सहेजें</string>
+    <string name="preview_image">इमेज पूर्वावलोकन</string>
+
+    <string name="geotag_fetching_location">स्थान प्राप्त हो रहा है...</string>
+    <string name="geotag_latitude">अक्षांश</string>
+    <string name="geotag_longitude">देशांतर</string>
+    <string name="geotag_date">तारीख</string>
+    <string name="geotag_map">नक्शा</string>
+    <string name="geotag_static_map">स्थिर नक्शा</string>
+    <string name="geotag_logo">हमारा लोगो</string>
+
+    <string name="edit_location_title">स्थान संपादित करें</string>
+    <string name="edit_location_center_pin">नक्शा पिन</string>
+    <string name="edit_location_radius_warning">सटीकता के लिए, संपादित स्थान मूल GPS स्थान से 1 किमी के भीतर ही रहना चाहिए।</string>
+    <string name="edit_location_enter_address">पता दर्ज करें</string>
+    <string name="edit_location_address_placeholder">स्थान दर्ज करें</string>
+    <string name="edit_location_landmark">लैंडमार्क</string>
+    <string name="edit_location_landmark_placeholder">नाम दर्ज करें</string>
+    <string name="edit_location_save">स्थान सहेजें</string>
+
+    <string name="permissions_required_marker">*</string>
+
+    <string name="language_en_native">English</string>
+    <string name="language_en_english">English</string>
+    <string name="language_en_continue">Continue in English</string>
+    <string name="language_hi_native">हिन्दी</string>
+    <string name="language_hi_english">Hindi</string>
+    <string name="language_hi_continue">हिन्दी में जारी रखें</string>
+    <string name="language_te_native">తెలుగు</string>
+    <string name="language_te_english">Telugu</string>
+    <string name="language_te_continue">తెలుగులో కొనసాగించండి</string>
+    <string name="language_ta_native">தமிழ்</string>
+    <string name="language_ta_english">Tamil</string>
+    <string name="language_ta_continue">தமிழில் தொடரவும்</string>
+    <string name="language_kn_native">ಕನ್ನಡ</string>
+    <string name="language_kn_english">Kannada</string>
+    <string name="language_kn_continue">ಕನ್ನಡದಲ್ಲಿ ಮುಂದುವರಿಸಿ</string>
 </resources>

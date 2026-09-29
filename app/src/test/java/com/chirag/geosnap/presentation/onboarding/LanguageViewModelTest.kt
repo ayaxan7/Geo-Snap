@@ -50,13 +50,21 @@ class LanguageViewModelTest {
         }
 
     @Test
-    fun `every supported language has a continue label`() {
+    fun `every supported language has string resources`() {
         val languages = LanguageViewModel.supportedLanguages()
         assertTrue(languages.isNotEmpty())
         languages.forEach { language ->
             assertTrue(
-                "language ${language.code} has a blank continue label",
-                language.continueWith.isNotBlank()
+                "language ${language.code} has no continue label resource",
+                language.continueLabelRes != 0
+            )
+            assertTrue(
+                "language ${language.code} has no native name resource",
+                language.nativeNameRes != 0
+            )
+            assertTrue(
+                "language ${language.code} has no english name resource",
+                language.englishNameRes != 0
             )
         }
     }

@@ -402,7 +402,7 @@ private fun PermissionRow(
                     append(stringResource(item.label))
                     if (!item.isOptional) {
                         withStyle(style = SpanStyle(color = Color.Red)) {
-                            append(" *")
+                            append(" " + stringResource(R.string.permissions_required_marker))
                         }
                     }
                 },

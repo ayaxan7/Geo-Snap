@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -123,7 +124,7 @@ fun EditLocationScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Edit Location",
+                        text = stringResource(R.string.edit_location_title),
                         fontWeight = FontWeight.Bold
                     )
                 },
@@ -131,7 +132,7 @@ fun EditLocationScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             painter = painterResource(R.drawable.ic_arrow_back),
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.camera_back),
                             tint = Color.Black
                         )
                     }
@@ -171,7 +172,7 @@ fun EditLocationScreen(
                 // moves underneath it.
                 Icon(
                     imageVector = Icons.Filled.Place,
-                    contentDescription = "Map Pin",
+                    contentDescription = stringResource(R.string.edit_location_center_pin),
                     tint = PinColor,
                     modifier = Modifier
                         .align(Alignment.Center)
@@ -188,7 +189,7 @@ fun EditLocationScreen(
                         .padding(horizontal = 2.dp, vertical = 8.dp)
                 ) {
                     Text(
-                        text = "For accuracy, edited locations must remain within 1 km of the original GPS location.",
+                        text = stringResource(R.string.edit_location_radius_warning),
                         color = Color.White,
                         textAlign = TextAlign.Center,
                         fontSize = 12.sp,
@@ -204,7 +205,7 @@ fun EditLocationScreen(
                     .padding(16.dp)
             ) {
                 Text(
-                    text = "Enter Address",
+                    text = stringResource(R.string.edit_location_enter_address),
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 16.sp,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -212,7 +213,9 @@ fun EditLocationScreen(
                 OutlinedTextField(
                     value = address,
                     onValueChange = { address = it },
-                    placeholder = { Text("Enter Location", maxLines = 2, overflow = TextOverflow.Ellipsis) },
+                    placeholder = {
+                        Text(stringResource(R.string.edit_location_address_placeholder), maxLines = 2, overflow = TextOverflow.Ellipsis)
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     maxLines = 2
@@ -221,7 +224,7 @@ fun EditLocationScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "Landmark",
+                    text = stringResource(R.string.edit_location_landmark),
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 16.sp,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -229,7 +232,7 @@ fun EditLocationScreen(
                 OutlinedTextField(
                     value = landmark,
                     onValueChange = { landmark = it },
-                    placeholder = { Text("Enter name") },
+                    placeholder = { Text(stringResource(R.string.edit_location_landmark_placeholder)) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp)
                 )
@@ -249,7 +252,7 @@ fun EditLocationScreen(
                     ),
                 ) {
                     Text(
-                        text = "Save Location",
+                        text = stringResource(R.string.edit_location_save),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )

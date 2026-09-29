@@ -144,14 +144,17 @@ fun CameraScreen(
         }
     }
 
-    val currentError = uiState.error.toString()
-    LaunchedEffect(currentError) {
-        if (currentError != null && currentError.lowercase() !="null") {
+    val currentErrorMessage = uiState.error?.stringRes()?.let(context::getString)
+    LaunchedEffect(currentErrorMessage) {
+        if (currentErrorMessage != null) {
             snackbarHostState.currentSnackbarData?.dismiss()
             snackbarHostState.showSnackbar(
-                message = context.getString(R.string.camera_error_snackbar, currentError)
+                message = context.getString(
+                    R.string.camera_error_snackbar,
+                    currentErrorMessage
+                )
             )
-            Log.d("CameraScreen", "Error: $currentError")
+            Log.d("CameraScreen", "Error: $currentErrorMessage")
             viewModel.clearError()
         }
     }
@@ -240,7 +243,7 @@ fun CameraScreen(
                     modifier = Modifier.fillMaxSize()
                 )
 
-                val bannerError = currentError
+                val bannerError = currentErrorMessage
                 if (!uiState.isReady && bannerError != null) {
                     CameraUnavailableBanner(
                         text = bannerError,

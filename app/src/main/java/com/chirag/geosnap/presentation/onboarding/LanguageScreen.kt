@@ -64,7 +64,8 @@ private fun LanguageContent(
     onConfirmClick: () -> Unit
 ) {
     val selectedLanguage = uiState.languages.firstOrNull { it.code == uiState.selectedCode }
-    val buttonLabel = selectedLanguage?.continueWith ?: stringResource(R.string.language_select)
+    val buttonLabel = selectedLanguage?.let { stringResource(it.continueLabelRes) }
+        ?: stringResource(R.string.language_select)
 
     Column(
         modifier = Modifier
@@ -170,14 +171,14 @@ private fun LanguageRow(
             modifier = Modifier.weight(1f)
         ) {
             Text(
-                text = language.nativeName,
+                text = stringResource(language.nativeNameRes),
                 style = MaterialTheme.typography.titleLarge,
                 color = Color.White,
                 fontWeight = FontWeight.Bold
             )
 
             Text(
-                text = language.englishName,
+                text = stringResource(language.englishNameRes),
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.White
             )
@@ -189,7 +190,7 @@ private fun LanguageRow(
 
         Image(
             painter = painterResource(id = imageRes),
-            contentDescription = language.englishName,
+            contentDescription = stringResource(language.englishNameRes),
             modifier = Modifier.height(48.dp)
         )
     }

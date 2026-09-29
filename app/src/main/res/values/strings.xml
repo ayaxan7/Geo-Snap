@@ -141,4 +141,36 @@
 
     <!-- Generic error -->
     <string name="error_generic">Something went wrong. Please try again.</string>
+
+    <!-- Edit location screen -->
+    <string name="edit_location_title">Edit Location</string>
+    <string name="edit_location_center_pin">Map Pin</string>
+    <string name="edit_location_radius_warning">For accuracy, edited locations must remain within 1 km of the original GPS location.</string>
+    <string name="edit_location_enter_address">Enter Address</string>
+    <string name="edit_location_address_placeholder">Enter Location</string>
+    <string name="edit_location_landmark">Landmark</string>
+    <string name="edit_location_landmark_placeholder">Enter name</string>
+    <string name="edit_location_save">Save Location</string>
+
+    <!-- Permissions screen -->
+    <string name="permissions_required_marker">*</string>
+
+    <!-- Language picker names and per-language continue labels. These values are
+         intentionally identical in every locale: a label is always shown in the
+         language it names, regardless of the app's display language. -->
+    <string name="language_en_native">English</string>
+    <string name="language_en_english">English</string>
+    <string name="language_en_continue">Continue in English</string>
+    <string name="language_hi_native">हिन्दी</string>
+    <string name="language_hi_english">Hindi</string>
+    <string name="language_hi_continue">हिन्दी में जारी रखें</string>
+    <string name="language_te_native">తెలుగు</string>
+    <string name="language_te_english">Telugu</string>
+    <string name="language_te_continue">తెలుగులో కొనసాగించండి</string>
+    <string name="language_ta_native">தமிழ்</string>
+    <string name="language_ta_english">Tamil</string>
+    <string name="language_ta_continue">தமிழில் தொடரவும்</string>
+    <string name="language_kn_native">ಕನ್ನಡ</string>
+    <string name="language_kn_english">Kannada</string>
+    <string name="language_kn_continue">ಕನ್ನಡದಲ್ಲಿ ಮುಂದುವರಿಸಿ</string>
 </resources>

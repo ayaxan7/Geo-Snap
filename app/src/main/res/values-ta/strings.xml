@@ -104,4 +104,51 @@
     </plurals>
 
     <string name="error_generic">ஏதோ தவறு ஏற்பட்டது. மீண்டும் முயற்சிக்கவும்.</string>
+
+    <string name="camera_error_share">இந்தப் பதிவைப் பகிர முடியவில்லை.</string>
+
+    <string name="preview_back">பின்</string>
+    <string name="preview_share">பகிர்</string>
+    <string name="preview_unmute">ஒலி இயக்கு</string>
+    <string name="preview_mute">ஒலி அணை</string>
+    <string name="preview_delete">நீக்கு</string>
+    <string name="preview_retake">மீண்டும் எடு</string>
+    <string name="preview_edit">திருத்து</string>
+    <string name="preview_save_to_gallery">கேலரியில் சேமி</string>
+    <string name="preview_image">பட முன்னோட்டம்</string>
+
+    <string name="geotag_fetching_location">இருப்பிடத்தைப் பெறுகிறது...</string>
+    <string name="geotag_latitude">அட்சரேகை</string>
+    <string name="geotag_longitude">தீர்க்கரேகை</string>
+    <string name="geotag_date">தேதி</string>
+    <string name="geotag_map">வரைபடம்</string>
+    <string name="geotag_static_map">நிலையான வரைபடம்</string>
+    <string name="geotag_logo">எங்கள் லோகோ</string>
+
+    <string name="edit_location_title">இருப்பிடத்தைத் திருத்து</string>
+    <string name="edit_location_center_pin">வரைபட முள்</string>
+    <string name="edit_location_radius_warning">துல்லியத்திற்காக, திருத்தப்பட்ட இருப்பிடம் அசல் GPS இருப்பிடத்திலிருந்து 1 கி.மீ.க்குள் இருக்க வேண்டும்.</string>
+    <string name="edit_location_enter_address">முகவரியை உள்ளிடவும்</string>
+    <string name="edit_location_address_placeholder">இருப்பிடத்தை உள்ளிடவும்</string>
+    <string name="edit_location_landmark">அடையாளப் புள்ளி</string>
+    <string name="edit_location_landmark_placeholder">பெயரை உள்ளிடவும்</string>
+    <string name="edit_location_save">இருப்பிடத்தைச் சேமி</string>
+
+    <string name="permissions_required_marker">*</string>
+
+    <string name="language_en_native">English</string>
+    <string name="language_en_english">English</string>
+    <string name="language_en_continue">Continue in English</string>
+    <string name="language_hi_native">हिन्दी</string>
+    <string name="language_hi_english">Hindi</string>
+    <string name="language_hi_continue">हिन्दी में जारी रखें</string>
+    <string name="language_te_native">తెలుగు</string>
+    <string name="language_te_english">Telugu</string>
+    <string name="language_te_continue">తెలుగులో కొనసాగించండి</string>
+    <string name="language_ta_native">தமிழ்</string>
+    <string name="language_ta_english">Tamil</string>
+    <string name="language_ta_continue">தமிழில் தொடரவும்</string>
+    <string name="language_kn_native">ಕನ್ನಡ</string>
+    <string name="language_kn_english">Kannada</string>
+    <string name="language_kn_continue">ಕನ್ನಡದಲ್ಲಿ ಮುಂದುವರಿಸಿ</string>
 </resources>

@@ -1,7 +1,9 @@
 package com.chirag.geosnap.presentation.onboarding
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.chirag.geosnap.R
 import com.chirag.geosnap.domain.usecase.CompleteOnboardingUseCase
 import com.chirag.geosnap.domain.usecase.GetSelectedLanguageUseCase
 import com.chirag.geosnap.domain.usecase.SetSelectedLanguageUseCase
@@ -27,10 +29,10 @@ class LanguageViewModel @Inject constructor(
 
     data class Language(
         val code: String,
-        val nativeName: String,
-        val englishName: String,
+        @StringRes val nativeNameRes: Int,
+        @StringRes val englishNameRes: Int,
         /** Button label shown once this language is selected (in that language). */
-        val continueWith: String
+        @StringRes val continueLabelRes: Int
     )
 
     data class UiState(
@@ -84,11 +86,36 @@ class LanguageViewModel @Inject constructor(
         const val DEFAULT_LANGUAGE = "en"
 
         fun supportedLanguages(): List<Language> = listOf(
-            Language("en", "English", "English", "Continue in English"),
-            Language("hi", "हिन्दी", "Hindi", "हिन्दी में जारी रखें"),
-            Language("te", "తెలుగు", "Telugu", "తెలుగులో కొనసాగించండి"),
-            Language("ta", "தமிழ்", "Tamil", "தமிழில் தொடரவும்"),
-            Language("kn", "ಕನ್ನಡ", "Kannada", "ಕನ್ನಡದಲ್ಲಿ ಮುಂದುವರಿಸಿ")
+            Language(
+                code = "en",
+                nativeNameRes = R.string.language_en_native,
+                englishNameRes = R.string.language_en_english,
+                continueLabelRes = R.string.language_en_continue
+            ),
+            Language(
+                code = "hi",
+                nativeNameRes = R.string.language_hi_native,
+                englishNameRes = R.string.language_hi_english,
+                continueLabelRes = R.string.language_hi_continue
+            ),
+            Language(
+                code = "te",
+                nativeNameRes = R.string.language_te_native,
+                englishNameRes = R.string.language_te_english,
+                continueLabelRes = R.string.language_te_continue
+            ),
+            Language(
+                code = "ta",
+                nativeNameRes = R.string.language_ta_native,
+                englishNameRes = R.string.language_ta_english,
+                continueLabelRes = R.string.language_ta_continue
+            ),
+            Language(
+                code = "kn",
+                nativeNameRes = R.string.language_kn_native,
+                englishNameRes = R.string.language_kn_english,
+                continueLabelRes = R.string.language_kn_continue
+            )
         )
     }
 }
