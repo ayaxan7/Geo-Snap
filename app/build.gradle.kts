@@ -32,6 +32,7 @@ android {
         }
         val mapsApiKey = properties.getProperty("MAPS_API_KEY", "")
         buildConfigField("String", "MAPS_API_KEY", "\"$mapsApiKey\"")
+        manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
     }
 
     buildTypes {
@@ -55,6 +56,8 @@ android {
 }
 
 dependencies {
+    implementation(libs.maps.compose)
+    implementation(libs.play.services.maps)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)

@@ -23,6 +23,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -75,6 +76,41 @@ class CameraViewModelTest {
             assertEquals(coordinate, preview.coordinate)
             assertTrue(media.savedImages.isEmpty())
             assertNull(vm.uiState.value.error)
+        }
+
+    @Test
+    fun `editing the location refreshes the preview card static map url`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val vm = createViewModel(mode = CameraMode.PHOTO.routeName)
+
+            vm.capturePhoto()
+            advanceUntilIdle()
+
+            val originalUrl = vm.uiState.value.pendingPreview?.cardContent?.staticMapUrl
+            assertNotNull(originalUrl)
+
+            val newLat = 23.043863
+            val newLng = 72.595022
+            vm.updatePendingLocation(
+                city = "New City",
+                address = "9 New Street, Testville",
+                lat = newLat,
+                lng = newLng
+            )
+
+            val card = vm.uiState.value.pendingPreview?.cardContent
+            assertNotNull(card)
+            assertEquals("New City", card!!.cityString)
+            assertEquals("9 New Street, Testville", card.fullAddress)
+            assertEquals(newLat, card.latitude)
+            assertEquals(newLng, card.longitude)
+            val newUrl = card.staticMapUrl
+            assertNotNull(newUrl)
+            assertTrue(
+                "expected the new url to embed the edited coords but was: $newUrl",
+                newUrl!!.contains("$newLat,$newLng")
+            )
+            assertNotEquals(originalUrl, newUrl)
         }
 
     @Test

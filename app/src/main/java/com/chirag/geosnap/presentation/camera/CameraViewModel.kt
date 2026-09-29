@@ -264,6 +264,21 @@ class CameraViewModel @Inject constructor(
         _uiState.update { it.copy(pendingPreview = null) }
     }
     
+    fun updatePendingLocation(city: String?, address: String?, lat: Double, lng: Double) {
+        val currentPreview = _uiState.value.pendingPreview ?: return
+        val newContent = currentPreview.cardContent.copy(
+            cityString = city,
+            fullAddress = address,
+            latitude = lat,
+            longitude = lng,
+            // Also refresh the thumbnail so the preview card shows the edited spot.
+            staticMapUrl = staticMapUrl(lat, lng)
+        )
+        _uiState.update { 
+            it.copy(pendingPreview = currentPreview.copy(cardContent = newContent)) 
+        }
+    }
+    
     fun savePreviewToGallery() {
         val preview = _uiState.value.pendingPreview ?: return
         
@@ -445,6 +460,11 @@ class CameraViewModel @Inject constructor(
      * address is fetched from the Google Maps Geocoding API when a key exists
      * (falling back to the local geocoder when it does not).
      */
+    suspend fun resolveLocation(lat: Double, lng: Double): Pair<String, String?> {
+        val address = resolveAddressForUi(GeoCoordinate(lat, lng))
+        return Pair(address.city, address.full)
+    }
+
     private suspend fun resolveAddressForUi(coord: GeoCoordinate): ResolvedAddress {
         val local = reverseGeocode(coord)
         val full = fetchGoogleFormattedAddress(coord) ?: local?.full

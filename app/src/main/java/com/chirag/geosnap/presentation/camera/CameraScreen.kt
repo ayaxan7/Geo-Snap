@@ -173,48 +173,65 @@ fun CameraScreen(
     ) { _ ->
         Box(modifier = Modifier.fillMaxSize()) {
             val pendingPreview = uiState.pendingPreview
+            var showEditLocation by remember { mutableStateOf(false) }
+
             if (pendingPreview != null) {
-                PreviewScreen(
-                    uri = Uri.fromFile(pendingPreview.file),
-                    isVideo = pendingPreview.isVideo,
-                    onDelete = viewModel::discardPreview,
-                    onRetake = viewModel::discardPreview,
-                    onEdit = { /* placeholder for edit */ },
-                    onSaveToGallery = viewModel::savePreviewToGallery,
-                    onShare = {
-                        // The pending capture is still a cache file, so it needs a
-                        // provider-backed uri; a raw file:// would be rejected.
-                        val uri = runCatching {
-                            FileProvider.getUriForFile(
-                                context,
-                                "${context.packageName}.fileprovider",
-                                pendingPreview.file
+                if (showEditLocation) {
+                    EditLocationScreen(
+                        initialLat = pendingPreview.cardContent.latitude ?: 0.0,
+                        initialLng = pendingPreview.cardContent.longitude ?: 0.0,
+                        initialAddress = pendingPreview.cardContent.fullAddress,
+                        initialLandmark = pendingPreview.cardContent.cityString,
+                        onResolveLocation = { lat, lng ->
+                            viewModel.resolveLocation(lat, lng)
+                        },
+                        onSave = { city, address, lat, lng ->
+                            viewModel.updatePendingLocation(city, address, lat, lng)
+                            showEditLocation = false
+                        },
+                        onBack = { showEditLocation = false }
+                    )
+                } else {
+                    PreviewScreen(
+                        uri = Uri.fromFile(pendingPreview.file),
+                        isVideo = pendingPreview.isVideo,
+                        onDelete = viewModel::discardPreview,
+                        onRetake = viewModel::discardPreview,
+                        onEdit = { /* this is the placeholder action in PreviewScreen */ },
+                        onSaveToGallery = viewModel::savePreviewToGallery,
+                        onShare = {
+                            val uri = runCatching {
+                                FileProvider.getUriForFile(
+                                    context,
+                                    "${context.packageName}.fileprovider",
+                                    pendingPreview.file
+                                )
+                            }.getOrNull()
+                            if (uri == null) {
+                                viewModel.reportError(CameraError.SHARE_FAILED)
+                            } else {
+                                shareMediaChooser(context, uri, isVideo = pendingPreview.isVideo)
+                                    ?.let(previewShareLauncher::launch)
+                            }
+                        },
+                        onBack = viewModel::discardPreview,
+                        modifier = Modifier.fillMaxSize(),
+                        mediaOverlay = {
+                            GeoTagCard(
+                                content = pendingPreview.cardContent,
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                                onEditClick = { showEditLocation = true }
                             )
-                        }.getOrNull()
-                        if (uri == null) {
-                            viewModel.reportError(CameraError.SHARE_FAILED)
-                        } else {
-                            shareMediaChooser(context, uri, isVideo = pendingPreview.isVideo)
-                                ?.let(previewShareLauncher::launch)
                         }
-                    },
-                    onBack = viewModel::discardPreview,
-                    modifier = Modifier.fillMaxSize(),
-                    mediaOverlay = {
-                        // Floats over the media, clear of the solid black bar below.
-                        GeoTagCard(
-                            content = pendingPreview.cardContent,
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .padding(horizontal = 16.dp, vertical = 12.dp)
+                    )
+    
+                    if (uiState.isProcessing) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.align(Alignment.Center)
                         )
                     }
-                )
-
-                if (uiState.isProcessing) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
-                    )
                 }
             } else {
                 // Full-bleed camera preview

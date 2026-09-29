@@ -35,6 +35,11 @@
         android:roundIcon="@drawable/geo_snap_icon"
         android:supportsRtl="true"
         android:theme="@style/Theme.GeoSnap">
+        <!-- Enables the GoogleMaps (com.google.maps.android.compose.GoogleMap)
+             widget in EditLocationScreen. -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${MAPS_API_KEY}" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

@@ -52,7 +52,8 @@ import java.util.Locale
 fun GeoTagCard(
     content: GeoTagCardContent,
     modifier: Modifier = Modifier,
-    mapBitmap: Bitmap? = null
+    mapBitmap: Bitmap? = null,
+    onEditClick: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
     val englishContext = remember(context) {
@@ -80,27 +81,28 @@ fun GeoTagCard(
     val fullAddressText =
         content.fullAddress ?: content.cityString ?: fetchingText
 
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(
-                Color(GeoTagCardSpec.CARD_BACKGROUND_COLOR),
-                RoundedCornerShape(GeoTagCardSpec.CARD_CORNER_DP.dp)
-            )
-            .border(
-                width = GeoTagCardSpec.CARD_BORDER_DP.dp,
-                color = Color(GeoTagCardSpec.CARD_BORDER_COLOR),
-                shape = RoundedCornerShape(GeoTagCardSpec.CARD_CORNER_DP.dp)
-            )
-            .padding(
-                horizontal = GeoTagCardSpec.PADDING_HORIZONTAL_DP.dp,
-                vertical = GeoTagCardSpec.PADDING_VERTICAL_DP.dp
-            ),
-        // Content hugs the card: it is bottom-aligned on one baseline (map, date
-        // row and logo share the same bottom line) instead of being padded out to
-        // a fixed height.
-        verticalAlignment = Alignment.Bottom
-    ) {
+    Box(modifier = modifier) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    Color(GeoTagCardSpec.CARD_BACKGROUND_COLOR),
+                    RoundedCornerShape(GeoTagCardSpec.CARD_CORNER_DP.dp)
+                )
+                .border(
+                    width = GeoTagCardSpec.CARD_BORDER_DP.dp,
+                    color = Color(GeoTagCardSpec.CARD_BORDER_COLOR),
+                    shape = RoundedCornerShape(GeoTagCardSpec.CARD_CORNER_DP.dp)
+                )
+                .padding(
+                    horizontal = GeoTagCardSpec.PADDING_HORIZONTAL_DP.dp,
+                    vertical = GeoTagCardSpec.PADDING_VERTICAL_DP.dp
+                ),
+            // Content hugs the card: it is bottom-aligned on one baseline (map, date
+            // row and logo share the same bottom line) instead of being padded out to
+            // a fixed height.
+            verticalAlignment = Alignment.Bottom
+        ) {
 
 
         MapThumbnail(
@@ -226,6 +228,23 @@ fun GeoTagCard(
             )
         }
     }
+    
+    if (onEditClick != null) {
+        androidx.compose.material3.IconButton(
+            onClick = onEditClick,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(8.dp)
+                .size(24.dp)
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_edit_pencil),
+                contentDescription = "Edit Location",
+                tint = Color.White
+            )
+        }
+    }
+}
 }
 
 @Composable
