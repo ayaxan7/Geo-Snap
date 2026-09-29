@@ -14,8 +14,8 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -27,14 +27,18 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -108,25 +112,40 @@ fun GalleryScreen(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .safeDrawingPadding()
-    ) {
-        GalleryTopBar(
-            onBack = onBack,
-            selectionMode = uiState.selectionMode,
-            selectedCount = selectedMedia.size,
-            onCancelSelection = viewModel::exitSelection
-        )
-
+    Scaffold(
+        containerColor = Color.White,
+        topBar = {
+            GalleryTopBar(
+                onBack = onBack,
+                selectionMode = uiState.selectionMode,
+                selectedCount = selectedMedia.size,
+                onCancelSelection = viewModel::exitSelection
+            )
+        },
+        bottomBar = {
+            GalleryBottomBar(
+                selectionMode = uiState.selectionMode,
+                canActOnSelection = canActOnSelection,
+                onDeleteClick = {
+                    if (uiState.selectionMode) {
+                        if (selectedMedia.isNotEmpty()) showDeleteDialog = true
+                    } else {
+                        viewModel.enterSelection()
+                    }
+                },
+                onShareClick = {
+                    if (uiState.selectionMode) shareSelected() else viewModel.enterSelection()
+                }
+            )
+        }
+    ) { paddingValues ->
         Box(
             modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
+                .fillMaxSize()
+                .padding(paddingValues)
         ) {
             when {
-                uiState.loading -> LoadingContent()
+                uiState.loading && uiState.media.isEmpty() -> LoadingContent()
                 uiState.loadingError -> ErrorContent(onRetry = viewModel::refresh)
                 uiState.media.isEmpty() -> EmptyContent()
                 else -> GalleryGrid(
@@ -149,21 +168,6 @@ fun GalleryScreen(
                     .padding(16.dp)
             )
         }
-
-        GalleryBottomBar(
-            selectionMode = uiState.selectionMode,
-            canActOnSelection = canActOnSelection,
-            onDeleteClick = {
-                if (uiState.selectionMode) {
-                    if (selectedMedia.isNotEmpty()) showDeleteDialog = true
-                } else {
-                    viewModel.enterSelection()
-                }
-            },
-            onShareClick = {
-                if (uiState.selectionMode) shareSelected() else viewModel.enterSelection()
-            }
-        )
     }
 
     if (showDeleteDialog) {
@@ -193,6 +197,7 @@ fun GalleryScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun GalleryTopBar(
     onBack: () -> Unit,
@@ -200,35 +205,34 @@ private fun GalleryTopBar(
     selectedCount: Int,
     onCancelSelection: () -> Unit
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp)
-    ) {
-        IconButton(onClick = if (selectionMode) onCancelSelection else onBack) {
-            Icon(
-                painter = painterResource(
-                    if (selectionMode) android.R.drawable.ic_menu_close_clear_cancel
-                    else R.drawable.ic_arrow_back
-                ),
-                contentDescription = if (selectionMode) {
-                    stringResource(R.string.gallery_delete_cancel)
+    TopAppBar(
+        title = {
+            Text(
+                text = if (selectionMode) {
+                    stringResource(R.string.gallery_selected_count, selectedCount)
                 } else {
-                    stringResource(R.string.camera_back)
-                }
+                    stringResource(R.string.gallery_title)
+                },
+                style = MaterialTheme.typography.titleLarge
             )
-        }
-        Text(
-            text = if (selectionMode) {
-                stringResource(R.string.gallery_selected_count, selectedCount)
-            } else {
-                stringResource(R.string.gallery_title)
-            },
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.weight(1f)
-        )
-    }
+        },
+        navigationIcon = {
+            IconButton(onClick = if (selectionMode) onCancelSelection else onBack) {
+                Icon(
+                    painter = painterResource(
+                        if (selectionMode) android.R.drawable.ic_menu_close_clear_cancel
+                        else R.drawable.ic_arrow_back
+                    ),
+                    contentDescription = if (selectionMode) {
+                        stringResource(R.string.gallery_delete_cancel)
+                    } else {
+                        stringResource(R.string.camera_back)
+                    }
+                )
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+    )
 }
 
 @Composable
@@ -394,6 +398,7 @@ private fun GalleryBottomBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .navigationBarsPadding()
             .padding(horizontal = 16.dp, vertical = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
