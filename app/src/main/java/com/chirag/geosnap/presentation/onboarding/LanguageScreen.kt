@@ -63,6 +63,9 @@ private fun LanguageContent(
     onLanguageSelected: (String) -> Unit,
     onConfirmClick: () -> Unit
 ) {
+    val selectedLanguage = uiState.languages.firstOrNull { it.code == uiState.selectedCode }
+    val buttonLabel = selectedLanguage?.continueWith ?: stringResource(R.string.language_select)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -114,8 +117,8 @@ private fun LanguageContent(
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFFEAEAEA),
                 contentColor = PrimaryGreen,
-                disabledContainerColor = Color.LightGray,
-                disabledContentColor = Color.DarkGray
+                disabledContainerColor = Color(0xFFEAEAEA),
+                disabledContentColor = PrimaryGreen
             ),
             shape = RoundedCornerShape(50),
             modifier = Modifier
@@ -123,7 +126,9 @@ private fun LanguageContent(
                 .height(56.dp)
         ) {
             Text(
-                text = stringResource(R.string.language_select), fontSize = 18.sp, fontWeight = FontWeight.Bold
+                text = buttonLabel,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
             )
         }
         Spacer(Modifier.height(8.dp))

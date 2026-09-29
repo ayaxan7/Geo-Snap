@@ -10,6 +10,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -28,29 +29,37 @@ class LanguageViewModelTest {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun `defaults to English when nothing stored`() = runTest(mainDispatcherRule.scheduler) {
+    fun `nothing is selected when nothing is stored`() = runTest(mainDispatcherRule.scheduler) {
         val repository = FakePreferencesRepository()
         val vm = createViewModel(repository)
 
         advanceUntilIdle()
 
-        assertEquals(LanguageViewModel.DEFAULT_LANGUAGE, vm.uiState.value.selectedCode)
+        assertNull(vm.uiState.value.selectedCode)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun `a radio button is pre-selected as soon as the screen opens`() =
+    fun `no radio button is pre-selected as soon as the screen opens`() =
         runTest(mainDispatcherRule.scheduler) {
             val repository = FakePreferencesRepository()
             val vm = createViewModel(repository)
 
-            // No advanceUntilIdle: the selection must exist before any async emission.
-            val selected = vm.uiState.value.selectedCode
+            // No advanceUntilIdle: nothing must be selected even before any async emission.
+            assertNull(vm.uiState.value.selectedCode)
+        }
+
+    @Test
+    fun `every supported language has a continue label`() {
+        val languages = LanguageViewModel.supportedLanguages()
+        assertTrue(languages.isNotEmpty())
+        languages.forEach { language ->
             assertTrue(
-                "expected a pre-selected language but was: $selected",
-                LanguageViewModel.supportedLanguages().any { it.code == selected }
+                "language ${language.code} has a blank continue label",
+                language.continueWith.isNotBlank()
             )
         }
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test

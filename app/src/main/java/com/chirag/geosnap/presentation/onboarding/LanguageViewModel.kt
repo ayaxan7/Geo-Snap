@@ -6,7 +6,6 @@ import com.chirag.geosnap.domain.usecase.CompleteOnboardingUseCase
 import com.chirag.geosnap.domain.usecase.GetSelectedLanguageUseCase
 import com.chirag.geosnap.domain.usecase.SetSelectedLanguageUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.util.Locale
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,7 +28,9 @@ class LanguageViewModel @Inject constructor(
     data class Language(
         val code: String,
         val nativeName: String,
-        val englishName: String
+        val englishName: String,
+        /** Button label shown once this language is selected (in that language). */
+        val continueWith: String
     )
 
     data class UiState(
@@ -38,7 +39,7 @@ class LanguageViewModel @Inject constructor(
         val saving: Boolean = false
     )
 
-    private val _uiState = MutableStateFlow(UiState(selectedCode = initialLanguageCode()))
+    private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
     init {
@@ -79,28 +80,15 @@ class LanguageViewModel @Inject constructor(
         _uiState.update { it.copy(selectedCode = code) }
     }
 
-    /**
-     * First-frame default so a radio button is always pre-selected the moment
-     * the screen opens: the device language when it is one we support, English
-     * otherwise. The persisted selection (if any) replaces it as soon as
-     * DataStore emits.
-     */
-    private fun initialLanguageCode(): String {
-        val systemLanguage = Locale.getDefault().language.lowercase()
-        return supportedLanguages()
-            .firstOrNull { it.code == systemLanguage }?.code
-            ?: DEFAULT_LANGUAGE
-    }
-
     companion object {
         const val DEFAULT_LANGUAGE = "en"
 
         fun supportedLanguages(): List<Language> = listOf(
-            Language("en", "English", "English"),
-            Language("hi", "हिन्दी", "Hindi"),
-            Language("te", "తెలుగు", "Telugu"),
-            Language("ta", "தமிழ்", "Tamil"),
-            Language("kn", "ಕನ್ನಡ", "Kannada")
+            Language("en", "English", "English", "Continue in English"),
+            Language("hi", "हिन्दी", "Hindi", "हिन्दी में जारी रखें"),
+            Language("te", "తెలుగు", "Telugu", "తెలుగులో కొనసాగించండి"),
+            Language("ta", "தமிழ்", "Tamil", "தமிழில் தொடரவும்"),
+            Language("kn", "ಕನ್ನಡ", "Kannada", "ಕನ್ನಡದಲ್ಲಿ ಮುಂದುವರಿಸಿ")
         )
     }
 }
