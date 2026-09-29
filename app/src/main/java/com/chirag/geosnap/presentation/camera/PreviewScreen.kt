@@ -44,6 +44,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
@@ -51,6 +52,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import coil3.compose.rememberAsyncImagePainter
 import com.chirag.geosnap.R
+import com.chirag.geosnap.ui.theme.GeoSnapTheme
 import com.chirag.geosnap.ui.theme.PrimaryGreen
 
 /**
@@ -125,7 +127,7 @@ fun PreviewScreen(
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Top
             ) {
                 PreviewAction(
@@ -269,7 +271,7 @@ private fun PreviewAction(
     ) {
         Icon(
             painter = painterResource(iconRes),
-            contentDescription = null,
+            contentDescription = stringResource(labelRes),
             tint = Color.White,
             modifier = Modifier.size(ACTION_ICON_SIZE)
         )
@@ -287,3 +289,20 @@ private val BOTTOM_BAR_HORIZONTAL_PADDING = 16.dp
 private val BOTTOM_BAR_VERTICAL_PADDING = 12.dp
 private val BOTTOM_BAR_SECTION_GAP = 20.dp
 private val SAVE_BUTTON_HEIGHT = 56.dp
+
+@Preview
+@Composable
+private fun PreviewScreenPreview() {
+    GeoSnapTheme {
+        PreviewScreen(
+            uri = Uri.EMPTY,
+            isVideo = false,
+            onDelete = {},
+            onRetake = {},
+            onEdit = {},
+            onSaveToGallery = {},
+            onShare = {},
+            onBack = {}
+        )
+    }
+}
