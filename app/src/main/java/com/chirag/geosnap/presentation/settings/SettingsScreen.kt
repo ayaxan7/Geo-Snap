@@ -171,7 +171,7 @@ fun SettingsScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.Favorite,
-                    contentDescription = null,
+                    contentDescription = "Proudly Made",
                     tint = PrimaryGreen,
                     modifier = Modifier.size(20.dp)
                 )
@@ -191,7 +191,7 @@ fun SettingsScreen(
 private fun SettingsDivider() {
     HorizontalDivider(
         color = Color(0xFFF0F0F0),
-        thickness = (0.5f).dp,
+        thickness = (0.8f).dp,
         modifier = Modifier.padding(horizontal = 16.dp)
     )
 }
@@ -206,7 +206,7 @@ private fun SettingsItemArrow(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(horizontal = 24.dp, vertical = 16.dp),
+            .padding(horizontal = 24.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
@@ -242,7 +242,7 @@ private fun SettingsItemSwitch(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 8.dp),
+            .padding(horizontal = 24.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
