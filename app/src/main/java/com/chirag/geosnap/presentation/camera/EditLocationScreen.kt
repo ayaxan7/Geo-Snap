@@ -41,6 +41,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chirag.geosnap.R
+import com.chirag.geosnap.ui.theme.PrimaryGreen
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -170,28 +171,29 @@ fun EditLocationScreen(
                 // moves underneath it.
                 Icon(
                     imageVector = Icons.Filled.Place,
-                    contentDescription = null,
+                    contentDescription = "Map Pin",
                     tint = PinColor,
                     modifier = Modifier
                         .align(Alignment.Center)
                         .offset(y = (-24).dp)
-                        .size(48.dp)
+                        .size(42.dp)
                 )
                 
                 // Warning Banner
                 Box(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
-                        .padding(16.dp)
+                        .padding(vertical = 16.dp, horizontal = 12.dp)
                         .background(Color(0xFFD32F2F), RoundedCornerShape(8.dp))
-                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                        .padding(horizontal = 2.dp, vertical = 8.dp)
                 ) {
                     Text(
                         text = "For accuracy, edited locations must remain within 1 km of the original GPS location.",
                         color = Color.White,
                         textAlign = TextAlign.Center,
                         fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Medium,
+                        lineHeight = 12.sp
                     )
                 }
             }
@@ -237,13 +239,14 @@ fun EditLocationScreen(
                 Button(
                     onClick = { onSave(landmark.ifBlank { null }, address.ifBlank { null }, lat, lng) },
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
+                        .fillMaxWidth(0.9f)
+                        .height(42.dp)
+                        .align(Alignment.CenterHorizontally),
                     shape = RoundedCornerShape(28.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFD9D9D9),
-                        contentColor = Color.White
-                    )
+                        contentColor = Color.White,
+                        containerColor = PrimaryGreen,
+                    ),
                 ) {
                     Text(
                         text = "Save Location",
