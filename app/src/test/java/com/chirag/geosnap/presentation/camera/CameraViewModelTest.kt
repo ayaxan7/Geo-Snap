@@ -389,7 +389,20 @@ class CameraViewModelTest {
             advanceUntilIdle()
 
             assertEquals(CaptureFilter.ORIGINAL, vm.uiState.value.filter)
-            assertEquals(0f, vm.uiState.value.filterStrength)
+            assertEquals(1f, vm.uiState.value.filterStrength)
+        }
+
+    @Test
+    fun `selecting a filter applies it at its normal strength`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val vm = createViewModel(mode = CameraMode.PHOTO.routeName)
+
+            vm.capturePhoto()
+            advanceUntilIdle()
+            vm.setFilter(CaptureFilter.VIBRANT)
+
+            assertEquals(CaptureFilter.VIBRANT, vm.uiState.value.filter)
+            assertEquals(1f, vm.uiState.value.filterStrength)
         }
 
     @Test
@@ -407,17 +420,17 @@ class CameraViewModelTest {
             advanceUntilIdle()
 
             assertEquals(CaptureFilter.ORIGINAL, vm.uiState.value.filter)
-            assertEquals(0f, vm.uiState.value.filterStrength)
+            assertEquals(1f, vm.uiState.value.filterStrength)
         }
 
     @Test
-    fun `filter strength is clamped between zero and one`() =
+    fun `filter strength is clamped between zero and two`() =
         runTest(mainDispatcherRule.scheduler) {
             val vm = createViewModel()
             vm.setFilterStrength(-3f)
             assertEquals(0f, vm.uiState.value.filterStrength)
             vm.setFilterStrength(7f)
-            assertEquals(1f, vm.uiState.value.filterStrength)
+            assertEquals(2f, vm.uiState.value.filterStrength)
         }
 
     @Test
@@ -455,7 +468,7 @@ class CameraViewModelTest {
             // Back on the camera screen, the edits are forgotten.
             assertNull(vm.uiState.value.pendingPreview)
             assertEquals(CaptureFilter.ORIGINAL, vm.uiState.value.filter)
-            assertEquals(0f, vm.uiState.value.filterStrength)
+            assertEquals(1f, vm.uiState.value.filterStrength)
             assertTrue(withTimeoutOrNull(1000.milliseconds) { vm.events.first() } is CameraEvent.MediaSaved)
         }
 
@@ -481,7 +494,7 @@ class CameraViewModelTest {
             // 0.213 luminance weight.
             assertEquals((1f + 0.213f) / 2f, saved.filter!![0], 1e-3f)
             assertEquals(CaptureFilter.ORIGINAL, vm.uiState.value.filter)
-            assertEquals(0f, vm.uiState.value.filterStrength)
+            assertEquals(1f, vm.uiState.value.filterStrength)
         }
 
     @Test

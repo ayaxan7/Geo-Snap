@@ -73,7 +73,6 @@ import com.chirag.geosnap.R
 import com.chirag.geosnap.data.media.FilterRgbMatrix
 import com.chirag.geosnap.ui.theme.GeoSnapTheme
 import com.chirag.geosnap.ui.theme.PrimaryGreen
-import kotlin.math.abs
 
 /**
  * Review screen for a freshly captured photo or video.
@@ -345,7 +344,10 @@ private fun EditBottomBar(
     onFilterStrengthChange: (Float) -> Unit
 ) {
     val filters = CaptureFilter.entries.toList()
-    var sliderValue by remember { mutableFloatStateOf(filterStrength * 100f) }
+    // Slider center (0) is the filter's normal strength; -100 fades back to the
+    // untouched capture, +100 boosts past normal. Keyed on the filter so picking
+    // a chip re-centers the thumb on the freshly armed normal strength.
+    var sliderValue by remember(filter) { mutableFloatStateOf((filterStrength - 1f) * 100f) }
 
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         LazyRow(
@@ -368,9 +370,8 @@ private fun EditBottomBar(
             value = sliderValue,
             onValueChange = {
                 sliderValue = it
-                // The track is bipolar around the middle (center = untouched);
-                // the applied strength is the magnitude on either side.
-                onFilterStrengthChange(abs(it) / 100f)
+                // 0 -> strength 1 (normal), -100 -> 0 (untouched), +100 -> 2 (boosted).
+                onFilterStrengthChange(1f + it / 100f)
             },
             valueRange = -100f..100f,
             colors = SliderDefaults.colors(

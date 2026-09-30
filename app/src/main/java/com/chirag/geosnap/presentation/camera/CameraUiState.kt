@@ -20,5 +20,6 @@ data class CameraUiState(
     val showLocationDialog: Boolean = false,
     val pendingPreview: PreviewData? = null,
     val filter: CaptureFilter = CaptureFilter.ORIGINAL,
-    val filterStrength: Float = 0f
+    // 1 = the filter at its normal (slider-center) strength.
+    val filterStrength: Float = 1f
 )

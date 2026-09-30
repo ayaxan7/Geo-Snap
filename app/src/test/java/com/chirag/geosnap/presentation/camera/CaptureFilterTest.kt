@@ -35,13 +35,13 @@ class CaptureFilterTest {
     }
 
     @Test
-    fun `negative and overflowing strengths are clamped`() {
+    fun `negative strengths clamp to identity and overflow clamps to the boost`() {
         for (filter in CaptureFilter.entries) {
             assertArrayEquals(filter.name, identity, filter.recipe(-1f), 1e-6f)
             assertArrayEquals(
                 filter.name,
-                filter.recipe(1f),
                 filter.recipe(2f),
+                filter.recipe(3f),
                 1e-6f
             )
         }
@@ -123,5 +123,38 @@ class CaptureFilterTest {
         }
         // At 50% the sharp-black offset is exactly half of -64, i.e. mid grey.
         assertEquals(-32f, CaptureFilter.SHARP_BLACK.recipe(0.5f)[4], 1e-3f)
+    }
+
+    @Test
+    fun `boost midpoint is the lerp of normal and intensified recipes`() {
+        val normal = CaptureFilter.SOFT_TONE.recipe(1f)
+        val boosted = CaptureFilter.SOFT_TONE.recipe(2f)
+        val midpoint = CaptureFilter.SOFT_TONE.recipe(1.5f)
+        for (i in 0 until 20) {
+            assertEquals(
+                "index=$i",
+                (normal[i] + boosted[i]) / 2f,
+                midpoint[i],
+                1e-3f
+            )
+        }
+        assertEquals(9f, midpoint[4], 1e-3f) // offset 6 -> 12
+    }
+
+    @Test
+    fun `boosted sharp black and gray stay grayscale`() {
+        for (filter in listOf(CaptureFilter.SHARP_BLACK, CaptureFilter.GRAY)) {
+            val boosted = filter.recipe(2f)
+            assertArrayEquals("R row", boosted.sliceArray(0..2), boosted.sliceArray(5..7), 1e-4f)
+            assertArrayEquals("G row", boosted.sliceArray(5..7), boosted.sliceArray(10..12), 1e-4f)
+        }
+        assertEquals(128f * (1f - 1.25f), CaptureFilter.GRAY.recipe(2f)[4], 1e-3f)
+    }
+
+    @Test
+    fun `boosted vibrant and soft tone intensify further`() {
+        val vibrant = CaptureFilter.VIBRANT.recipe(2f)
+        assertTrue("green diag should beat normal", vibrant[6] > CaptureFilter.VIBRANT.recipe(1f)[6])
+        assertEquals(12f, CaptureFilter.SOFT_TONE.recipe(2f)[4], 1e-3f)
     }
 }

@@ -206,7 +206,7 @@ class CameraViewModel @Inject constructor(
                         it.copy(
                             isProcessing = false,
                             filter = CaptureFilter.ORIGINAL,
-                            filterStrength = 0f,
+                            filterStrength = FILTER_STRENGTH_NORMAL,
                             pendingPreview = PreviewData(file, coordinate, false, cardContent)
                         )
                     }
@@ -253,7 +253,7 @@ class CameraViewModel @Inject constructor(
                     it.copy(
                         isProcessing = false,
                         filter = CaptureFilter.ORIGINAL,
-                        filterStrength = 0f,
+                        filterStrength = FILTER_STRENGTH_NORMAL,
                         pendingPreview = PreviewData(file, coordinate, true, cardContent)
                     )
                 }
@@ -268,14 +268,14 @@ class CameraViewModel @Inject constructor(
         _uiState.update { it.copy(pendingPreview = null) }
     }
 
-    /** Selects the filter to apply to the preview and to the saved media. */
+    /** Selects the filter, starting it at its normal (slider-center) strength. */
     fun setFilter(filter: CaptureFilter) {
-        _uiState.update { it.copy(filter = filter) }
+        _uiState.update { it.copy(filter = filter, filterStrength = FILTER_STRENGTH_NORMAL) }
     }
 
-    /** Sets the filter strength in `0..1` (0 = untouched capture). */
+    /** Sets the filter strength in `0..2` (1 = normal look, 0 = untouched). */
     fun setFilterStrength(strength: Float) {
-        _uiState.update { it.copy(filterStrength = strength.coerceIn(0f, 1f)) }
+        _uiState.update { it.copy(filterStrength = strength.coerceIn(0f, FILTER_STRENGTH_MAX)) }
     }
     
     fun updatePendingLocation(city: String?, address: String?, lat: Double, lng: Double) {
@@ -340,7 +340,7 @@ class CameraViewModel @Inject constructor(
                         isProcessing = false,
                         pendingPreview = null,
                         filter = CaptureFilter.ORIGINAL,
-                        filterStrength = 0f
+                        filterStrength = FILTER_STRENGTH_NORMAL
                     )
                 }
                 _events.tryEmit(CameraEvent.MediaSaved(uri, isVideo = preview.isVideo))
@@ -587,6 +587,12 @@ class CameraViewModel @Inject constructor(
 
         /** How often the camera asks for a fresh fix. */
         val POLL_INTERVAL = 10.seconds
+
+        /** Filter strength at the slider center (the filter's normal look). */
+        const val FILTER_STRENGTH_NORMAL = 1f
+
+        /** Upper bound for the boost side of the filter slider. */
+        const val FILTER_STRENGTH_MAX = 2f
 
         /** Upper bound on the capture-time address lookup before the preview opens. */
         val CAPTURE_GEOCODE_TIMEOUT = 3.seconds
