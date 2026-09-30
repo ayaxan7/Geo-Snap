@@ -1,6 +1,7 @@
 package com.chirag.geosnap.presentation.camera
 
 import android.net.Uri
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -44,7 +45,21 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.ui.draw.clip
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
@@ -80,6 +95,7 @@ fun PreviewScreen(
     mediaOverlay: @Composable BoxScope.() -> Unit = {}
 ) {
     var isMuted by rememberSaveable { mutableStateOf(true) }
+    var isEditing by rememberSaveable { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -89,9 +105,13 @@ fun PreviewScreen(
         PreviewTopBar(
             isVideo = isVideo,
             isMuted = isMuted,
+            isEditing = isEditing,
             onToggleMute = { isMuted = !isMuted },
             onShare = onShare,
-            onBack = onBack
+            onSaveEdit = { isEditing = false },
+            onBack = {
+                if (isEditing) isEditing = false else onBack()
+            }
         )
 
         Box(
@@ -125,45 +145,52 @@ fun PreviewScreen(
                 ),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
-            ) {
-                PreviewAction(
-                    iconRes = R.drawable.ic_delete,
-                    labelRes = R.string.preview_delete,
-                    onClick = onDelete
-                )
-                PreviewAction(
-                    iconRes = R.drawable.ic_retake,
-                    labelRes = R.string.preview_retake,
-                    onClick = onRetake
-                )
-                PreviewAction(
-                    iconRes = R.drawable.ic_edit,
-                    labelRes = R.string.preview_edit,
-                    onClick = onEdit
-                )
-            }
+            if (isEditing) {
+                EditBottomBar(uri = uri)
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
+                ) {
+                    PreviewAction(
+                        iconRes = R.drawable.ic_delete,
+                        labelRes = R.string.preview_delete,
+                        onClick = onDelete
+                    )
+                    PreviewAction(
+                        iconRes = R.drawable.ic_retake,
+                        labelRes = R.string.preview_retake,
+                        onClick = onRetake
+                    )
+                    PreviewAction(
+                        iconRes = R.drawable.ic_edit,
+                        labelRes = R.string.preview_edit,
+                        onClick = {
+                            onEdit()
+                            isEditing = true
+                        }
+                    )
+                }
 
-            Spacer(modifier = Modifier.height(BOTTOM_BAR_SECTION_GAP))
+                Spacer(modifier = Modifier.height(BOTTOM_BAR_SECTION_GAP))
 
-            Button(
-                onClick = onSaveToGallery,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(SAVE_BUTTON_HEIGHT),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White,
-                    contentColor = PrimaryGreen
-                )
-            ) {
-                Text(
-                    text = stringResource(R.string.preview_save_to_gallery),
-                    style = MaterialTheme.typography.titleMedium
-                )
+                Button(
+                    onClick = onSaveToGallery,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(SAVE_BUTTON_HEIGHT),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.White,
+                        contentColor = PrimaryGreen
+                    )
+                ) {
+                    Text(
+                        text = stringResource(R.string.preview_save_to_gallery),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
             }
         }
     }
@@ -177,8 +204,10 @@ fun PreviewScreen(
 private fun PreviewTopBar(
     isVideo: Boolean,
     isMuted: Boolean,
+    isEditing: Boolean,
     onToggleMute: () -> Unit,
     onShare: () -> Unit,
+    onSaveEdit: () -> Unit,
     onBack: () -> Unit
 ) {
     Row(
@@ -197,7 +226,7 @@ private fun PreviewTopBar(
                 tint = Color.White
             )
         }
-        if (isVideo) {
+        if (isVideo && !isEditing) {
             IconButton(onClick = onToggleMute) {
                 Icon(
                     imageVector = if (isMuted) {
@@ -212,12 +241,27 @@ private fun PreviewTopBar(
                 )
             }
         }
-        IconButton(onClick = onShare) {
-            Icon(
-                painter = painterResource(R.drawable.ic_share),
-                contentDescription = stringResource(R.string.preview_share),
-                tint = Color.White
-            )
+        if (isEditing) {
+            Button(
+                onClick = onSaveEdit,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.White,
+                    contentColor = PrimaryGreen
+                ),
+                shape = RoundedCornerShape(8.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
+                modifier = Modifier.height(36.dp)
+            ) {
+                Text("Save", fontWeight = FontWeight.Bold)
+            }
+        } else {
+            IconButton(onClick = onShare) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_share),
+                    contentDescription = stringResource(R.string.preview_share),
+                    tint = Color.White
+                )
+            }
         }
     }
 }
@@ -254,6 +298,119 @@ private fun PreviewVideo(uri: Uri, isMuted: Boolean) {
         },
         modifier = Modifier.fillMaxSize()
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun EditBottomBar(uri: Uri) {
+    var selectedFilter by remember { mutableStateOf("Original") }
+    val filters = listOf("Original", "Vibrant", "Soft Tone", "Sharp Black", "Gray")
+    var sliderValue by remember { mutableFloatStateOf(0f) }
+
+    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        LazyRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            items(filters) { filter ->
+                FilterItem(
+                    name = filter,
+                    uri = uri,
+                    isSelected = filter == selectedFilter,
+                    onClick = { selectedFilter = filter }
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Slider(
+            value = sliderValue,
+            onValueChange = { sliderValue = it },
+            valueRange = -100f..100f,
+            colors = SliderDefaults.colors(
+                thumbColor = PrimaryGreen
+            ),
+            thumb = {
+                SliderDefaults.Thumb(
+                    interactionSource = remember {
+                        MutableInteractionSource()
+                    },
+                    colors = SliderDefaults.colors(
+                        thumbColor = PrimaryGreen
+                    ),
+                    thumbSize = DpSize(20.dp, 20.dp)
+                )
+            },
+            track = { sliderState ->
+                Canvas(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(3.dp)
+                ) {
+                    val centerX = size.width / 2f
+                    val thumbX = (
+                            (sliderState.value - sliderState.valueRange.start) /
+                                    (sliderState.valueRange.endInclusive -
+                                            sliderState.valueRange.start)
+                            ) * size.width
+
+                    val strokeWidth = 3.dp.toPx()
+                    val y = size.height / 2f
+
+                    // Gray track on both sides
+                    drawLine(
+                        color = Color.DarkGray,
+                        start = Offset(0f, y),
+                        end = Offset(size.width, y),
+                        strokeWidth = strokeWidth,
+                        cap = StrokeCap.Round
+                    )
+
+                    // Green track from center to thumb
+                    if (thumbX != centerX) {
+                        drawLine(
+                            color = PrimaryGreen,
+                            start = Offset(centerX, y),
+                            end = Offset(thumbX, y),
+                            strokeWidth = strokeWidth,
+                            cap = StrokeCap.Round
+                        )
+                    }
+                }
+            }
+        )
+        Text(text = "${sliderValue.toInt()}", color = PrimaryGreen, style = MaterialTheme.typography.bodySmall)
+    }
+}
+
+@Composable
+private fun FilterItem(name: String, uri: Uri, isSelected: Boolean, onClick: () -> Unit) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.clickable(onClick = onClick)) {
+        Box(
+            modifier = Modifier
+                .size(72.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .border(
+                    width = if (isSelected) 2.dp else 0.dp,
+                    color = if (isSelected) PrimaryGreen else Color.Transparent,
+                    shape = RoundedCornerShape(8.dp)
+                )
+        ) {
+            Image(
+                painter = rememberAsyncImagePainter(uri),
+                contentDescription = name,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = name,
+            color = Color.White,
+            style = MaterialTheme.typography.bodySmall,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+        )
+    }
 }
 
 /** Icon-over-label tile for the delete / retake / edit row. */
