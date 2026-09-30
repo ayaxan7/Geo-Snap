@@ -1,8 +1,10 @@
 package com.chirag.geosnap.presentation.gallery
 
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
@@ -17,7 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -31,7 +33,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -58,6 +59,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -68,8 +70,9 @@ import com.chirag.geosnap.R
 import com.chirag.geosnap.domain.model.GeoMedia
 import com.chirag.geosnap.domain.model.MediaType
 import com.chirag.geosnap.presentation.sharing.shareMediaChooser
+import com.chirag.geosnap.ui.theme.GeoSnapTheme
 import com.chirag.geosnap.ui.theme.PrimaryGreen
-import kotlinx.coroutines.withTimeoutOrNull
+import java.nio.file.WatchEvent
 
 private const val LONG_HOLD_MILLIS = 3000L
 
@@ -80,14 +83,42 @@ fun GalleryScreen(
     viewModel: GalleryViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.refresh() }
+
+    GalleryContent(
+        uiState = uiState,
+        onBack = onBack,
+        onItemClick = onItemClick,
+        onRefresh = viewModel::refresh,
+        onEnterSelection = viewModel::enterSelection,
+        onStartSelectionAt = viewModel::startSelectionAt,
+        onExitSelection = viewModel::exitSelection,
+        onToggleSelection = viewModel::toggleSelection,
+        onDeleteSelection = viewModel::deleteSelection,
+        onClearDeleteSelectionFailed = viewModel::clearDeleteSelectionFailed
+    )
+}
+
+@Composable
+private fun GalleryContent(
+    uiState: GalleryViewModel.UiState,
+    onBack: () -> Unit,
+    onItemClick: (Int) -> Unit = {},
+    onRefresh: () -> Unit = {},
+    onEnterSelection: () -> Unit = {},
+    onStartSelectionAt: (String) -> Unit = {},
+    onExitSelection: () -> Unit = {},
+    onToggleSelection: (String) -> Unit = {},
+    onDeleteSelection: () -> Unit = {},
+    onClearDeleteSelectionFailed: () -> Unit = {}
+) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val shareLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { }
     var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
-
-    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.refresh() }
 
     val selectedMedia = uiState.media.filter { it.uri.toString() in uiState.selection }
     val canActOnSelection = selectedMedia.isNotEmpty() && !uiState.deletingSelection
@@ -100,7 +131,7 @@ fun GalleryScreen(
             else -> "*/*"
         }
         shareMediaChooser(context, selectedMedia.map { it.uri }, mime)?.let(shareLauncher::launch)
-        viewModel.exitSelection()
+        onExitSelection()
     }
 
     val deleteErrorText = stringResource(R.string.gallery_delete_error)
@@ -108,37 +139,32 @@ fun GalleryScreen(
         if (uiState.deleteSelectionFailed) {
             snackbarHostState.currentSnackbarData?.dismiss()
             snackbarHostState.showSnackbar(deleteErrorText)
-            viewModel.clearDeleteSelectionFailed()
+            onClearDeleteSelectionFailed()
         }
     }
 
-    Scaffold(
-        containerColor = Color.White,
-        topBar = {
-            GalleryTopBar(
-                onBack = onBack,
-                selectionMode = uiState.selectionMode,
-                selectedCount = selectedMedia.size,
-                onCancelSelection = viewModel::exitSelection
-            )
-        },
-        bottomBar = {
-            GalleryBottomBar(
-                selectionMode = uiState.selectionMode,
-                canActOnSelection = canActOnSelection,
-                onDeleteClick = {
-                    if (uiState.selectionMode) {
-                        if (selectedMedia.isNotEmpty()) showDeleteDialog = true
-                    } else {
-                        viewModel.enterSelection()
-                    }
-                },
-                onShareClick = {
-                    if (uiState.selectionMode) shareSelected() else viewModel.enterSelection()
+    Scaffold(containerColor = Color.White, topBar = {
+        GalleryTopBar(
+            onBack = onBack,
+            selectionMode = uiState.selectionMode,
+            selectedCount = selectedMedia.size,
+            onCancelSelection = onExitSelection
+        )
+    }, bottomBar = {
+        GalleryBottomBar(
+            selectionMode = uiState.selectionMode,
+            canActOnSelection = canActOnSelection,
+            onDeleteClick = {
+                if (uiState.selectionMode) {
+                    if (selectedMedia.isNotEmpty()) showDeleteDialog = true
+                } else {
+                    onEnterSelection()
                 }
-            )
-        }
-    ) { paddingValues ->
+            },
+            onShareClick = {
+                if (uiState.selectionMode) shareSelected() else onEnterSelection()
+            })
+    }) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -146,19 +172,17 @@ fun GalleryScreen(
         ) {
             when {
                 uiState.loading && uiState.media.isEmpty() -> LoadingContent()
-                uiState.loadingError -> ErrorContent(onRetry = viewModel::refresh)
+                uiState.loadingError -> ErrorContent(onRetry = onRefresh)
                 uiState.media.isEmpty() -> EmptyContent()
                 else -> GalleryGrid(
                     sections = uiState.sections,
-                    flatIndexByUri = uiState.media
-                        .mapIndexed { index, media -> media.uri.toString() to index }
+                    flatIndexByUri = uiState.media.mapIndexed { index, media -> media.uri.toString() to index }
                         .toMap(),
                     selectionMode = uiState.selectionMode,
                     selectedUris = uiState.selection,
                     onItemClick = onItemClick,
-                    onToggleSelection = viewModel::toggleSelection,
-                    onStartSelection = viewModel::startSelectionAt
-                )
+                    onToggleSelection = onToggleSelection,
+                    onStartSelection = onStartSelectionAt)
             }
 
             SnackbarHost(
@@ -182,9 +206,8 @@ fun GalleryScreen(
                 TextButton(
                     onClick = {
                         showDeleteDialog = false
-                        viewModel.deleteSelection()
-                    }
-                ) {
+                        onDeleteSelection()
+                    }) {
                     Text(stringResource(R.string.gallery_delete_confirm))
                 }
             },
@@ -192,46 +215,38 @@ fun GalleryScreen(
                 TextButton(onClick = { showDeleteDialog = false }) {
                     Text(stringResource(R.string.gallery_delete_cancel))
                 }
-            }
-        )
+            })
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun GalleryTopBar(
-    onBack: () -> Unit,
-    selectionMode: Boolean,
-    selectedCount: Int,
-    onCancelSelection: () -> Unit
+    onBack: () -> Unit, selectionMode: Boolean, selectedCount: Int, onCancelSelection: () -> Unit
 ) {
     TopAppBar(
         title = {
-            Text(
-                text = if (selectionMode) {
-                    stringResource(R.string.gallery_selected_count, selectedCount)
+        Text(
+            text = if (selectionMode) {
+                stringResource(R.string.gallery_selected_count, selectedCount)
+            } else {
+                stringResource(R.string.gallery_title)
+            }, style = MaterialTheme.typography.titleLarge
+        )
+    }, navigationIcon = {
+        IconButton(onClick = if (selectionMode) onCancelSelection else onBack) {
+            Icon(
+                painter = painterResource(
+                    if (selectionMode) android.R.drawable.ic_menu_close_clear_cancel
+                    else R.drawable.ic_arrow_back
+                ), contentDescription = if (selectionMode) {
+                    stringResource(R.string.gallery_delete_cancel)
                 } else {
-                    stringResource(R.string.gallery_title)
-                },
-                style = MaterialTheme.typography.titleLarge
+                    stringResource(R.string.camera_back)
+                }
             )
-        },
-        navigationIcon = {
-            IconButton(onClick = if (selectionMode) onCancelSelection else onBack) {
-                Icon(
-                    painter = painterResource(
-                        if (selectionMode) android.R.drawable.ic_menu_close_clear_cancel
-                        else R.drawable.ic_arrow_back
-                    ),
-                    contentDescription = if (selectionMode) {
-                        stringResource(R.string.gallery_delete_cancel)
-                    } else {
-                        stringResource(R.string.camera_back)
-                    }
-                )
-            }
-        },
-        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+        }
+    }, colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
     )
 }
 
@@ -268,8 +283,7 @@ private fun GalleryGrid(
                             flatIndexByUri[uri]?.let(onItemClick)
                         }
                     },
-                    onLongHold = { onStartSelection(uri) }
-                )
+                    onLongHold = { onStartSelection(uri) })
             }
         }
     }
@@ -330,8 +344,7 @@ private fun MediaThumbnail(
                         false -> Unit
                     }
                 }
-            }
-    ) {
+            }) {
         AsyncImage(
             model = media.uri,
             contentDescription = media.displayName,
@@ -342,8 +355,7 @@ private fun MediaThumbnail(
         )
         if (media.type == MediaType.VIDEO) {
             Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
+                modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
             ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_play),
@@ -373,20 +385,18 @@ private fun MediaThumbnail(
                 )
             }
             Checkbox(
-                checked = selected,
-                onCheckedChange = null,
-                colors = CheckboxDefaults.colors(
+                checked = selected, onCheckedChange = null, colors = CheckboxDefaults.colors(
                     checkedColor = PrimaryGreen,
                     checkmarkColor = Color.White,
                     uncheckedColor = Color.White
-                ),
-                modifier = Modifier
+                ), modifier = Modifier
                     .align(Alignment.TopStart)
                     .padding(4.dp)
             )
         }
     }
 }
+
 
 @Composable
 private fun GalleryBottomBar(
@@ -399,34 +409,62 @@ private fun GalleryBottomBar(
         modifier = Modifier
             .fillMaxWidth()
             .navigationBarsPadding()
-            .padding(horizontal = 16.dp, vertical = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+            .padding(horizontal = 24.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        OutlinedButton(
-            onClick = onDeleteClick,
-            enabled = if (selectionMode) canActOnSelection else true,
-            modifier = Modifier.weight(1f)
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .clickable(
+                    enabled = canActOnSelection,
+                    onClick = onDeleteClick
+                )
+                .padding(vertical = 4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
             Icon(
-                painter = painterResource(android.R.drawable.ic_menu_delete),
-                contentDescription = null,
-                modifier = Modifier.size(20.dp)
+                painter = painterResource(R.drawable.ic_delete),
+                contentDescription = stringResource(
+                    R.string.gallery_delete_confirm
+                ),
+                modifier = Modifier.size(24.dp),
+                tint = MaterialTheme.colorScheme.onSurface
             )
-            Spacer(Modifier.width(8.dp))
-            Text(stringResource(R.string.gallery_delete_confirm))
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = stringResource(R.string.gallery_delete_confirm),
+                style = MaterialTheme.typography.labelSmall,
+                maxLines = 1
+            )
         }
-        Button(
-            onClick = onShareClick,
-            enabled = if (selectionMode) canActOnSelection else true,
-            modifier = Modifier.weight(1f)
+
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .clickable(
+                    enabled = canActOnSelection,
+                    onClick = onShareClick
+                )
+                .padding(vertical = 4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
             Icon(
-                painter = painterResource(android.R.drawable.ic_menu_share),
-                contentDescription = null,
-                modifier = Modifier.size(20.dp)
+                painter = painterResource(R.drawable.ic_share),
+                contentDescription = stringResource(
+                    R.string.gallery_share
+                ),
+                modifier = Modifier.size(20.dp),
+                tint = MaterialTheme.colorScheme.onSurface
             )
-            Spacer(Modifier.width(8.dp))
-            Text(stringResource(R.string.gallery_share))
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = stringResource(R.string.gallery_share),
+                style = MaterialTheme.typography.labelSmall,
+                maxLines = 1
+            )
         }
     }
 }
@@ -482,5 +520,32 @@ private fun ErrorContent(onRetry: () -> Unit) {
         Button(onClick = onRetry) {
             Text(stringResource(R.string.retry))
         }
+    }
+}
+
+@Preview
+@Composable
+private fun GalleryScreenPreview() {
+    val sampleMedia = listOf(
+        GeoMedia(
+            uri = Uri.parse("file:///sample1.jpg"),
+            type = MediaType.IMAGE,
+            timestamp = System.currentTimeMillis(),
+            latitude = 37.7749,
+            longitude = -122.4194,
+            displayName = "Sample Image 1"
+        ), GeoMedia(
+            uri = Uri.parse("file:///sample2.mp4"),
+            type = MediaType.VIDEO,
+            timestamp = System.currentTimeMillis() - 86400000L * 2,
+            displayName = "Sample Video 1"
+        )
+    )
+    val sampleUiState = GalleryViewModel.UiState(
+        media = sampleMedia, sections = groupMediaByDate(sampleMedia), loading = false
+    )
+    GeoSnapTheme {
+        GalleryContent(
+            uiState = sampleUiState, onBack = {})
     }
 }
