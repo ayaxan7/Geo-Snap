@@ -3,6 +3,8 @@ package com.chirag.geosnap.presentation.gallery
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -19,13 +21,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material3.AlertDialog
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -33,11 +35,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -50,6 +52,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -61,6 +64,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -72,9 +76,8 @@ import com.chirag.geosnap.domain.model.MediaType
 import com.chirag.geosnap.presentation.sharing.shareMediaChooser
 import com.chirag.geosnap.ui.theme.GeoSnapTheme
 import com.chirag.geosnap.ui.theme.PrimaryGreen
-import java.nio.file.WatchEvent
 
-private const val LONG_HOLD_MILLIS = 3000L
+private const val LONG_HOLD_MILLIS = 1000L
 
 @Composable
 fun GalleryScreen(
@@ -151,19 +154,19 @@ private fun GalleryContent(
             onCancelSelection = onExitSelection
         )
     }, bottomBar = {
-        GalleryBottomBar(
-            selectionMode = uiState.selectionMode,
-            canActOnSelection = canActOnSelection,
-            onDeleteClick = {
-                if (uiState.selectionMode) {
-                    if (selectedMedia.isNotEmpty()) showDeleteDialog = true
-                } else {
-                    onEnterSelection()
-                }
-            },
-            onShareClick = {
-                if (uiState.selectionMode) shareSelected() else onEnterSelection()
-            })
+        if (uiState.media.isNotEmpty() && uiState.selectionMode) {
+            GalleryBottomBar(
+//                selectionMode = uiState.selectionMode,
+                canActOnSelection = canActOnSelection, onDeleteClick = {
+                    if (uiState.selectionMode) {
+                        if (selectedMedia.isNotEmpty()) showDeleteDialog = true
+                    } else {
+                        onEnterSelection()
+                    }
+                }, onShareClick = {
+                    if (uiState.selectionMode) shareSelected() else onEnterSelection()
+                })
+        }
     }) { paddingValues ->
         Box(
             modifier = Modifier
@@ -196,26 +199,72 @@ private fun GalleryContent(
 
     if (showDeleteDialog) {
         val count = selectedMedia.size
-        AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
-            title = { Text(stringResource(R.string.gallery_delete_title)) },
-            text = {
-                Text(pluralStringResource(R.plurals.gallery_delete_items_message, count, count))
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showDeleteDialog = false
-                        onDeleteSelection()
-                    }) {
-                    Text(stringResource(R.string.gallery_delete_confirm))
+        Dialog(onDismissRequest = { showDeleteDialog = false }) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(Color(0xFFE53935), Color(0xFF4B1110))
+                        ), shape = RoundedCornerShape(16.dp)
+                    )
+                    .padding(24.dp)
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.ic_delete_photo),
+                        contentDescription = null,
+                        modifier = Modifier.size(64.dp)
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = stringResource(R.string.gallery_delete_title),
+                        style = MaterialTheme.typography.titleLarge,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = pluralStringResource(
+                            R.plurals.gallery_delete_items_message,
+                            count,
+                            count
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.White,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = { showDeleteDialog = false },
+                            modifier = Modifier.weight(1f),
+                            border = BorderStroke(1.dp, Color.White),
+                            shape = RoundedCornerShape(8.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
+                        ) {
+                            Text(stringResource(R.string.gallery_delete_cancel))
+                        }
+                        Button(
+                            onClick = {
+                                showDeleteDialog = false
+                                onDeleteSelection()
+                            }, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.White, contentColor = Color(0xFFD32F2F)
+                            ), shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text(stringResource(R.string.gallery_delete_confirm))
+                        }
+                    }
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) {
-                    Text(stringResource(R.string.gallery_delete_cancel))
-                }
-            })
+            }
+        }
     }
 }
 
@@ -400,10 +449,8 @@ private fun MediaThumbnail(
 
 @Composable
 private fun GalleryBottomBar(
-    selectionMode: Boolean,
-    canActOnSelection: Boolean,
-    onDeleteClick: () -> Unit,
-    onShareClick: () -> Unit
+//    selectionMode: Boolean,
+    canActOnSelection: Boolean, onDeleteClick: () -> Unit, onShareClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -417,8 +464,7 @@ private fun GalleryBottomBar(
             modifier = Modifier
                 .weight(1f)
                 .clickable(
-                    enabled = canActOnSelection,
-                    onClick = onDeleteClick
+                    enabled = canActOnSelection, onClick = onDeleteClick
                 )
                 .padding(vertical = 4.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -444,20 +490,16 @@ private fun GalleryBottomBar(
             modifier = Modifier
                 .weight(1f)
                 .clickable(
-                    enabled = canActOnSelection,
-                    onClick = onShareClick
+                    enabled = canActOnSelection, onClick = onShareClick
                 )
                 .padding(vertical = 4.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Icon(
-                painter = painterResource(R.drawable.ic_share),
-                contentDescription = stringResource(
+                painter = painterResource(R.drawable.ic_share), contentDescription = stringResource(
                     R.string.gallery_share
-                ),
-                modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.onSurface
+                ), modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(

@@ -56,6 +56,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.window.Dialog
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.foundation.Image
 import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastForEach
@@ -212,26 +224,73 @@ fun MediaViewerScreen(
             }
 
             if (showDeleteDialog) {
-                AlertDialog(
-                    onDismissRequest = { showDeleteDialog = false },
-                    title = { Text(stringResource(R.string.gallery_delete_title)) },
-                    text = { Text(stringResource(R.string.gallery_delete_message)) },
-                    confirmButton = {
-                        TextButton(
-                            onClick = {
-                                showDeleteDialog = false
-                                viewModel.deleteAt(pagerState.currentPage, onEmpty = onBack)
-                            }
+                Dialog(onDismissRequest = { showDeleteDialog = false }) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                brush = Brush.verticalGradient(
+                                    colors = listOf(Color(0xFFE53935), Color(0xFF4B1110))
+                                ),
+                                shape = RoundedCornerShape(16.dp)
+                            )
+                            .padding(24.dp)
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text(stringResource(R.string.gallery_delete_confirm))
-                        }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { showDeleteDialog = false }) {
-                            Text(stringResource(R.string.gallery_delete_cancel))
+                            Image(
+                                painter = painterResource(R.drawable.ic_delete_photo),
+                                contentDescription = null,
+                                modifier = Modifier.size(64.dp)
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = stringResource(R.string.gallery_delete_title),
+                                style = MaterialTheme.typography.titleLarge,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = stringResource(R.string.gallery_delete_message),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.White,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(24.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                OutlinedButton(
+                                    onClick = { showDeleteDialog = false },
+                                    modifier = Modifier.weight(1f),
+                                    border = BorderStroke(1.dp, Color.White),
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                                    shape = RoundedCornerShape(8.dp)
+                                ) {
+                                    Text(stringResource(R.string.gallery_delete_cancel))
+                                }
+                                Button(
+                                    onClick = {
+                                        showDeleteDialog = false
+                                        viewModel.deleteAt(pagerState.currentPage, onEmpty = onBack)
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color.White,
+                                        contentColor = Color(0xFFD32F2F)
+                                    ),
+                                    shape = RoundedCornerShape(8.dp)
+                                ) {
+                                    Text(stringResource(R.string.gallery_delete_confirm))
+                                }
+                            }
                         }
                     }
-                )
+                }
             }
         }
     }
