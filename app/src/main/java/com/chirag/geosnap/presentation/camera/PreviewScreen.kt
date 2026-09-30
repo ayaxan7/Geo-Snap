@@ -41,6 +41,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -63,12 +65,15 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import coil3.compose.rememberAsyncImagePainter
 import com.chirag.geosnap.R
+import com.chirag.geosnap.data.media.FilterRgbMatrix
 import com.chirag.geosnap.ui.theme.GeoSnapTheme
 import com.chirag.geosnap.ui.theme.PrimaryGreen
+import kotlin.math.abs
 
 /**
  * Review screen for a freshly captured photo or video.
@@ -92,6 +97,10 @@ fun PreviewScreen(
     onShare: () -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    filter: CaptureFilter = CaptureFilter.ORIGINAL,
+    filterStrength: Float = 0f,
+    onFilterChange: (CaptureFilter) -> Unit = {},
+    onFilterStrengthChange: (Float) -> Unit = {},
     mediaOverlay: @Composable BoxScope.() -> Unit = {}
 ) {
     var isMuted by rememberSaveable { mutableStateOf(true) }
@@ -121,12 +130,18 @@ fun PreviewScreen(
                 .background(Color.Black)
         ) {
             if (isVideo) {
-                PreviewVideo(uri = uri, isMuted = isMuted)
+                PreviewVideo(
+                    uri = uri,
+                    isMuted = isMuted,
+                    filter = filter,
+                    filterStrength = filterStrength
+                )
             } else {
                 Image(
                     painter = rememberAsyncImagePainter(uri),
                     contentDescription = stringResource(R.string.preview_image),
                     contentScale = ContentScale.Fit,
+                    colorFilter = filter.composeColorFilter(filterStrength),
                     modifier = Modifier.fillMaxSize()
                 )
             }
@@ -146,7 +161,13 @@ fun PreviewScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             if (isEditing) {
-                EditBottomBar(uri = uri)
+                EditBottomBar(
+                    uri = uri,
+                    filter = filter,
+                    filterStrength = filterStrength,
+                    onFilterChange = onFilterChange,
+                    onFilterStrengthChange = onFilterStrengthChange
+                )
             } else {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -266,17 +287,31 @@ private fun PreviewTopBar(
     }
 }
 
+@androidx.annotation.OptIn(UnstableApi::class)
 @Composable
-private fun PreviewVideo(uri: Uri, isMuted: Boolean) {
+private fun PreviewVideo(
+    uri: Uri,
+    isMuted: Boolean,
+    filter: CaptureFilter,
+    filterStrength: Float
+) {
     val context = LocalContext.current
+    val rgbMatrix = remember { FilterRgbMatrix() }
     val exoPlayer = remember(uri) {
         ExoPlayer.Builder(context).build().apply {
+            // The rgb matrix is read per frame, so filter tweaks from the slider
+            // apply live without rebuilding the player or its pipelines.
+            setVideoEffects(listOf(rgbMatrix))
             setMediaItem(MediaItem.fromUri(uri))
             repeatMode = ExoPlayer.REPEAT_MODE_ALL
             volume = 0f
             prepare()
             playWhenReady = true
         }
+    }
+
+    LaunchedEffect(rgbMatrix, filter, filterStrength) {
+        rgbMatrix.set(filter.recipe(filterStrength))
     }
 
     LaunchedEffect(exoPlayer, isMuted) {
@@ -302,22 +337,28 @@ private fun PreviewVideo(uri: Uri, isMuted: Boolean) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun EditBottomBar(uri: Uri) {
-    var selectedFilter by remember { mutableStateOf("Original") }
-    val filters = listOf("Original", "Vibrant", "Soft Tone", "Sharp Black", "Gray")
-    var sliderValue by remember { mutableFloatStateOf(0f) }
+private fun EditBottomBar(
+    uri: Uri,
+    filter: CaptureFilter,
+    filterStrength: Float,
+    onFilterChange: (CaptureFilter) -> Unit,
+    onFilterStrengthChange: (Float) -> Unit
+) {
+    val filters = CaptureFilter.entries.toList()
+    var sliderValue by remember { mutableFloatStateOf(filterStrength * 100f) }
 
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         LazyRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(filters) { filter ->
+            items(filters) { item ->
                 FilterItem(
-                    name = filter,
+                    name = item.displayName,
                     uri = uri,
-                    isSelected = filter == selectedFilter,
-                    onClick = { selectedFilter = filter }
+                    filter = item,
+                    isSelected = item == filter,
+                    onClick = { onFilterChange(item) }
                 )
             }
         }
@@ -325,7 +366,12 @@ private fun EditBottomBar(uri: Uri) {
 
         Slider(
             value = sliderValue,
-            onValueChange = { sliderValue = it },
+            onValueChange = {
+                sliderValue = it
+                // The track is bipolar around the middle (center = untouched);
+                // the applied strength is the magnitude on either side.
+                onFilterStrengthChange(abs(it) / 100f)
+            },
             valueRange = -100f..100f,
             colors = SliderDefaults.colors(
                 thumbColor = PrimaryGreen
@@ -384,7 +430,13 @@ private fun EditBottomBar(uri: Uri) {
 }
 
 @Composable
-private fun FilterItem(name: String, uri: Uri, isSelected: Boolean, onClick: () -> Unit) {
+private fun FilterItem(
+    name: String,
+    uri: Uri,
+    filter: CaptureFilter,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.clickable(onClick = onClick)) {
         Box(
             modifier = Modifier
@@ -400,6 +452,7 @@ private fun FilterItem(name: String, uri: Uri, isSelected: Boolean, onClick: () 
                 painter = rememberAsyncImagePainter(uri),
                 contentDescription = name,
                 contentScale = ContentScale.Crop,
+                colorFilter = filter.composeColorFilter(1f),
                 modifier = Modifier.fillMaxSize()
             )
         }
@@ -439,6 +492,20 @@ private fun PreviewAction(
         )
     }
 }
+
+private fun CaptureFilter.composeColorFilter(strength: Float): ColorFilter? {
+    if (this == CaptureFilter.ORIGINAL || strength <= 0f) return null
+    return ColorFilter.colorMatrix(ColorMatrix(recipe(strength)))
+}
+
+private val CaptureFilter.displayName: String
+    get() = when (this) {
+        CaptureFilter.ORIGINAL -> "Original"
+        CaptureFilter.VIBRANT -> "Vibrant"
+        CaptureFilter.SOFT_TONE -> "Soft Tone"
+        CaptureFilter.SHARP_BLACK -> "Sharp Black"
+        CaptureFilter.GRAY -> "Gray"
+    }
 
 private val TOP_BAR_HEIGHT = 56.dp
 private val ACTION_ICON_SIZE = 24.dp

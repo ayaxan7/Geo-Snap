@@ -14,7 +14,8 @@ interface MediaRepository {
      * Persists a captured image [sourceFile] into the public MediaStore gallery.
      * When [coordinate] is provided the GPS metadata is embedded into the JPEG.
      * When [overlay] is provided the location card is burnt into the bottom of the
-     * image before it is saved.
+     * image, after [filter] (a `4x5` color-matrix recipe) is applied to the pixels,
+     * before it is saved.
      *
      * @return the `content://` URI string of the saved image.
      */
@@ -22,13 +23,16 @@ interface MediaRepository {
         sourceFile: File,
         coordinate: GeoCoordinate?,
         overlay: Bitmap? = null,
+        filter: FloatArray? = null,
         saveToMediaStore: Boolean = true
     ): String
 
     /**
      * Persists a captured video [sourceFile] into the public MediaStore gallery.
      * When [overlay] is provided the location card is burnt into the video frames
-     * (via a Media3 Transformer pass) before it is saved.
+     * and when [filter] is provided the color recipe is applied to every frame
+     * (via a Media3 Transformer pass, before the card is composited) before it is
+     * saved.
      *
      * @return the `content://` URI string of the saved video.
      */
@@ -36,6 +40,7 @@ interface MediaRepository {
         sourceFile: File,
         coordinate: GeoCoordinate?,
         overlay: Bitmap? = null,
+        filter: FloatArray? = null,
         saveToMediaStore: Boolean = true
     ): String
 

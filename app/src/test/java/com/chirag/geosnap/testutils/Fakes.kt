@@ -92,6 +92,7 @@ data class SavedMedia(
     val file: File,
     val coordinate: GeoCoordinate?,
     val overlay: Bitmap? = null,
+    val filter: FloatArray? = null,
     val saveToMediaStore: Boolean = true
 )
 
@@ -111,10 +112,11 @@ class FakeMediaRepository : MediaRepository {
         sourceFile: File,
         coordinate: GeoCoordinate?,
         overlay: Bitmap?,
+        filter: FloatArray?,
         saveToMediaStore: Boolean
     ): String {
         failSaveOnce()
-        savedImages += SavedMedia(sourceFile, coordinate, overlay, saveToMediaStore)
+        savedImages += SavedMedia(file = sourceFile, coordinate = coordinate, overlay = overlay, filter = filter, saveToMediaStore = saveToMediaStore)
         return "content://geosnap.test/images/${nextId++}"
     }
 
@@ -122,10 +124,11 @@ class FakeMediaRepository : MediaRepository {
         sourceFile: File,
         coordinate: GeoCoordinate?,
         overlay: Bitmap?,
+        filter: FloatArray?,
         saveToMediaStore: Boolean
     ): String {
         failSaveOnce()
-        savedVideos += SavedMedia(sourceFile, coordinate, overlay, saveToMediaStore)
+        savedVideos += SavedMedia(file = sourceFile, coordinate = coordinate, overlay = overlay, filter = filter, saveToMediaStore = saveToMediaStore)
         return "content://geosnap.test/videos/${nextId++}"
     }
 

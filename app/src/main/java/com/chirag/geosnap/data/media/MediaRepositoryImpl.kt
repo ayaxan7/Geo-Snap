@@ -6,6 +6,8 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
 import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.Rect
@@ -43,6 +45,7 @@ import javax.inject.Singleton
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 
 /**
@@ -70,16 +73,17 @@ class MediaRepositoryImpl @Inject constructor(
         sourceFile: File,
         coordinate: GeoCoordinate?,
         overlay: Bitmap?,
+        filter: FloatArray?,
         saveToMediaStore: Boolean
     ): String = withContext(Dispatchers.IO) {
         val now = System.currentTimeMillis()
-        val toPersist = if (overlay != null) {
+        val toPersist = if (overlay != null || filter != null) {
             try {
                 // Burn from the pristine CameraX JPEG (no prior EXIF rewrite so the
                 // decoder sees the untouched file); GPS is written onto the output.
-                burnOverlayIntoImage(sourceFile, overlay, coordinate)
+                burnOverlayIntoImage(sourceFile, overlay, filter, coordinate)
             } catch (t: Throwable) {
-                Log.w(TAG, "Image overlay burn failed, saving original", t)
+                Log.w(TAG, "Image processing failed, saving original", t)
                 if (coordinate != null) writeGpsExifTo(sourceFile, coordinate)
                 sourceFile
             }
@@ -122,16 +126,17 @@ class MediaRepositoryImpl @Inject constructor(
         sourceFile: File,
         coordinate: GeoCoordinate?,
         overlay: Bitmap?,
+        filter: FloatArray?,
         saveToMediaStore: Boolean
     ): String = withContext(Dispatchers.IO) {
         // MP4 EXIF container support is inconsistent across devices; GPS is kept
         // in the GeoMedia model for videos so it can be written once an MP4 GPS
         // writer is introduced.
-        val toPersist = if (overlay != null) {
+        val toPersist = if (overlay != null || filter != null) {
             try {
-                transcodeWithOverlay(sourceFile, overlay)
+                transcodeWithOverlay(sourceFile, overlay, filter)
             } catch (t: Throwable) {
-                Log.w(TAG, "Video overlay transcode failed, saving original", t)
+                Log.w(TAG, "Video transcode failed, saving original", t)
                 sourceFile
             }
         } else {
@@ -288,7 +293,13 @@ class MediaRepositoryImpl @Inject constructor(
         val targetDir = File(context.filesDir, DIRECTORY_NAME).apply { mkdirs() }
         val destFile = File(targetDir, displayName)
         sourceFile.copyTo(destFile, overwrite = true)
-        return Uri.fromFile(destFile)
+        // A file:// URI in a ClipData trips FileUriExposedException on API 24+,
+        // so quick-shared captures go through FileProvider.
+        return FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider",
+            destFile
+        )
     }
 
     private fun writeGpsExifTo(file: File, coordinate: GeoCoordinate) {
@@ -310,14 +321,15 @@ class MediaRepositoryImpl @Inject constructor(
 
     /**
      * Composites the (already rendered) location card [overlay] onto the
-     * bottom-center of [sourceFile] and returns a new JPEG. The source is decoded
-     * with `inSampleSize` so the long edge is capped at [MAX_DECODE_EDGE], any
-     * EXIF rotation is baked upright, and GPS tags are copied onto the output.
-     * EXIF rotation is baked upright, and GPS tags are copied onto the output.
+     * bottom-center of [sourceFile] and returns a new JPEG, applying the color
+     * [filter] recipe to the pixels first. The source is decoded with
+     * `inSampleSize` so the long edge is capped at [MAX_DECODE_EDGE], any EXIF
+     * rotation is baked upright, and GPS tags are copied onto the output.
      */
     private fun burnOverlayIntoImage(
         sourceFile: File,
-        overlay: Bitmap,
+        overlay: Bitmap?,
+        filter: FloatArray?,
         coordinate: GeoCoordinate?
     ): File {
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
@@ -343,23 +355,30 @@ class MediaRepositoryImpl @Inject constructor(
             base = upright
         }
 
-        val cardWidth = (base.width * CARD_WIDTH_FRACTION).toInt().coerceAtLeast(1)
-        val cardHeight =
-            (cardWidth.toFloat() * overlay.height / overlay.width).toInt().coerceAtLeast(1)
-        val marginX = (base.width - cardWidth) / 2
-        val marginBottom = (base.height * CARD_MARGIN_BOTTOM_FRACTION).toInt()
-        val canvas = Canvas(base)
-        canvas.drawBitmap(
-            overlay,
-            Rect(0, 0, overlay.width, overlay.height),
-            Rect(
-                marginX,
-                base.height - marginBottom - cardHeight,
-                marginX + cardWidth,
-                base.height - marginBottom
-            ),
-            SMOOTH_PAINT
-        )
+        if (filter != null) {
+            val filtered = applyRecipe(base, filter)
+            base.recycle()
+            base = filtered
+        }
+
+        if (overlay != null) {
+            val cardWidth = (base.width * CARD_WIDTH_FRACTION).toInt().coerceAtLeast(1)
+            val cardHeight =
+                (cardWidth.toFloat() * overlay.height / overlay.width).toInt().coerceAtLeast(1)
+            val marginX = (base.width - cardWidth) / 2
+            val marginBottom = (base.height * CARD_MARGIN_BOTTOM_FRACTION).toInt()
+            Canvas(base).drawBitmap(
+                overlay,
+                Rect(0, 0, overlay.width, overlay.height),
+                Rect(
+                    marginX,
+                    base.height - marginBottom - cardHeight,
+                    marginX + cardWidth,
+                    base.height - marginBottom
+                ),
+                SMOOTH_PAINT
+            )
+        }
 
         val output = File(context.cacheDir, "burned_${System.currentTimeMillis()}.jpg")
         FileOutputStream(output).use { stream ->
@@ -370,6 +389,20 @@ class MediaRepositoryImpl @Inject constructor(
             writeGpsExifTo(output, coordinate)
         }
         return output
+    }
+
+    /** Renders [source] onto a fresh bitmap through the color recipe. */
+    private fun applyRecipe(source: Bitmap, recipe: FloatArray): Bitmap {
+        val filtered = Bitmap.createBitmap(
+            source.width,
+            source.height,
+            source.config ?: Bitmap.Config.ARGB_8888
+        )
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG).apply {
+            colorFilter = ColorMatrixColorFilter(ColorMatrix(recipe))
+        }
+        Canvas(filtered).drawBitmap(source, 0f, 0f, paint)
+        return filtered
     }
 
     private fun rotateToUpright(bitmap: Bitmap, orientation: Int): Bitmap {
@@ -393,12 +426,17 @@ class MediaRepositoryImpl @Inject constructor(
     }
 
     /**
-     * Runs the video through a Media3 [Transformer] pass that overlays the
-     * location card at the bottom-center of every frame. Audio passes through
-     * untouched. Returns the transcoded temp file, deleting it is the caller's
-     * responsibility once persisted.
+     * Runs the video through a Media3 [Transformer] pass that first applies the
+     * color [filter] recipe to every frame and then overlays the location card
+     * at the bottom-center. Audio passes through untouched. Returns the
+     * transcoded temp file, deleting it is the caller's responsibility once
+     * persisted.
      */
-    private suspend fun transcodeWithOverlay(sourceFile: File, overlay: Bitmap): File =
+    private suspend fun transcodeWithOverlay(
+        sourceFile: File,
+        overlay: Bitmap?,
+        filter: FloatArray?
+    ): File =
         withContext(Dispatchers.Main.immediate) {
             val output = File(context.cacheDir, "burned_${System.currentTimeMillis()}.mp4")
             val finished = CompletableDeferred<Unit>()
@@ -421,29 +459,39 @@ class MediaRepositoryImpl @Inject constructor(
             // Media3 composits BitmapOverlays in the output (post-rotation/display)
             // frame space, so size the card against the rotation-aware display
             // width so it occupies the same ~90% as the on-screen preview.
-            val (frameWidth, _) = videoFrameSize(sourceFile)
-            val cardWidthPx =
-                (frameWidth * CARD_WIDTH_FRACTION).toInt().coerceAtLeast(1)
-            val cardHeightPx =
-                (cardWidthPx.toFloat() * overlay.height / overlay.width).toInt().coerceAtLeast(1)
-            // Bottom margin keeps the card just above the frame edge (~5%).
-            // NDC y=-1 is the frame bottom, so 5% up is -1 + 2*0.05.
-            val bottomAnchor = -1f + 2f * CARD_MARGIN_BOTTOM_FRACTION
-            val settings = StaticOverlaySettings.Builder()
-                .setBackgroundFrameAnchor(0f, bottomAnchor)
-                .setOverlayFrameAnchor(0f, -1f)
-                .setScale(
-                    cardWidthPx.toFloat() / overlay.width,
-                    cardHeightPx.toFloat() / overlay.height
+            val overlayEffect = overlay?.let { cardOverlay ->
+                val (frameWidth, _) = videoFrameSize(sourceFile)
+                val cardWidthPx =
+                    (frameWidth * CARD_WIDTH_FRACTION).toInt().coerceAtLeast(1)
+                val cardHeightPx =
+                    (cardWidthPx.toFloat() * cardOverlay.height / cardOverlay.width)
+                        .toInt()
+                        .coerceAtLeast(1)
+                // Bottom margin keeps the card just above the frame edge (~5%).
+                // NDC y=-1 is the frame bottom, so 5% up is -1 + 2*0.05.
+                val bottomAnchor = -1f + 2f * CARD_MARGIN_BOTTOM_FRACTION
+                val settings = StaticOverlaySettings.Builder()
+                    .setBackgroundFrameAnchor(0f, bottomAnchor)
+                    .setOverlayFrameAnchor(0f, -1f)
+                    .setScale(
+                        cardWidthPx.toFloat() / cardOverlay.width,
+                        cardHeightPx.toFloat() / cardOverlay.height
+                    )
+                    .build()
+                OverlayEffect(
+                    listOf(
+                        BitmapOverlay.createStaticBitmapOverlay(cardOverlay, settings)
+                    )
                 )
-                .build()
-            val effect = OverlayEffect(
-                listOf(BitmapOverlay.createStaticBitmapOverlay(overlay, settings))
-            )
+            }
+            val videoEffects = buildList {
+                if (filter != null) add(FilterRgbMatrix(filter))
+                if (overlayEffect != null) add(overlayEffect)
+            }
             val mediaItem = EditedMediaItem.Builder(
                 MediaItem.Builder().setUri(Uri.fromFile(sourceFile)).build()
             )
-                .setEffects(Effects(emptyList(), listOf(effect)))
+                .setEffects(Effects(emptyList(), videoEffects))
                 .build()
 
             try {

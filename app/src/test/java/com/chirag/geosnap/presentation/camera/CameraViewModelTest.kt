@@ -381,6 +381,110 @@ class CameraViewModelTest {
         }
 
     @Test
+    fun `filter defaults to original for a new capture`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val vm = createViewModel(mode = CameraMode.PHOTO.routeName)
+
+            vm.capturePhoto()
+            advanceUntilIdle()
+
+            assertEquals(CaptureFilter.ORIGINAL, vm.uiState.value.filter)
+            assertEquals(0f, vm.uiState.value.filterStrength)
+        }
+
+    @Test
+    fun `a new capture clears a previously selected filter`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val vm = createViewModel(mode = CameraMode.PHOTO.routeName)
+
+            vm.capturePhoto()
+            advanceUntilIdle()
+            vm.setFilter(CaptureFilter.VIBRANT)
+            vm.setFilterStrength(0.5f)
+            assertEquals(CaptureFilter.VIBRANT, vm.uiState.value.filter)
+
+            vm.capturePhoto()
+            advanceUntilIdle()
+
+            assertEquals(CaptureFilter.ORIGINAL, vm.uiState.value.filter)
+            assertEquals(0f, vm.uiState.value.filterStrength)
+        }
+
+    @Test
+    fun `filter strength is clamped between zero and one`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val vm = createViewModel()
+            vm.setFilterStrength(-3f)
+            assertEquals(0f, vm.uiState.value.filterStrength)
+            vm.setFilterStrength(7f)
+            assertEquals(1f, vm.uiState.value.filterStrength)
+        }
+
+    @Test
+    fun `saving an unedited preview forwards no filter recipe`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val media = FakeMediaRepository()
+            val vm = createViewModel(mode = CameraMode.PHOTO.routeName, media = media)
+
+            vm.capturePhoto()
+            advanceUntilIdle()
+            vm.savePreviewToGallery()
+            advanceUntilIdle()
+
+            assertEquals(1, media.savedImages.size)
+            assertNull(media.savedImages.first().filter)
+        }
+
+    @Test
+    fun `saving a preview forwards the selected filter recipe and resets state`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val media = FakeMediaRepository()
+            val vm = createViewModel(mode = CameraMode.PHOTO.routeName, media = media)
+
+            vm.capturePhoto()
+            advanceUntilIdle()
+            vm.setFilter(CaptureFilter.SHARP_BLACK)
+            vm.setFilterStrength(1f)
+            vm.savePreviewToGallery()
+            advanceUntilIdle()
+
+            val saved = media.savedImages.single()
+            assertNotNull(saved.filter)
+            // The contrast anchor for the full-strength recipe is baked in.
+            assertEquals(-64f, saved.filter!![4], 1e-3f)
+            // Back on the camera screen, the edits are forgotten.
+            assertNull(vm.uiState.value.pendingPreview)
+            assertEquals(CaptureFilter.ORIGINAL, vm.uiState.value.filter)
+            assertEquals(0f, vm.uiState.value.filterStrength)
+            assertTrue(withTimeoutOrNull(1000.milliseconds) { vm.events.first() } is CameraEvent.MediaSaved)
+        }
+
+    @Test
+    fun `saving a video forwards the selected filter recipe`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val media = FakeMediaRepository()
+            val vm = createViewModel(mode = CameraMode.VIDEO.routeName, media = media)
+
+            vm.startRecording()
+            runCurrent()
+            vm.stopRecording()
+            advanceUntilIdle()
+
+            vm.setFilter(CaptureFilter.GRAY)
+            vm.setFilterStrength(0.5f)
+            vm.savePreviewToGallery()
+            advanceUntilIdle()
+
+            val saved = media.savedVideos.single()
+            assertNotNull(saved.filter)
+            // Half-strength gray: the red diagonal sits halfway between 1 and the
+            // 0.213 luminance weight.
+            assertEquals((1f + 0.213f) / 2f, saved.filter!![0], 1e-3f)
+            assertEquals(CaptureFilter.ORIGINAL, vm.uiState.value.filter)
+            assertEquals(0f, vm.uiState.value.filterStrength)
+        }
+
+    @Test
     fun `saving a recorded preview burns the reviewed card`() =
         runTest(mainDispatcherRule.scheduler) {
             val media = FakeMediaRepository()

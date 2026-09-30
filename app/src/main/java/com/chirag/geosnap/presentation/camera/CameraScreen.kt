@@ -219,6 +219,10 @@ fun CameraScreen(
                         },
                         onBack = viewModel::discardPreview,
                         modifier = Modifier.fillMaxSize(),
+                        filter = uiState.filter,
+                        filterStrength = uiState.filterStrength,
+                        onFilterChange = viewModel::setFilter,
+                        onFilterStrengthChange = viewModel::setFilterStrength,
                         mediaOverlay = {
                             GeoTagCard(
                                 content = pendingPreview.cardContent,

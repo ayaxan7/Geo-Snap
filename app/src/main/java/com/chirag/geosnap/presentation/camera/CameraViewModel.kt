@@ -205,6 +205,8 @@ class CameraViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isProcessing = false,
+                            filter = CaptureFilter.ORIGINAL,
+                            filterStrength = 0f,
                             pendingPreview = PreviewData(file, coordinate, false, cardContent)
                         )
                     }
@@ -250,6 +252,8 @@ class CameraViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         isProcessing = false,
+                        filter = CaptureFilter.ORIGINAL,
+                        filterStrength = 0f,
                         pendingPreview = PreviewData(file, coordinate, true, cardContent)
                     )
                 }
@@ -262,6 +266,16 @@ class CameraViewModel @Inject constructor(
     fun discardPreview() {
         _uiState.value.pendingPreview?.file?.delete()
         _uiState.update { it.copy(pendingPreview = null) }
+    }
+
+    /** Selects the filter to apply to the preview and to the saved media. */
+    fun setFilter(filter: CaptureFilter) {
+        _uiState.update { it.copy(filter = filter) }
+    }
+
+    /** Sets the filter strength in `0..1` (0 = untouched capture). */
+    fun setFilterStrength(strength: Float) {
+        _uiState.update { it.copy(filterStrength = strength.coerceIn(0f, 1f)) }
     }
     
     fun updatePendingLocation(city: String?, address: String?, lat: Double, lng: Double) {
@@ -304,12 +318,31 @@ class CameraViewModel @Inject constructor(
                     )
                 )
                 val uri = if (preview.isVideo) {
-                    mediaRepository.saveCapturedVideo(preview.file, preview.coordinate, overlay, saveToMediaStore = hasMediaPermission)
+                    mediaRepository.saveCapturedVideo(
+                        preview.file,
+                        preview.coordinate,
+                        overlay,
+                        filterRecipe(uiState.value),
+                        hasMediaPermission
+                    )
                 } else {
-                    mediaRepository.saveCapturedImage(preview.file, preview.coordinate, overlay, saveToMediaStore = hasMediaPermission)
+                    mediaRepository.saveCapturedImage(
+                        preview.file,
+                        preview.coordinate,
+                        overlay,
+                        filterRecipe(uiState.value),
+                        hasMediaPermission
+                    )
                 }
                 preview.file.delete()
-                _uiState.update { it.copy(isProcessing = false, pendingPreview = null) }
+                _uiState.update {
+                    it.copy(
+                        isProcessing = false,
+                        pendingPreview = null,
+                        filter = CaptureFilter.ORIGINAL,
+                        filterStrength = 0f
+                    )
+                }
                 _events.tryEmit(CameraEvent.MediaSaved(uri, isVideo = preview.isVideo))
             } catch (e: Exception) {
                 Log.e(TAG, "Media save failed", e)
@@ -326,6 +359,18 @@ class CameraViewModel @Inject constructor(
     fun reportError(error: CameraError) {
         _uiState.update { it.copy(isProcessing = false, error = error) }
     }
+
+    /**
+     * The `4x5` color recipe to burn in, or null when the capture is left
+     * untouched. Called at save time so strength tweaks made up to the last
+     * moment are included.
+     */
+    private fun filterRecipe(state: CameraUiState): FloatArray? =
+        if (state.filter != CaptureFilter.ORIGINAL && state.filterStrength > 0f) {
+            state.filter.recipe(state.filterStrength)
+        } else {
+            null
+        }
 
     private suspend fun fetchCoordinateForTagging(): GeoCoordinate? = try {
         getCurrentLocation()

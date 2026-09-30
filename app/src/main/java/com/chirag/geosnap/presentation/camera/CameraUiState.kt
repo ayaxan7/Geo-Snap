@@ -18,5 +18,7 @@ data class CameraUiState(
     val fullAddress: String? = null,
     val isLocationEnabled: Boolean = false,
     val showLocationDialog: Boolean = false,
-    val pendingPreview: PreviewData? = null
+    val pendingPreview: PreviewData? = null,
+    val filter: CaptureFilter = CaptureFilter.ORIGINAL,
+    val filterStrength: Float = 0f
 )
