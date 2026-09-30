@@ -229,9 +229,7 @@ private fun GalleryContent(
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = pluralStringResource(
-                            R.plurals.gallery_delete_items_message,
-                            count,
-                            count
+                            R.plurals.gallery_delete_items_message, count, count
                         ),
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.White,
