@@ -1,6 +1,7 @@
 package com.chirag.geosnap.presentation.camera
 
 import android.net.Uri
+import androidx.annotation.StringRes
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -272,7 +273,7 @@ private fun PreviewTopBar(
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
                 modifier = Modifier.height(36.dp)
             ) {
-                Text("Save", fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.preview_save), fontWeight = FontWeight.Bold)
             }
         } else {
             IconButton(onClick = onShare) {
@@ -356,7 +357,7 @@ private fun EditBottomBar(
         ) {
             items(filters) { item ->
                 FilterItem(
-                    name = item.displayName,
+                    name = stringResource(item.labelRes),
                     uri = uri,
                     filter = item,
                     isSelected = item == filter,
@@ -499,13 +500,14 @@ private fun CaptureFilter.composeColorFilter(strength: Float): ColorFilter? {
     return ColorFilter.colorMatrix(ColorMatrix(recipe(strength)))
 }
 
-private val CaptureFilter.displayName: String
+@get:StringRes
+private val CaptureFilter.labelRes: Int
     get() = when (this) {
-        CaptureFilter.ORIGINAL -> "Original"
-        CaptureFilter.VIBRANT -> "Vibrant"
-        CaptureFilter.SOFT_TONE -> "Soft Tone"
-        CaptureFilter.SHARP_BLACK -> "Sharp Black"
-        CaptureFilter.GRAY -> "Gray"
+        CaptureFilter.ORIGINAL -> R.string.filter_original
+        CaptureFilter.VIBRANT -> R.string.filter_vibrant
+        CaptureFilter.SOFT_TONE -> R.string.filter_soft_tone
+        CaptureFilter.SHARP_BLACK -> R.string.filter_sharp_black
+        CaptureFilter.GRAY -> R.string.filter_gray
     }
 
 private val TOP_BAR_HEIGHT = 56.dp

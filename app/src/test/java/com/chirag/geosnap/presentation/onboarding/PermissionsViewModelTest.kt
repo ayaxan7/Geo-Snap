@@ -10,14 +10,14 @@ class PermissionsViewModelTest {
 
     private val camera = PermissionsViewModel.PermissionRequirement(
         permission = "android.permission.CAMERA",
-        label = R.string.permissions_granted,
-        description = R.string.permissions_granted,
+        label = R.string.permission_camera_label,
+        description = R.string.permission_camera_description,
         iconRes = R.drawable.ic_camera
     )
     private val location = PermissionsViewModel.PermissionRequirement(
         permission = "android.permission.ACCESS_FINE_LOCATION",
-        label = R.string.permissions_granted,
-        description = R.string.permissions_granted,
+        label = R.string.permission_location_label,
+        description = R.string.permission_location_description,
         iconRes = R.drawable.ic_location
     )
     private val requirements = listOf(camera, location)

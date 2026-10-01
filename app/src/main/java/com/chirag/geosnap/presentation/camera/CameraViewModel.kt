@@ -14,6 +14,7 @@ import com.chirag.geosnap.domain.model.GeoCoordinate
 import com.chirag.geosnap.domain.repository.MediaRepository
 import com.chirag.geosnap.domain.usecase.GetCurrentLocationUseCase
 import com.chirag.geosnap.domain.usecase.IsLocationEnabledUseCase
+import com.chirag.geosnap.presentation.core.hasMediaPermission
 import com.chirag.geosnap.presentation.navigation.Destination
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -295,13 +296,10 @@ class CameraViewModel @Inject constructor(
     
     fun savePreviewToGallery() {
         val preview = _uiState.value.pendingPreview ?: return
-        
-        // Check for media permissions
-        val hasMediaPermission = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.READ_MEDIA_IMAGES) == android.content.pm.PackageManager.PERMISSION_GRANTED
-        } else {
-            androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.READ_EXTERNAL_STORAGE) == android.content.pm.PackageManager.PERMISSION_GRANTED
-        }
+
+        // Auto Save to Device mirrors the media permission state: granted means
+        // the save also goes to the phone gallery, revoked means app-only.
+        val hasMediaPermission = context.hasMediaPermission()
 
         _uiState.update { it.copy(isProcessing = true) }
         viewModelScope.launch {

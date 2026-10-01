@@ -16,6 +16,14 @@ interface CapturedMediaDao {
     @Query("SELECT contentUri FROM captured_media")
     suspend fun allUris(): List<String>
 
+    /**
+     * Every display name ever recorded (including soft-deleted). New captures
+     * exist twice (app copy + MediaStore twin) under the same name, so backfill
+     * skips MediaStore items whose name is already indexed.
+     */
+    @Query("SELECT displayName FROM captured_media")
+    suspend fun allDisplayNames(): List<String>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(entity: CapturedMediaEntity)
 

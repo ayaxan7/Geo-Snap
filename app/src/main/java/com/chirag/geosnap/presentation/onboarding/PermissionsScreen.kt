@@ -1,14 +1,9 @@
 package com.chirag.geosnap.presentation.onboarding
 
 import android.Manifest
-import android.app.Activity
 import android.content.Context
-import android.content.ContextWrapper
-import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Build
-import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -68,6 +63,9 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.chirag.geosnap.R
 import com.chirag.geosnap.presentation.components.CommonButton
+import com.chirag.geosnap.presentation.core.findActivity
+import com.chirag.geosnap.presentation.core.mediaPermissionsForSdk
+import com.chirag.geosnap.presentation.core.openAppSettings
 import com.chirag.geosnap.ui.theme.PrimaryGreen
 
 /**
@@ -81,15 +79,7 @@ fun requiredRuntimePermissions(): List<String> = buildList {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         add(Manifest.permission.POST_NOTIFICATIONS)
     }
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        add(Manifest.permission.READ_MEDIA_IMAGES)
-        add(Manifest.permission.READ_MEDIA_VIDEO)
-    } else {
-        add(Manifest.permission.READ_EXTERNAL_STORAGE)
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        }
-    }
+    addAll(mediaPermissionsForSdk())
 }
 
 private fun Context.currentPermissionGrants(permissions: List<String>): Map<String, Boolean> =
@@ -148,19 +138,6 @@ private fun permissionsCopy(permissions: List<String>): List<PermissionsViewMode
             )
         }
     }.distinctBy { it.label } // Group permissions with the same label so we only show one row
-
-private tailrec fun Context.findActivity(): Activity? = when (this) {
-    is Activity -> this
-    is ContextWrapper -> baseContext.findActivity()
-    else -> null
-}
-
-private fun Context.openAppSettings() {
-    val intent = Intent(
-        Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageName, null)
-    )
-    startActivity(intent)
-}
 
 @Composable
 fun PermissionsScreen(

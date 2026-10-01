@@ -249,14 +249,22 @@ fun MediaViewerScreen(
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
-                                text = stringResource(R.string.gallery_delete_title),
+                                text = if (currentMedia?.type == MediaType.VIDEO) {
+                                    stringResource(R.string.gallery_delete_title_video)
+                                } else {
+                                    stringResource(R.string.gallery_delete_title_photo)
+                                },
                                 style = MaterialTheme.typography.titleLarge,
                                 color = Color.White,
                                 fontWeight = FontWeight.Bold
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = stringResource(R.string.gallery_delete_message),
+                                text = if (currentMedia?.type == MediaType.VIDEO) {
+                                    stringResource(R.string.gallery_delete_message_video)
+                                } else {
+                                    stringResource(R.string.gallery_delete_message_photo)
+                                },
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color.White,
                                 textAlign = TextAlign.Center
@@ -287,7 +295,7 @@ fun MediaViewerScreen(
                                     ),
                                     shape = RoundedCornerShape(8.dp)
                                 ) {
-                                    Text(stringResource(R.string.gallery_delete_confirm))
+                                    Text(stringResource(R.string.gallery_delete_proceed))
                                 }
                             }
                         }

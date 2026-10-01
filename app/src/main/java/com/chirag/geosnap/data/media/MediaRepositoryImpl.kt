@@ -49,18 +49,21 @@ import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 
 /**
- * MediaStore-backed media persistence.
+ * Media persistence for the app gallery.
  *
  * Design notes:
- *  - On API 29+ media is written via [MediaStore.MediaColumns.RELATIVE_PATH] under
- *    `Pictures/GeoSnap` / `Movies/GeoSnap` (scoped storage, no permission needed).
- *  - On API 28 the DATA column is set to a public gallery path; writing there
- *    requires `WRITE_EXTERNAL_STORAGE`, which the app requests only on those
- *    devices (see AndroidManifest `maxSdkVersion="28"`).
- *  - Images are geotagged by writing EXIF GPS tags before they are copied into
- *    MediaStore, so metadata survives on the final file without the need to
- *    re-open the content URI for writes.
- *  - All returned URIs are `content://` URIs suitable for sharing and gallery.
+ *  - Every capture gets a permanent private copy under `filesDir/GeoSnap`;
+ *    its FileProvider `content://` URI is what Room records, so deleting the
+ *    photo from the device gallery never affects the app gallery (and vice
+ *    versa).
+ *  - When phone-gallery saving is enabled (`saveToMediaStore`) the same bytes
+ *    are also written to the public MediaStore under `Pictures/GeoSnap` /
+ *    `Movies/GeoSnap` (scoped storage needs no permission on API 29+; API 28
+ *    requires `WRITE_EXTERNAL_STORAGE`, see AndroidManifest `maxSdkVersion`).
+ *  - Images are geotagged by writing EXIF GPS tags before they are copied out,
+ *    so metadata survives on the final files without re-opening URIs for write.
+ *  - All returned URIs are `content://` URIs suitable for the gallery, Coil
+ *    and sharing.
  */
 @androidx.annotation.OptIn(UnstableApi::class)
 @Singleton
@@ -93,18 +96,23 @@ class MediaRepositoryImpl @Inject constructor(
         }
         try {
             val displayName = "${FILE_PREFIX}_${timestampText(now)}.jpg"
-            val uri = if (saveToMediaStore) {
-                persist(
-                    sourceFile = toPersist,
-                    displayName = displayName,
-                    mimeType = "image/jpeg",
-                    relativeFolder = "Pictures",
-                    publicDirectory = Environment.DIRECTORY_PICTURES,
-                    collection = MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                    now = now
-                ).toString()
-            } else {
-                persistInternal(toPersist, displayName).toString()
+            // The app's own copy is the source of truth for the app gallery, so
+            // the phone-gallery copy can be deleted without affecting it.
+            val uri = persistInternal(toPersist, displayName).toString()
+            if (saveToMediaStore) {
+                runCatching {
+                    persist(
+                        sourceFile = toPersist,
+                        displayName = displayName,
+                        mimeType = "image/jpeg",
+                        relativeFolder = "Pictures",
+                        publicDirectory = Environment.DIRECTORY_PICTURES,
+                        collection = MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                        now = now
+                    )
+                }.onFailure {
+                    Log.w(TAG, "MediaStore copy failed for image, app copy kept", it)
+                }
             }
             capturedMediaDao.upsert(
                 CapturedMediaEntity(
@@ -145,18 +153,23 @@ class MediaRepositoryImpl @Inject constructor(
         try {
             val now = System.currentTimeMillis()
             val displayName = "${FILE_PREFIX}_${timestampText(now)}.mp4"
-            val uri = if (saveToMediaStore) {
-                persist(
-                    sourceFile = toPersist,
-                    displayName = displayName,
-                    mimeType = "video/mp4",
-                    relativeFolder = "Movies",
-                    publicDirectory = Environment.DIRECTORY_MOVIES,
-                    collection = MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-                    now = now
-                ).toString()
-            } else {
-                persistInternal(toPersist, displayName).toString()
+            // The app's own copy is the source of truth for the app gallery, so
+            // the phone-gallery copy can be deleted without affecting it.
+            val uri = persistInternal(toPersist, displayName).toString()
+            if (saveToMediaStore) {
+                runCatching {
+                    persist(
+                        sourceFile = toPersist,
+                        displayName = displayName,
+                        mimeType = "video/mp4",
+                        relativeFolder = "Movies",
+                        publicDirectory = Environment.DIRECTORY_MOVIES,
+                        collection = MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                        now = now
+                    )
+                }.onFailure {
+                    Log.w(TAG, "MediaStore copy failed for video, app copy kept", it)
+                }
             }
             capturedMediaDao.upsert(
                 CapturedMediaEntity(
@@ -181,16 +194,36 @@ class MediaRepositoryImpl @Inject constructor(
             .sortedByDescending { it.timestamp }
     }
 
-    override suspend fun deleteMedia(contentUri: String): Boolean = withContext(Dispatchers.IO) {
-        runCatching { capturedMediaDao.markDeleted(contentUri) }.isSuccess
+override suspend fun deleteMedia(contentUri: String): Boolean = withContext(Dispatchers.IO) {
+    runCatching {
+        capturedMediaDao.markDeleted(contentUri)
+        deleteAppCopy(contentUri)
+    }.isSuccess
+}
+
+/**
+ * Physically removes the app's private copy of [contentUri] (if the URI points
+ * at one). MediaStore copies are deliberately left untouched.
+ */
+private fun deleteAppCopy(contentUri: String) {
+    val uri = runCatching { contentUri.toUri() }.getOrNull() ?: return
+    if (uri.authority != "${context.packageName}.fileprovider") return
+    val segments = uri.pathSegments
+    if (segments.size == 2 && segments[0] == "app_media") {
+        runCatching {
+            File(context.filesDir, DIRECTORY_NAME).resolve(segments[1]).delete()
+        }
     }
+}
 
     /**
-     * One-way sync from MediaStore into Room so captures made before this
-     * feature (or any file that is on the device but not yet indexed) appear in
-     * the app gallery. Media the user soft-deleted is never re-imported because
-     * its uri is already present in Room (upsert is a no-op for the unique
-     * contentUri index, and `deleted` is never flipped back).
+     * One-way sync from MediaStore into Room so captures made before the app
+     * kept its own copies appear in the app gallery anyway. Media the user
+     * soft-deleted is never re-imported because its uri is already present in
+     * Room (upsert is a no-op for the unique contentUri index, and `deleted` is
+     * never flipped back). New captures are indexed by their app-copy row, so a
+     * MediaStore item whose name is already known is skipped instead of
+     * producing a duplicate (both copies share a unique display name).
      */
     private suspend fun backfillFromMediaStore() {
         val images = queryCollection(
@@ -206,8 +239,11 @@ class MediaRepositoryImpl @Inject constructor(
             longitudeColumn = MediaStore.Video.VideoColumns.LONGITUDE
         )
         val mediaStore = images + videos
-        val known = capturedMediaDao.allUris().toSet()
-        val missing = mediaStore.filter { it.uri.toString() !in known }
+        val knownUris = capturedMediaDao.allUris().toSet()
+        val knownNames = capturedMediaDao.allDisplayNames().toSet()
+        val missing = mediaStore.filter {
+            it.uri.toString() !in knownUris && it.displayName !in knownNames
+        }
         if (missing.isNotEmpty()) {
             capturedMediaDao.upsertAll(missing.map(::toEntity))
         }
@@ -595,8 +631,9 @@ class MediaRepositoryImpl @Inject constructor(
     private fun android.database.Cursor.getDoubleOrNull(columnIndex: Int): Double? =
         if (isNull(columnIndex)) null else getDouble(columnIndex)
 
+    /** Millisecond resolution keeps two same-second captures from colliding. */
     private fun timestampText(millis: Long): String =
-        SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date(millis))
+        SimpleDateFormat("yyyyMMdd_HHmmss_SSS", Locale.US).format(Date(millis))
 
     private companion object {
         const val TAG = "MediaRepositoryImpl"

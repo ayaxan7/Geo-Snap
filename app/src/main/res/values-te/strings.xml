@@ -6,11 +6,7 @@
     <string name="permissions_title">యాప్ అనుమతులు</string>
     <string name="permissions_subtitle_header">GeoSnap ను ఉపయోగించడానికి మాకు ఈ క్రింది అనుమతులు అవసరం</string>
     <string name="permissions_subtitle">ఈ అనుమతులు GeoSnap ఖచ్చితమైన స్థల వివరాలతో ఫోటోలు మరియు వీడియోలను క్యాప్చర్ చేయడానికి సహాయపడతాయి.</string>
-    <string name="permissions_allow">అనుమతించు</string>
     <string name="permissions_open_settings">సెట్టింగ్స్ తెరవండి</string>
-    <string name="permissions_granted">అనుమతి లభించింది</string>
-    <string name="permissions_denied">తిరస్కరించారు</string>
-    <string name="permissions_status_needed">అవసరం</string>
     <string name="permissions_permanently_denied">శాశ్వతంగా తిరస్కరించారు — సెట్టింగ్స్లో దీన్ని ఆన్ చేయండి</string>
     <string name="permissions_agree">అనుమతులు, నిబంధనలు &amp; షరతులు మరియు గోప్యతా విధానానికి నేను అంగీకరిస్తున్నాను.</string>
     <string name="permissions_get_started">ప్రారంభిద్దాం</string>
@@ -21,8 +17,6 @@
     <string name="permission_microphone_description">మీరు వీడియోలు క్యాప్చర్ చేసేటప్పుడు GeoSnap ఆడియోను రికార్డ్ చేయడానికి అనుమతిస్తుంది. ఈ అనుమతి ధ్వనితో వీడియో రికార్డ్ చేసేటప్పుడు మాత్రమే ఉపయోగించబడుతుంది.</string>
     <string name="permission_location_label">లొకేషన్ యాక్సెస్</string>
     <string name="permission_location_description">GeoSnap మీ ప్రస్తుత లొకేషన్‌ను గుర్తించడానికి మరియు మీ ఫోటోలు, వీడియోలకు మీ చిరునామా, నిర్దేశాంకాలు మరియు GPS ఖచ్చితత్వం వంటి వివరాలను జోడించడానికి అనుమతిస్తుంది.</string>
-    <string name="permission_coarse_location_label">లొకేషన్ యాక్సెస్</string>
-    <string name="permission_coarse_location_description">GeoSnap మీ ప్రస్తుత లొకేషన్‌ను గుర్తించడానికి మరియు మీ ఫోటోలు, వీడియోలకు మీ చిరునామా, నిర్దేశాంకాలు మరియు GPS ఖచ్చితత్వం వంటి వివరాలను జోడించడానికి అనుమతిస్తుంది.</string>
     <string name="permission_storage_label">ఫోటోలు &amp; మీడియా యాక్సెస్</string>
     <string name="permission_storage_description">క్యాప్చర్ చేసిన ఫోటోలను మరియు వీడియోలను మీ పరికరంలో సేవ్ చేయడానికి మరియు ఎడిటింగ్, లొకేషన్ అప్డేట్స్ లేదా షేరింగ్ కోసం ఇప్పటికే ఉన్న ఫోటోలను ఎంచుకోవడానికి మిమ్మల్ని అనుమతిస్తుంది.</string>
     <string name="permission_notifications_label">నోటిఫికేషన్లు</string>
@@ -35,10 +29,8 @@
 
     <string name="language_title">మీ భాషను ఎంచుకోండి</string>
     <string name="language_subtitle">కొనసాగించడానికి మీకు ఇష్టమైన భాషను ఎంచుకోండి</string>
-    <string name="language_continue">కొనసాగించండి</string>
     <string name="language_select">భాషను ఎంచుకోండి</string>
 
-    <string name="home_tagline">తీయండి. ట్యాగ్ చేయండి. షేర్ చేయండి.</string>
     <string name="home_take_photo">ఫోటో తీయండి</string>
     <string name="home_take_photo_desc">లొకేషన్‌తో క్యాప్చర్ చేయండి</string>
     <string name="home_take_video">వీడియో తీయండి</string>
@@ -51,15 +43,30 @@
     <string name="home_settings">సెట్టింగ్స్</string>
     <string name="home_india_map">ఇండియా మ్యాప్</string>
 
+    <string name="settings_auto_save_title">పరికరంలో ఆటో సేవ్ చేయండి</string>
+    <string name="settings_auto_save_revoke_title">ఆటో సేవ్ ఆఫ్ చేయాలా?</string>
+    <string name="settings_auto_save_revoke_message">దీన్ని ఆఫ్ చేయడానికి మీరు యాప్ సమాచారం తెరిచి, అనుమతులకు వెళ్లి \"ఫోటోలు మరియు వీడియోలు\" అని ఆఫ్ చేయాలి. మీరు తిరిగి వచ్చినప్పుడు GeoSnap పరీక్షించి స్విచ్ ఆఫ్ చేస్తుంది.</string>
+    <string name="settings_auto_save_enable_title">ఫోటో మరియు మీడియా యాక్సెస్ అవసరం</string>
+    <string name="settings_auto_save_enable_message">ఈ అనుమతి శాశ్వతంగా తిరస్కరించబడింది. యాప్ సమాచారం తెరిచి, అనుమతులకు వెళ్లి \"ఫోటోలు మరియు వీడియోలు\"కు అనుమతించండి; అప్పుడు GeoSnap మీ పరికర గ్యాలరీలో కాపీలను సేవ్ చేయగలదు.</string>
+    <string name="settings_auto_save_open_app_info">యాప్ సమాచారం తెరవండి</string>
+    <string name="settings_auto_save_not_now">ఇప్పుడు కాదు</string>
+    <string name="settings_notifications">నోటిఫికేషన్లు</string>
+    <string name="settings_language">భాష</string>
+    <string name="settings_templates">టెంప్లేట్లు</string>
+    <string name="settings_subscription_plans">సబ్‌స్క్రిప్షన్ ప్లాన్‌లు</string>
+    <string name="settings_sync_drive">సింక్ - డ్రైవ్</string>
+    <string name="settings_rate_app">యాప్‌కు రేటింగ్ ఇవ్వండి</string>
+    <string name="settings_terms">నిబంధనలు మరియు షరతులు</string>
+    <string name="settings_privacy_policy">గోప్యతా విధానం</string>
+    <string name="settings_help_support">సహాయం మరియు మద్దతు</string>
+    <string name="settings_proudly_made">అభిమానంతో తయారు చేయబడింది</string>
+    <string name="settings_proudly_made_india">భారతదేశంలో అభిమానంతో తయారు చేయబడింది</string>
+
     <string name="camera_back">వెనుకకు</string>
     <string name="camera_flip">కెమెరా మార్చండి</string>
     <string name="camera_flash">ఫ్లాష్</string>
-    <string name="camera_capture">క్యాప్చర్</string>
-    <string name="camera_quick_share_hint">దాన్ని వెంటనే షేర్ చేయడానికి ఫోటోను క్యాప్చర్ చేయండి</string>
-    <string name="camera_recording">రికార్డింగ్</string>
     <string name="camera_photo_saved">ఫోటో గ్యాలరీకి సేవ్ చేయబడింది</string>
     <string name="camera_video_saved">వీడియో గ్యాలరీకి సేవ్ చేయబడింది</string>
-    <string name="camera_share_again">మరొకటి షేర్ చేయండి</string>
     <string name="camera_mode_photo">ఫోటో</string>
     <string name="camera_mode_quick_share">క్విక్ షేర్</string>
     <string name="camera_mode_video">వీడియో</string>
@@ -77,8 +84,6 @@
     <string name="camera_error_snackbar">లోపం: %1$s</string>
 
     <string name="share_title">షేర్ ద్వారా</string>
-    <string name="share_image">GeoSnap ఫోటో</string>
-    <string name="share_error">ఫోటోను షేర్ చేయడానికి ఏ యాప్ అందుబాటులో లేదు.</string>
 
     <string name="gallery_title">గ్యాలరీ</string>
     <string name="gallery_empty">ఇంకా ఏ మీడియా క్యాప్చర్ కాలేదు.\nమీరు క్యాప్చర్ చేసిన ఫోటోలు మరియు వీడియోలు ఇక్కడ కనిపిస్తాయి.</string>
@@ -86,10 +91,14 @@
     <string name="retry">మళ్లీ ప్రయత్నించండి</string>
     <string name="gallery_viewer_counter">%1$d / %2$d</string>
     <string name="gallery_share">భాగస్వామ్యం చేయండి</string>
-    <string name="gallery_delete_title">గ్యాలరీ నుండి తొలగించండి</string>
-    <string name="gallery_delete_message">దీన్ని GeoSnap గ్యాలరీ నుండి తీసేయాలా? ఫైల్ మీ పరికర గ్యాలరీలోనే ఉంటుంది.</string>
     <string name="gallery_delete_confirm">తొలగించండి</string>
     <string name="gallery_delete_cancel">రద్దు చేయండి</string>
+    <string name="gallery_delete_proceed">అవును, కొనసాగించండి</string>
+    <string name="gallery_delete_title_photo">ఫోటో తొలగించాలా?</string>
+    <string name="gallery_delete_title_video">వీడియో తొలగించాలా?</string>
+    <string name="gallery_delete_title_media">మీడియా తొలగించాలా?</string>
+    <string name="gallery_delete_message_photo">ఎంచుకున్న ఫోటోను తొలగించాలని మీరు ఖచ్చితంగా అనుకుంటున్నారా?</string>
+    <string name="gallery_delete_message_video">ఎంచుకున్న వీడియోను తొలగించాలని మీరు ఖచ్చితంగా అనుకుంటున్నారా?</string>
     <string name="gallery_delete_error">ఈ మీడియాను తొలగించలేకపోయాము.</string>
     <string name="gallery_selected_count">ఎంచుకున్నవి: %1$d</string>
     <string name="gallery_section_today">ఈ రోజు</string>
@@ -98,12 +107,10 @@
     <string name="gallery_section_this_month">ఈ నెల</string>
     <string name="gallery_section_last_month">గత నెల</string>
     <string name="gallery_section_older">పాతవి</string>
-    <plurals name="gallery_delete_items_message">
-        <item quantity="one">దీన్ని GeoSnap గ్యాలరీ నుండి తీసేయాలా? ఫైల్ మీ పరికర గ్యాలరీలోనే ఉంటుంది.</item>
-        <item quantity="other">%1$d అంశాలను GeoSnap గ్యాలరీ నుండి తీసేయాలా? ఫైల్లు మీ పరికర గ్యాలరీలోనే ఉంటాయి.</item>
-    </plurals>
+    <string name="gallery_delete_message_media">ఎంచుకున్న మీడియాను తొలగించాలని మీరు ఖచ్చితంగా అనుకుంటున్నారా?</string>
+    <string name="gallery_delete_message_photos">ఎంచుకున్న ఫోటోలను తొలగించాలని మీరు ఖచ్చితంగా అనుకుంటున్నారా?</string>
+    <string name="gallery_delete_message_videos">ఎంచుకున్న వీడియోలను తొలగించాలని మీరు ఖచ్చితంగా అనుకుంటున్నారా?</string>
 
-    <string name="error_generic">ఏదో తప్పు జరిగింది. దయచేసి మళ్లీ ప్రయత్నించండి.</string>
 
     <string name="camera_error_share">ఈ క్యాప్చర్‌ను భాగస్వామ్యం చేయలేకపోయాము.</string>
 
@@ -115,7 +122,14 @@
     <string name="preview_retake">మళ్లీ తీయండి</string>
     <string name="preview_edit">సవరించండి</string>
     <string name="preview_save_to_gallery">గ్యాలరీకి సేవ్ చేయండి</string>
+    <string name="preview_save">సేవ్ చేయండి</string>
     <string name="preview_image">చిత్రం ప్రివ్యూ</string>
+
+    <string name="filter_original">అసలు</string>
+    <string name="filter_vibrant">వైబ్రెంట్</string>
+    <string name="filter_soft_tone">సాఫ్ట్ టోన్</string>
+    <string name="filter_sharp_black">షార్ప్ బ్లాక్</string>
+    <string name="filter_gray">గ్రే</string>
 
     <string name="geotag_fetching_location">స్థానం తెలుసుకుంటోంది...</string>
     <string name="geotag_latitude">అక్షాంశం</string>

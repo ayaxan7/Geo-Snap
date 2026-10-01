@@ -6,11 +6,7 @@
     <string name="permissions_title">பயன்பாட்டு அனுமதிகள்</string>
     <string name="permissions_subtitle_header">GeoSnap-ஐப் பயன்படுத்த கீழ்க்கண்ட அனுமதிகள் தேவை</string>
     <string name="permissions_subtitle">இந்த அனுமதிகள், GeoSnap புகைப்படங்கள் மற்றும் வீடியோக்களை துல்லியமான இருப்பிட விவரங்களுடன் எடுக்க உதவுகின்றன.</string>
-    <string name="permissions_allow">அனுமதி</string>
     <string name="permissions_open_settings">அமைப்புகளைத் திற</string>
-    <string name="permissions_granted">அனுமதி வழங்கப்பட்டது</string>
-    <string name="permissions_denied">மறுக்கப்பட்டது</string>
-    <string name="permissions_status_needed">தேவை</string>
     <string name="permissions_permanently_denied">நிரந்தரமாக மறுக்கப்பட்டது — அமைப்புகளில் இயக்கவும்</string>
     <string name="permissions_agree">அனுமதிகள், விதிமுறைகள் &amp; நிபந்தனைகள் மற்றும் தனியுரிமைக் கொள்கைக்கு நான் ஒப்புக்கொள்கிறேன்.</string>
     <string name="permissions_get_started">தொடங்குவோம்</string>
@@ -21,8 +17,6 @@
     <string name="permission_microphone_description">வீடியோக்களைப் பதிவு செய்யும்போது GeoSnap ஒலியைப் பதிவுசெய்ய அனுமதிக்கிறது. இந்த அனுமதி ஒலியுடன் வீடியோ பதிவுசெய்யும்போது மட்டுமே பயன்படுத்தப்படுகிறது.</string>
     <string name="permission_location_label">இருப்பிட அணுகல்</string>
     <string name="permission_location_description">உங்கள் தற்போதைய இருப்பிடத்தைக் கண்டறிந்து, உங்கள் முகவரி, ஆயங்கள் மற்றும் GPS துல்லியம் போன்ற விவரங்களை உங்கள் புகைப்படங்கள் மற்றும் வீடியோக்களில் சேர்க்க GeoSnap-க்கு அனுமதிக்கிறது.</string>
-    <string name="permission_coarse_location_label">இருப்பிட அணுகல்</string>
-    <string name="permission_coarse_location_description">உங்கள் தற்போதைய இருப்பிடத்தைக் கண்டறிந்து, உங்கள் முகவரி, ஆயங்கள் மற்றும் GPS துல்லியம் போன்ற விவரங்களை உங்கள் புகைப்படங்கள் மற்றும் வீடியோக்களில் சேர்க்க GeoSnap-க்கு அனுமதிக்கிறது.</string>
     <string name="permission_storage_label">புகைப்படங்கள் &amp; மீடியா அணுகல்</string>
     <string name="permission_storage_description">எடுக்கப்பட்ட புகைப்படங்கள் மற்றும் வீடியோக்களை உங்கள் சாதனத்தில் சேமிக்கவும், எடிட்டிங், இருப்பிட புதுப்பிப்புகள் அல்லது பகிர்வுக்குப் பயன்படுத்த ஏற்கனவே உள்ள புகைப்படங்களைத் தேர்ந்தெடுக்கவும் இது உங்களை அனுமதிக்கிறது.</string>
     <string name="permission_notifications_label">அறிவிப்புகள்</string>
@@ -35,10 +29,8 @@
 
     <string name="language_title">உங்கள் மொழியைத் தேர்ந்தெடுக்கவும்</string>
     <string name="language_subtitle">தொடர, உங்களுக்கு விருப்பமான மொழியைத் தேர்ந்தெடுக்கவும்</string>
-    <string name="language_continue">தொடரவும்</string>
     <string name="language_select">மொழியைத் தேர்ந்தெடுக்கவும்</string>
 
-    <string name="home_tagline">எடு. குறியிடு. பகிர்.</string>
     <string name="home_take_photo">புகைப்படம் எடு</string>
     <string name="home_take_photo_desc">இருப்பிடத்துடன் கைப்பற்று</string>
     <string name="home_take_video">வீடியோ எடு</string>
@@ -51,15 +43,30 @@
     <string name="home_settings">அமைப்புகள்</string>
     <string name="home_india_map">இந்திய வரைபடம்</string>
 
+    <string name="settings_auto_save_title">சாதனத்தில் தானியங்கு சேமிக்கவும்</string>
+    <string name="settings_auto_save_revoke_title">தானியங்கு சேமிப்பை அணையவா?</string>
+    <string name="settings_auto_save_revoke_message">இதை அணைய, \"செயலி தகவல்\" திறந்து, அனுமதிகள் என்ற இடத்திற்குச் சென்று \"புகைப்படங்கள் மற்றும் வீடியோக்கள்\" என்பதை அண்டும். நீங்கள் திரும்பும்போது GeoSnap சரிபார்த்து இந்தச் சுவிட்சை அணைத்துவிடும்.</string>
+    <string name="settings_auto_save_enable_title">புகைப்படம் மற்றும் மீடியா அணுகல் தேவை</string>
+    <string name="settings_auto_save_enable_message">இந்த அனுமதி நிரந்தரமாக மறுக்கப்பட்டுவிட்டது. \"செயலி தகவல்\" திறந்து, அனுமதிகள் என்ற இடத்திற்குச் சென்று \"புகைப்படங்கள் மற்றும் வீடியோக்கள்\" என்பதை அனுமதியுங்கள்; அப்போதுதான் GeoSnap உங்கள் சாதனக் கேலரியில் நகல்களைச் சேமிக்க முடியும்.</string>
+    <string name="settings_auto_save_open_app_info">செயலி தகவலைத் திற</string>
+    <string name="settings_auto_save_not_now">இப்போது இல்லை</string>
+    <string name="settings_notifications">அறிவிப்புகள்</string>
+    <string name="settings_language">மொழி</string>
+    <string name="settings_templates">வார்ப்புருக்கள்</string>
+    <string name="settings_subscription_plans">குழுமாய்வு திட்டங்கள்</string>
+    <string name="settings_sync_drive">ஒத்திசைவு - டிரைவ்</string>
+    <string name="settings_rate_app">செயலிக்கு மதிப்பீடு அளியுங்கள்</string>
+    <string name="settings_terms">விதிமுறைகள் மற்றும் நிபந்தனைகள்</string>
+    <string name="settings_privacy_policy">தனியுரிமைக் கொள்கை</string>
+    <string name="settings_help_support">உதவி மற்றும் ஆதரவு</string>
+    <string name="settings_proudly_made">இதயத்துடன் உருவாக்கப்பட்டது</string>
+    <string name="settings_proudly_made_india">இந்தியாவில் இதயத்துடன் உருவாக்கப்பட்டது</string>
+
     <string name="camera_back">பின்</string>
     <string name="camera_flip">கேமராவை மாற்று</string>
     <string name="camera_flash">ஃபிளாஷ்</string>
-    <string name="camera_capture">கைப்பற்று</string>
-    <string name="camera_quick_share_hint">அதை உடனடியாகப் பகிர ஒரு புகைப்படத்தை கைப்பற்றவும்</string>
-    <string name="camera_recording">பதிவு</string>
     <string name="camera_photo_saved">புகைப்படம் கேலரியில் சேமிக்கப்பட்டது</string>
     <string name="camera_video_saved">வீடியோ கேலரியில் சேமிக்கப்பட்டது</string>
-    <string name="camera_share_again">மேலும் பகிர்</string>
     <string name="camera_mode_photo">புகைப்படம்</string>
     <string name="camera_mode_quick_share">விரைவுப் பகிர்வு</string>
     <string name="camera_mode_video">வீடியோ</string>
@@ -77,8 +84,6 @@
     <string name="camera_error_snackbar">பிழை: %1$s</string>
 
     <string name="share_title">வழியாகப் பகிர்</string>
-    <string name="share_image">GeoSnap புகைப்படம்</string>
-    <string name="share_error">புகைப்படத்தைப் பகிர எந்தப் பயன்பாடும் இல்லை.</string>
 
     <string name="gallery_title">கேலரி</string>
     <string name="gallery_empty">இன்னும் எந்த மீடியாவும் எடுக்கப்படவில்லை.\nநீங்கள் எடுக்கும் புகைப்படங்களும் வீடியோக்களும் இங்கே தோன்றும்.</string>
@@ -86,10 +91,14 @@
     <string name="retry">மீண்டும் முயற்சிக்கவும்</string>
     <string name="gallery_viewer_counter">%1$d / %2$d</string>
     <string name="gallery_share">பகிர்</string>
-    <string name="gallery_delete_title">கேலரியிலிருந்து நீக்கு</string>
-    <string name="gallery_delete_message">இதை GeoSnap கேலரியிலிருந்து நீக்கவா? கோப்பு உங்கள் சாதன கேலரியில் இருக்கும்.</string>
     <string name="gallery_delete_confirm">நீக்கு</string>
     <string name="gallery_delete_cancel">ரத்து</string>
+    <string name="gallery_delete_proceed">ஆம், தொடரவும்</string>
+    <string name="gallery_delete_title_photo">புகைப்படத்தை நீக்கவா?</string>
+    <string name="gallery_delete_title_video">வீடியோவை நீக்கவா?</string>
+    <string name="gallery_delete_title_media">மீடியாவை நீக்கவா?</string>
+    <string name="gallery_delete_message_photo">தேர்ந்தெடுத்த புகைப்படத்தை நீக்குவது உறுதியா?</string>
+    <string name="gallery_delete_message_video">தேர்ந்தெடுத்த வீடியோவை நீக்குவது உறுதியா?</string>
     <string name="gallery_delete_error">இந்த மீடியாவை நீக்க முடியவில்லை.</string>
     <string name="gallery_selected_count">தேர்ந்தெடுக்கப்பட்டவை: %1$d</string>
     <string name="gallery_section_today">இன்று</string>
@@ -98,12 +107,10 @@
     <string name="gallery_section_this_month">இந்த மாதம்</string>
     <string name="gallery_section_last_month">கடந்த மாதம்</string>
     <string name="gallery_section_older">பழையவை</string>
-    <plurals name="gallery_delete_items_message">
-        <item quantity="one">இதை GeoSnap கேலரியிலிருந்து நீக்கவா? கோப்பு உங்கள் சாதன கேலரியில் இருக்கும்.</item>
-        <item quantity="other">%1$d உருப்படிகளை GeoSnap கேலரியிலிருந்து நீக்கவா? கோப்புகள் உங்கள் சாதன கேலரியில் இருக்கும்.</item>
-    </plurals>
+    <string name="gallery_delete_message_media">தேர்ந்தெடுத்த மீடியாவை நீக்குவது உறுதியா?</string>
+    <string name="gallery_delete_message_photos">தேர்ந்தெடுத்த புகைப்படங்களை நீக்குவது உறுதியா?</string>
+    <string name="gallery_delete_message_videos">தேர்ந்தெடுத்த வீடியோக்களை நீக்குவது உறுதியா?</string>
 
-    <string name="error_generic">ஏதோ தவறு ஏற்பட்டது. மீண்டும் முயற்சிக்கவும்.</string>
 
     <string name="camera_error_share">இந்தப் பதிவைப் பகிர முடியவில்லை.</string>
 
@@ -115,7 +122,14 @@
     <string name="preview_retake">மீண்டும் எடு</string>
     <string name="preview_edit">திருத்து</string>
     <string name="preview_save_to_gallery">கேலரியில் சேமி</string>
+    <string name="preview_save">சேமி</string>
     <string name="preview_image">பட முன்னோட்டம்</string>
+
+    <string name="filter_original">அசல்</string>
+    <string name="filter_vibrant">வைப்ரென்ட்</string>
+    <string name="filter_soft_tone">சாஃப்ட் டோன்</string>
+    <string name="filter_sharp_black">ஷார்ப் பிளாக்</string>
+    <string name="filter_gray">கிரே</string>
 
     <string name="geotag_fetching_location">இருப்பிடத்தைப் பெறுகிறது...</string>
     <string name="geotag_latitude">அட்சரேகை</string>

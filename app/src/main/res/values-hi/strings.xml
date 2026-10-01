@@ -6,11 +6,7 @@
     <string name="permissions_title">ऐप अनुमतियाँ</string>
     <string name="permissions_subtitle_header">GeoSnap का उपयोग करने के लिए हमें निम्नलिखित अनुमतियों की आवश्यकता है</string>
     <string name="permissions_subtitle">ये अनुमतियाँ GeoSnap को सटीक स्थान जानकारी के साथ फ़ोटो और वीडियो कैप्चर करने में मदद करती हैं।</string>
-    <string name="permissions_allow">अनुमति दें</string>
     <string name="permissions_open_settings">सेटिंग खोलें</string>
-    <string name="permissions_granted">अनुमति मिली</string>
-    <string name="permissions_denied">अस्वीकृत</string>
-    <string name="permissions_status_needed">आवश्यक</string>
     <string name="permissions_permanently_denied">स्थायी रूप से अस्वीकृत — सेटिंग में इसे चालू करें</string>
     <string name="permissions_agree">मैं अनुमतियों, नियम और शर्तों तथा गोपनीयता नीति से सहमत हूँ।</string>
     <string name="permissions_get_started">आरंभ करें</string>
@@ -21,8 +17,6 @@
     <string name="permission_microphone_description">GeoSnap को वीडियो कैप्चर करते समय ऑडियो रिकॉर्ड करने की अनुमति देता है। इस अनुमति का उपयोग केवल ध्वनि के साथ वीडियो रिकॉर्ड करते समय किया जाता है।</string>
     <string name="permission_location_label">लोकेशन की पहुँच</string>
     <string name="permission_location_description">GeoSnap को आपकी वर्तमान लोकेशन का पता लगाने और आपकी तस्वीरों तथा वीडियो में आपका पता, निर्देशांक और GPS सटीकता जैसी जानकारी जोड़ने की अनुमति देता है।</string>
-    <string name="permission_coarse_location_label">लोकेशन की पहुँच</string>
-    <string name="permission_coarse_location_description">GeoSnap को आपकी वर्तमान लोकेशन का पता लगाने और आपकी तस्वीरों तथा वीडियो में आपका पता, निर्देशांक और GPS सटीकता जैसी जानकारी जोड़ने की अनुमति देता है।</string>
     <string name="permission_storage_label">फ़ोटो और मीडिया की पहुँच</string>
     <string name="permission_storage_description">आपको कैप्चर किए गए फ़ोटो और वीडियो को अपने डिवाइस पर सहेजने तथा संपादन, लोकेशन अपडेट या साझा करने के लिए मौजूदा फ़ोटो चुनने की अनुमति देता है।</string>
     <string name="permission_notifications_label">सूचनाएँ</string>
@@ -35,10 +29,8 @@
 
     <string name="language_title">अपनी भाषा चुनें</string>
     <string name="language_subtitle">जारी रखने के लिए अपनी पसंदीदा भाषा चुनें</string>
-    <string name="language_continue">जारी रखें</string>
     <string name="language_select">भाषा चुनें</string>
 
-    <string name="home_tagline">खींचें। टैग करें। साझा करें।</string>
     <string name="home_take_photo">फ़ोटो लें</string>
     <string name="home_take_photo_desc">स्थान के साथ कैप्चर करें</string>
     <string name="home_take_video">वीडियो लें</string>
@@ -51,15 +43,30 @@
     <string name="home_settings">सेटिंग</string>
     <string name="home_india_map">भारत का नक्शा</string>
 
+    <string name="settings_auto_save_title">डिवाइस में ऑटो सेव करें</string>
+    <string name="settings_auto_save_revoke_title">डिवाइस में ऑटो सेव बंद करें?</string>
+    <string name="settings_auto_save_revoke_message">इसे बंद करने के लिए आपको ऐप जानकारी खोलनी होगी, अनुमतियाँ पर जाना होगा और \"फ़ोटो और वीडियो\" बंद करना होगा। लौटने पर GeoSnap जाँच करके स्विच बंद कर देगा।</string>
+    <string name="settings_auto_save_enable_title">फ़ोटो और मीडिया की पहुँच आवश्यक है</string>
+    <string name="settings_auto_save_enable_message">यह अनुमति स्थायी रूप से अस्वीकृत की गई है। ऐप जानकारी खोलें, अनुमतियाँ पर जाएँ और \"फ़ोटो और वीडियो\" की अनुमति दें, जिससे GeoSnap आपकी डिवाइस गैलरी में प्रतियाँ सहेज सके।</string>
+    <string name="settings_auto_save_open_app_info">ऐप जानकारी खोलें</string>
+    <string name="settings_auto_save_not_now">अभी नहीं</string>
+    <string name="settings_notifications">सूचनाएँ</string>
+    <string name="settings_language">भाषा</string>
+    <string name="settings_templates">टेम्पलेट</string>
+    <string name="settings_subscription_plans">सदस्यता योजनाएँ</string>
+    <string name="settings_sync_drive">सिंक - ड्राइव</string>
+    <string name="settings_rate_app">ऐप को रेट करें</string>
+    <string name="settings_terms">नियम और शर्तें</string>
+    <string name="settings_privacy_policy">गोपनीयता नीति</string>
+    <string name="settings_help_support">सहायता और समर्थन</string>
+    <string name="settings_proudly_made">गर्व से बनाया गया</string>
+    <string name="settings_proudly_made_india">भारत में गर्व से बनाया गया</string>
+
     <string name="camera_back">वापस</string>
     <string name="camera_flip">कैमरा बदलें</string>
     <string name="camera_flash">फ़्लैश</string>
-    <string name="camera_capture">कैप्चर</string>
-    <string name="camera_quick_share_hint">इसे तुरंत साझा करने के लिए एक फ़ोटो कैप्चर करें</string>
-    <string name="camera_recording">रिकॉर्डिंग</string>
     <string name="camera_photo_saved">फ़ोटो गैलरी में सहेजा गया</string>
     <string name="camera_video_saved">वीडियो गैलरी में सहेजा गया</string>
-    <string name="camera_share_again">और साझा करें</string>
     <string name="camera_mode_photo">फ़ोटो</string>
     <string name="camera_mode_quick_share">क्विक शेयर</string>
     <string name="camera_mode_video">वीडियो</string>
@@ -77,8 +84,6 @@
     <string name="camera_error_snackbar">त्रुटि: %1$s</string>
 
     <string name="share_title">इसके माध्यम से साझा करें</string>
-    <string name="share_image">GeoSnap फ़ोटो</string>
-    <string name="share_error">फ़ोटो साझा करने के लिए कोई ऐप उपलब्ध नहीं है।</string>
 
     <string name="gallery_title">गैलरी</string>
     <string name="gallery_empty">अभी तक कोई मीडिया कैप्चर नहीं हुआ।\nआपके द्वारा कैप्चर किए गए फ़ोटो और वीडियो यहाँ दिखाई देंगे।</string>
@@ -86,10 +91,14 @@
     <string name="retry">फिर प्रयास करें</string>
     <string name="gallery_viewer_counter">%1$d / %2$d</string>
     <string name="gallery_share">साझा करें</string>
-    <string name="gallery_delete_title">गैलरी से हटाएँ</string>
-    <string name="gallery_delete_message">इसे GeoSnap गैलरी से निकालें? फ़ाइल आपके डिवाइस की गैलरी में यथावत रहेगी।</string>
     <string name="gallery_delete_confirm">हटाएँ</string>
     <string name="gallery_delete_cancel">रद्द करें</string>
+    <string name="gallery_delete_proceed">हाँ, आगे बढ़ें</string>
+    <string name="gallery_delete_title_photo">फ़ोटो हटाएँ?</string>
+    <string name="gallery_delete_title_video">वीडियो हटाएँ?</string>
+    <string name="gallery_delete_title_media">मीडिया हटाएँ?</string>
+    <string name="gallery_delete_message_photo">क्या आप वाकई चयनित फ़ोटो हटाना चाहते हैं?</string>
+    <string name="gallery_delete_message_video">क्या आप वाकई चयनित वीडियो हटाना चाहते हैं?</string>
     <string name="gallery_delete_error">यह मीडिया हटाया नहीं जा सका।</string>
     <string name="gallery_selected_count">चयनित: %1$d</string>
     <string name="gallery_section_today">आज</string>
@@ -98,12 +107,9 @@
     <string name="gallery_section_this_month">इस महीने</string>
     <string name="gallery_section_last_month">पिछला महीना</string>
     <string name="gallery_section_older">पुराना</string>
-    <plurals name="gallery_delete_items_message">
-        <item quantity="one">इसे GeoSnap गैलरी से निकालें? फ़ाइल आपके डिवाइस की गैलरी में यथावत रहेगी।</item>
-        <item quantity="other">%1$d आइटम GeoSnap गैलरी से निकालें? फ़ाइलें आपके डिवाइस की गैलरी में यथावत रहेंगी।</item>
-    </plurals>
-
-    <string name="error_generic">कुछ गड़बड़ हो गई। कृपया फिर प्रयास करें।</string>
+    <string name="gallery_delete_message_media">क्या आप वाकई चयनित मीडिया हटाना चाहते हैं?</string>
+    <string name="gallery_delete_message_photos">क्या आप वाकई चयनित फ़ोटो हटाना चाहते हैं?</string>
+    <string name="gallery_delete_message_videos">क्या आप वाकई चयनित वीडियो हटाना चाहते हैं?</string>
 
     <string name="camera_error_share">यह कैप्चर साझा नहीं किया जा सका।</string>
 
@@ -115,7 +121,14 @@
     <string name="preview_retake">फिर से लें</string>
     <string name="preview_edit">संपादित करें</string>
     <string name="preview_save_to_gallery">गैलरी में सहेजें</string>
+    <string name="preview_save">सहेजें</string>
     <string name="preview_image">इमेज पूर्वावलोकन</string>
+
+    <string name="filter_original">मूल</string>
+    <string name="filter_vibrant">वाइब्रेंट</string>
+    <string name="filter_soft_tone">सॉफ्ट टोन</string>
+    <string name="filter_sharp_black">शार्प ब्लैक</string>
+    <string name="filter_gray">ग्रे</string>
 
     <string name="geotag_fetching_location">स्थान प्राप्त हो रहा है...</string>
     <string name="geotag_latitude">अक्षांश</string>

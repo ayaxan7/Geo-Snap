@@ -58,7 +58,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -199,6 +198,21 @@ private fun GalleryContent(
 
     if (showDeleteDialog) {
         val count = selectedMedia.size
+        val hasPhoto = selectedMedia.any { it.type == MediaType.IMAGE }
+        val hasVideo = selectedMedia.any { it.type == MediaType.VIDEO }
+        val isMixed = hasPhoto && hasVideo
+        val deleteTitleRes = when {
+            isMixed -> R.string.gallery_delete_title_media
+            hasVideo -> R.string.gallery_delete_title_video
+            else -> R.string.gallery_delete_title_photo
+        }
+        val deleteMessageRes = when {
+            isMixed -> R.string.gallery_delete_message_media
+            hasVideo -> if (count == 1) R.string.gallery_delete_message_video
+            else R.string.gallery_delete_message_videos
+            else -> if (count == 1) R.string.gallery_delete_message_photo
+            else R.string.gallery_delete_message_photos
+        }
         Dialog(onDismissRequest = { showDeleteDialog = false }) {
             Box(
                 modifier = Modifier
@@ -221,16 +235,14 @@ private fun GalleryContent(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = stringResource(R.string.gallery_delete_title),
+                        text = stringResource(deleteTitleRes),
                         style = MaterialTheme.typography.titleLarge,
                         color = Color.White,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = pluralStringResource(
-                            R.plurals.gallery_delete_items_message, count, count
-                        ),
+                        text = stringResource(deleteMessageRes),
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.White,
                         textAlign = TextAlign.Center
@@ -257,7 +269,7 @@ private fun GalleryContent(
                                 containerColor = Color.White, contentColor = Color(0xFFD32F2F)
                             ), shape = RoundedCornerShape(8.dp)
                         ) {
-                            Text(stringResource(R.string.gallery_delete_confirm))
+                            Text(stringResource(R.string.gallery_delete_proceed))
                         }
                     }
                 }
