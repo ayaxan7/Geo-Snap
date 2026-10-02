@@ -24,6 +24,7 @@ room = "2.7.2"
 retrofit = "2.11.0"
 okhttp = "4.12.0"
 moshi = "1.15.1"
+playAppUpdate = "2.1.0"
 
 [libraries]
 maps-compose = { group = "com.google.maps.android", name = "maps-compose", version.ref = "mapsCompose" }
@@ -98,6 +99,9 @@ androidx-room-compiler = { group = "androidx.room", name = "room-compiler", vers
 # Coroutines
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
+
+# Play In-App Updates (2.1.0 is the latest release; includes the Flow-based KTX API)
+play-app-update-ktx = { group = "com.google.android.play", name = "app-update-ktx", version.ref = "playAppUpdate" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

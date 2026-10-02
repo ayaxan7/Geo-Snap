@@ -198,20 +198,20 @@ fun SettingsScreen(
             )
             SettingsDivider()
 
-            SettingsItemArrow(
-                icon = R.drawable.ic_subscription,
-                titleRes = R.string.settings_subscription_plans,
-                onClick = { }
-            )
-            SettingsDivider()
+//            SettingsItemArrow(
+//                icon = R.drawable.ic_subscription,
+//                titleRes = R.string.settings_subscription_plans,
+//                onClick = { }
+//            )
+//            SettingsDivider()
 
-            SettingsItemSwitch(
-                icon = R.drawable.ic_sync,
-                titleRes = R.string.settings_sync_drive,
-                checked = syncEnabled,
-                onCheckedChange = { syncEnabled = it }
-            )
-            SettingsDivider()
+//            SettingsItemSwitch(
+//                icon = R.drawable.ic_sync,
+//                titleRes = R.string.settings_sync_drive,
+//                checked = syncEnabled,
+//                onCheckedChange = { syncEnabled = it }
+//            )
+//            SettingsDivider()
 
             SettingsItemSwitch(
                 icon = R.drawable.ic_media,
@@ -239,27 +239,27 @@ fun SettingsScreen(
                 titleRes = R.string.settings_rate_app,
                 onClick = { }
             )
-            SettingsDivider()
+//            SettingsDivider()
 
-            SettingsItemArrow(
-                icon = R.drawable.ic_terms,
-                titleRes = R.string.settings_terms,
-                onClick = { }
-            )
-            SettingsDivider()
-
-            SettingsItemArrow(
-                icon = R.drawable.ic_privacy,
-                titleRes = R.string.settings_privacy_policy,
-                onClick = { }
-            )
-            SettingsDivider()
-
-            SettingsItemArrow(
-                icon = R.drawable.ic_help,
-                titleRes = R.string.settings_help_support,
-                onClick = { }
-            )
+//            SettingsItemArrow(
+//                icon = R.drawable.ic_terms,
+//                titleRes = R.string.settings_terms,
+//                onClick = { }
+//            )
+//            SettingsDivider()
+//
+//            SettingsItemArrow(
+//                icon = R.drawable.ic_privacy,
+//                titleRes = R.string.settings_privacy_policy,
+//                onClick = { }
+//            )
+//            SettingsDivider()
+//
+//            SettingsItemArrow(
+//                icon = R.drawable.ic_help,
+//                titleRes = R.string.settings_help_support,
+//                onClick = { }
+//            )
             
             Spacer(modifier = Modifier.weight(1f))
             

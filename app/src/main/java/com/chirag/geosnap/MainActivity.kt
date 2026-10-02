@@ -5,11 +5,17 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.chirag.geosnap.core.LocaleHelper
 import com.chirag.geosnap.presentation.navigation.GeoSnapAppRoot
+import com.chirag.geosnap.presentation.update.InAppUpdateHost
 import com.chirag.geosnap.ui.theme.GeoSnapTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -26,7 +32,15 @@ class MainActivity : ComponentActivity() {
         setContent {
             GeoSnapTheme(darkTheme = false) {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    GeoSnapAppRoot()
+                    val snackbarHostState = remember { SnackbarHostState() }
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        GeoSnapAppRoot()
+                        SnackbarHost(
+                            hostState = snackbarHostState,
+                            modifier = Modifier.align(Alignment.BottomCenter)
+                        )
+                    }
+                    InAppUpdateHost(snackbarHostState = snackbarHostState)
                 }
             }
         }

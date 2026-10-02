@@ -165,4 +165,7 @@
     <string name="language_kn_native">ಕನ್ನಡ</string>
     <string name="language_kn_english">Kannada</string>
     <string name="language_kn_continue">ಕನ್ನಡದಲ್ಲಿ ಮುಂದುವರಿಸಿ</string>
+<!-- Play in-app updates -->
+    <string name="update_downloaded_message">புதுப்பிப்பு தயாராக உள்ளது. அதை நிறுவியும் அப்ளிகேஷனை மீண்டும் தொடங்கவும்.</string>
+    <string name="update_restart_action">மீண்டும் தொடங்கு</string>
 </resources>

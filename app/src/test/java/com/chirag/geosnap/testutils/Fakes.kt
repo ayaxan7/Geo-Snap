@@ -17,6 +17,13 @@ import com.chirag.geosnap.presentation.camera.GeoTagCardContent
 import com.chirag.geosnap.presentation.camera.GeoTagOverlayRenderer
 import androidx.camera.view.PreviewView
 import androidx.lifecycle.LifecycleOwner
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContract
+import androidx.core.app.ActivityOptionsCompat
+import com.chirag.geosnap.core.update.AppUpdateType
+import com.chirag.geosnap.core.update.UpdateSignal
+import com.chirag.geosnap.core.update.UpdateSignalSource
 import com.chirag.geosnap.data.maps.GeocodeResponse
 import com.chirag.geosnap.data.maps.GeocodeResult
 import com.chirag.geosnap.data.maps.MapsApi
@@ -24,6 +31,7 @@ import java.io.File
 import java.io.IOException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.asStateFlow
 import okhttp3.ResponseBody
 import okhttp3.ResponseBody.Companion.toResponseBody
@@ -253,4 +261,44 @@ class FakeCameraEngine : CameraEngine {
     }
 
     override fun release() = Unit
+}
+
+/**
+ * Stand-in for the Play update dialog launcher. [UpdateSignalSource.start] only
+ * forwards it, so no test ever launches an update flow.
+ */
+class NoOpUpdateLauncher : ActivityResultLauncher<IntentSenderRequest>() {
+    override fun launch(input: IntentSenderRequest) = Unit
+    override fun launch(input: IntentSenderRequest, options: ActivityOptionsCompat?) = Unit
+    override fun unregister() = Unit
+    override fun getContract(): ActivityResultContract<IntentSenderRequest, *> =
+        throw UnsupportedOperationException("Tests never launch an update flow")
+}
+
+/** Scripted [UpdateSignalSource]: replays a fixed list of signals, no Play Store. */
+class FakeUpdateSignalSource(
+    private val signalsToEmit: List<UpdateSignal> = emptyList()
+) : UpdateSignalSource {
+
+    /** Types the app asked Play to show, in order. */
+    val startedFlows = mutableListOf<AppUpdateType>()
+
+    var completeCalls = 0
+    var startError: Throwable? = null
+    var completeError: Throwable? = null
+
+    override fun signals(): Flow<UpdateSignal> = signalsToEmit.asFlow()
+
+    override fun start(
+        type: AppUpdateType,
+        launcher: ActivityResultLauncher<IntentSenderRequest>
+    ) {
+        startedFlows += type
+        startError?.let { throw it }
+    }
+
+    override suspend fun complete() {
+        completeCalls++
+        completeError?.let { throw it }
+    }
 }
