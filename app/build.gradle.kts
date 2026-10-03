@@ -65,9 +65,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
-    implementation("androidx.compose.material:material-icons-extended")
-    // Or if you are using Material 3 exclusively:
-    implementation("androidx.compose.material3:material3")
+    implementation(libs.androidx.compose.material.icons.extended)
     // Lifecycle / ViewModel
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)
