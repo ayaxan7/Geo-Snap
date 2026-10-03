@@ -5,6 +5,7 @@ import com.chirag.geosnap.data.maps.StaticMapFetcher
 import com.chirag.geosnap.testutils.FakeMapsApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlin.math.abs
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -85,6 +86,48 @@ class CanvasGeoTagOverlayRendererTest {
         return alpha > 100 && green > red + 60 && green > blue + 60
     }
 
+    /** The bounding box of everything actually drawn inside the card. */
+    private data class InkBounds(
+        val left: Int,
+        val right: Int,
+        val top: Int,
+        val bottom: Int
+    ) {
+        val centreX: Float get() = (left + right) / 2f
+        val height: Int get() = bottom - top + 1
+    }
+
+    /**
+     * Measures the drawn content, sampling a region that is provably free of the
+     * card's opaque white border: horizontally that is inside the shell's padding
+     * (past the stroke at the very edge), and vertically just inside the stroke,
+     * which is where the rounded corners have already curved away from the sides.
+     */
+    private fun Bitmap.inkBounds(metrics: GeoTagCardMetrics): InkBounds {
+        val x0 = (metrics.paddingHorizontalDp * renderDensity).toInt()
+        val x1 = width - x0
+        val stroke = (GeoTagCardShell.CARD_BORDER_DP * renderDensity).toInt()
+        val row = IntArray(x1 - x0)
+        var left = Int.MAX_VALUE
+        var right = Int.MIN_VALUE
+        var top = Int.MAX_VALUE
+        var bottom = Int.MIN_VALUE
+        for (y in stroke + 2 until height - stroke - 2) {
+            getPixels(row, 0, row.size, x0, y, row.size, 1)
+            row.forEachIndexed { i, color ->
+                if (color ushr 24 and 0xFF > INK_ALPHA_THRESHOLD) {
+                    val x = x0 + i
+                    if (x < left) left = x
+                    if (x > right) right = x
+                    if (y < top) top = y
+                    if (y > bottom) bottom = y
+                }
+            }
+        }
+        assertTrue("no drawn content found", left <= right)
+        return InkBounds(left, right, top, bottom)
+    }
+
     private fun isTextLike(color: Int): Boolean {
         val alpha = color ushr 24 and 0xFF
         val red = color shr 16 and 0xFF
@@ -138,6 +181,37 @@ class CanvasGeoTagOverlayRendererTest {
             minimal.height < mapLeft.height
         )
         assertEquals(minimal.width, mapLeft.width)
+    }
+
+    @Test
+    fun `minimal content is horizontally centred in the card`() {
+        val bitmap = card(CardTemplates.MINIMAL)
+        val ink = bitmap.inkBounds(CardTemplates.MINIMAL.metrics())
+        val cardCentre = bitmap.width / 2f
+
+        assertTrue(
+            "content centred at ${ink.centreX}, card centre at $cardCentre",
+            abs(ink.centreX - cardCentre) <= CENTRE_TOLERANCE_PX
+        )
+    }
+
+    @Test
+    fun `minimal reserves the shell and details padding above and below the text`() {
+        val metrics = CardTemplates.MINIMAL.metrics()
+        val bitmap = card(CardTemplates.MINIMAL)
+        val ink = bitmap.inkBounds(metrics)
+        val expectedGap =
+            (metrics.paddingVerticalDp + metrics.detailsPaddingVerticalDp) * renderDensity
+
+        assertTrue(
+            "expected at least ${expectedGap.toInt() - ASCENT_TOLERANCE_PX}px above the text, got ${ink.top}px",
+            ink.top >= expectedGap - ASCENT_TOLERANCE_PX
+        )
+        assertTrue(
+            "card is ${bitmap.height}px, too short for ${expectedGap.toInt()}px padding around " +
+                "${ink.height}px of content",
+            bitmap.height >= 2 * expectedGap + ink.height
+        )
     }
 
     @Test
@@ -221,5 +295,20 @@ class CanvasGeoTagOverlayRendererTest {
                 bitmap.width > 1 && bitmap.height > 1
             )
         }
+    }
+
+    private companion object {
+        /** Anything drawn over the card background (alpha 0xB3) is content. */
+        const val INK_ALPHA_THRESHOLD = 185
+
+        /**
+         * Centring tolerance: text rasterisation is not perfectly symmetric, so
+         * glyph ink can sit a few px off centre. Measured drift is under 5px,
+         * while the bug this guards against is a full horizontal padding.
+         */
+        const val CENTRE_TOLERANCE_PX = 12f
+
+        /** Ink starts below the layout top by roughly the glyph ascent. */
+        const val ASCENT_TOLERANCE_PX = 12f
     }
 }

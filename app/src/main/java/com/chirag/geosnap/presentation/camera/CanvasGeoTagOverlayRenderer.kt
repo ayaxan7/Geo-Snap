@@ -206,6 +206,12 @@ class CanvasGeoTagOverlayRenderer internal constructor(
      * mirroring [MinimalContent]. Because the separator is a styled span inside a
      * single layout, it is measured and centred as one run of text rather than as
      * three independently placed blocks.
+     *
+     * Geometry matches the preview: the layouts are laid out over the shell's
+     * content width but drawn at [GeoTagCardShell.PADDING_HORIZONTAL_DP], which is
+     * where Compose's padded `Column` starts. Drawing them at x=0 would centre the
+     * text one horizontal padding to the left of the card, and the details padding
+     * is applied above and below the column exactly as [renderMapLeft] does.
      */
     private fun renderMinimal(metrics: GeoTagCardMetrics, copy: CardCopy): Bitmap {
         val padV = dp(metrics.paddingVerticalDp)
@@ -240,21 +246,22 @@ class CanvasGeoTagOverlayRenderer internal constructor(
         )
 
         val lineGap = dp(metrics.detailsLineGapDp)
+        val detailsVPad = dp(metrics.detailsPaddingVerticalDp)
         val columnH = dateLayout.height + lineGap + locationLayout.height + lineGap +
             coordinatesLayout.height
-        val cardHeight = padV + columnH + padV
+        val cardHeight = padV + detailsVPad + columnH + detailsVPad + padV
 
         val bitmap = Bitmap.createBitmap(cardWidth, cardHeight, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
 
         drawCardShell(canvas, bitmap, metrics)
 
-        var y = padV.toFloat()
-        canvas.drawLayout(dateLayout, 0f, y)
+        var y = (padV + detailsVPad).toFloat()
+        canvas.drawLayout(dateLayout, padH.toFloat(), y)
         y += dateLayout.height + lineGap
-        canvas.drawLayout(locationLayout, 0f, y)
+        canvas.drawLayout(locationLayout, padH.toFloat(), y)
         y += locationLayout.height + lineGap
-        canvas.drawLayout(coordinatesLayout, 0f, y)
+        canvas.drawLayout(coordinatesLayout, padH.toFloat(), y)
 
         return bitmap
     }
