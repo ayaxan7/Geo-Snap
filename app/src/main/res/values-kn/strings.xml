@@ -71,7 +71,6 @@
     <string name="camera_mode_quick_share">ಕ್ವಿಕ್ ಶೇರ್</string>
     <string name="camera_mode_video">ವೀಡಿಯೋ</string>
     <string name="camera_timer">ಟೈಮರ್</string>
-    <string name="camera_grid">ಗ್ರಿಡ್</string>
     <string name="camera_gallery">ಗ್ಯಾಲರಿ</string>
 
     <string name="camera_error_unavailable">ಈ ಸಾಧನದಲ್ಲಿ ಕ್ಯಾಮೆರಾ ಲಭ್ಯವಿಲ್ಲ.</string>
@@ -168,4 +167,11 @@
 <!-- Play in-app updates -->
     <string name="update_downloaded_message">ನವೀಕರಣೆ ಸಿದ್ಧವಾಗಿದೆ. ಅದನ್ನು ಸ್ಥಾಪಿಸಲು ಆ್ಯಪ್ ಮತ್ತೆ ಪ್ರಾರಂಭಿಸಿ.</string>
     <string name="update_restart_action">ಮತ್ತೆ ಪ್ರಾರಂಭಿಸಿ</string>
+<!-- Geotag card templates -->
+    <string name="templates_title">ಕಾರ್ಡ್ ಟೆಂಪ್ಲೇಟ್‌ಗಳು</string>
+    <string name="camera_templates">ಕಾರ್ಡ್ ಟೆಂಪ್ಲೇಟ್‌ಗಳು</string>
+    <string name="template_classic">ಕ್ಲಾಸಿಕ್</string>
+    <string name="templates_applies_to_new_captures">ಹೊಸ ಫೋಟೋ ಮತ್ತು ವಿಡಿಯೋಗಳಿಗೆ ಬಳಸಲಾಗುತ್ತದೆ</string>
+    <string name="template_selected">ಆಯ್ಕೆಮಾಡಲಾಗಿದೆ</string>
+    <string name="template_not_selected">ಆಯ್ಕೆಮಾಡಿಲ್ಲ</string>
 </resources>

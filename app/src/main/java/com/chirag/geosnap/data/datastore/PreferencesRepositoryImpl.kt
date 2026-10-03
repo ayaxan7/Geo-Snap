@@ -25,6 +25,7 @@ class PreferencesRepositoryImpl @Inject constructor(
     private object Keys {
         val HAS_COMPLETED_ONBOARDING = booleanPreferencesKey("has_completed_onboarding")
         val SELECTED_LANGUAGE = stringPreferencesKey("selected_language")
+        val SELECTED_CARD_TEMPLATE = stringPreferencesKey("selected_card_template")
     }
 
     override val hasCompletedOnboarding: Flow<Boolean> = dataStore.data
@@ -35,6 +36,10 @@ class PreferencesRepositoryImpl @Inject constructor(
         .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
         .map { preferences -> preferences[Keys.SELECTED_LANGUAGE] }
 
+    override val selectedCardTemplateId: Flow<String?> = dataStore.data
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .map { preferences -> preferences[Keys.SELECTED_CARD_TEMPLATE] }
+
     override suspend fun setOnboardingCompleted() {
         dataStore.edit { preferences ->
             preferences[Keys.HAS_COMPLETED_ONBOARDING] = true
@@ -44,6 +49,12 @@ class PreferencesRepositoryImpl @Inject constructor(
     override suspend fun setSelectedLanguage(languageCode: String) {
         dataStore.edit { preferences ->
             preferences[Keys.SELECTED_LANGUAGE] = languageCode
+        }
+    }
+
+    override suspend fun setSelectedCardTemplateId(templateId: String) {
+        dataStore.edit { preferences ->
+            preferences[Keys.SELECTED_CARD_TEMPLATE] = templateId
         }
     }
 }

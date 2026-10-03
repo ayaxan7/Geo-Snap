@@ -71,7 +71,6 @@
     <string name="camera_mode_quick_share">விரைவுப் பகிர்வு</string>
     <string name="camera_mode_video">வீடியோ</string>
     <string name="camera_timer">டைமர்</string>
-    <string name="camera_grid">கிரிட்</string>
     <string name="camera_gallery">கேலரி</string>
 
     <string name="camera_error_unavailable">இந்தச் சாதனத்தில் கேமரா கிடைக்கவில்லை.</string>
@@ -168,4 +167,11 @@
 <!-- Play in-app updates -->
     <string name="update_downloaded_message">புதுப்பிப்பு தயாராக உள்ளது. அதை நிறுவியும் அப்ளிகேஷனை மீண்டும் தொடங்கவும்.</string>
     <string name="update_restart_action">மீண்டும் தொடங்கு</string>
+<!-- Geotag card templates -->
+    <string name="templates_title">அட்டை வார்ப்புருக்கள்</string>
+    <string name="camera_templates">அட்டை வார்ப்புருக்கள்</string>
+    <string name="template_classic">கிளாசிக்</string>
+    <string name="templates_applies_to_new_captures">புதிய படங்கள் மற்றும் வீடியோக்களுக்குப் பயன்படுத்தப்படும்</string>
+    <string name="template_selected">தேர்ந்தெடுக்கப்பட்டது</string>
+    <string name="template_not_selected">தேர்ந்தெடுக்கப்படவில்லை</string>
 </resources>

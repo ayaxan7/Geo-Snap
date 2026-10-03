@@ -78,7 +78,6 @@
     <string name="camera_mode_quick_share">Quick Share</string>
     <string name="camera_mode_video">Video</string>
     <string name="camera_timer">Timer</string>
-    <string name="camera_grid">Grid</string>
     <string name="camera_gallery">Gallery</string>
 
     <!-- Camera errors -->
@@ -191,4 +190,11 @@
 <!-- Play in-app updates -->
     <string name="update_downloaded_message">Update ready. Restart to install it.</string>
     <string name="update_restart_action">Restart</string>
+<!-- Geotag card templates -->
+    <string name="templates_title">Card Templates</string>
+    <string name="camera_templates">Card templates</string>
+    <string name="template_classic">Classic</string>
+    <string name="templates_applies_to_new_captures">Used for new photos and videos</string>
+    <string name="template_selected">Selected</string>
+    <string name="template_not_selected">Not selected</string>
 </resources>

@@ -75,6 +75,7 @@ import com.chirag.geosnap.ui.theme.PrimaryGreen
 fun SettingsScreen(
     onBack: () -> Unit,
     onLanguageClick: () -> Unit,
+    onTemplatesClick: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -194,7 +195,7 @@ fun SettingsScreen(
             SettingsItemArrow(
                 icon = R.drawable.ic_templates,
                 titleRes = R.string.settings_templates,
-                onClick = { }
+                onClick = onTemplatesClick
             )
             SettingsDivider()
 

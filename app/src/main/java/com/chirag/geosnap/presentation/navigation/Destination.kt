@@ -19,6 +19,7 @@ sealed class Destination(val route: String) {
     data object Home : Destination(route = HomeRoute)
     data object Gallery : Destination(route = GalleryRoute)
     data object Settings : Destination(route = SettingsRoute)
+    data object Templates : Destination(route = TemplatesRoute)
 
     /** Full-screen media viewer, opened at the tapped gallery [index]. */
     data class GalleryViewer(val index: Int) : Destination(
@@ -72,6 +73,7 @@ private const val LanguageRoute = "language"
 private const val HomeRoute = "home"
 private const val GalleryRoute = "gallery"
 private const val SettingsRoute = "settings"
+private const val TemplatesRoute = "templates"
 
 /** Central navigation entry points for the app. */
 fun NavController.navigateTo(destination: Destination, builder: NavOptionsBuilder.() -> Unit = {}) {
@@ -88,6 +90,10 @@ fun NavController.navigateToLanguage() {
 
 fun NavController.navigateToSettings() {
     navigateTo(Destination.Settings) { launchSingleTop = true }
+}
+
+fun NavController.navigateToTemplates() {
+    navigateTo(Destination.Templates) { launchSingleTop = true }
 }
 
 fun NavController.navigateToHome() {

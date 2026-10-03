@@ -63,6 +63,7 @@ fun CameraScreen(
     mode: CameraMode,
     onBack: () -> Unit,
     onGallery: () -> Unit = {},
+    onTemplatesClick: () -> Unit = {},
     viewModel: CameraViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -262,6 +263,7 @@ fun CameraScreen(
                     hasFlash = uiState.hasFlash,
                     onBack = onBack,
                     onFlash = viewModel::toggleFlash,
+                    onTemplatesClick = onTemplatesClick,
                     modifier = Modifier
                         .fillMaxWidth()
                         .align(Alignment.TopCenter)

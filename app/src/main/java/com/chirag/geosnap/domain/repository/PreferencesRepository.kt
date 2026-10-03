@@ -14,7 +14,16 @@ interface PreferencesRepository {
 
     val selectedLanguage: Flow<String?>
 
+    /**
+     * Id of the geotag card template applied to new captures, or null when the
+     * user has never picked one and [com.chirag.geosnap.presentation.camera.CardTemplates.DEFAULT]
+     * should be used.
+     */
+    val selectedCardTemplateId: Flow<String?>
+
     suspend fun setOnboardingCompleted()
 
     suspend fun setSelectedLanguage(languageCode: String)
+
+    suspend fun setSelectedCardTemplateId(templateId: String)
 }

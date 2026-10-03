@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -37,263 +39,258 @@ import coil3.compose.AsyncImage
 import com.chirag.geosnap.R
 import com.chirag.geosnap.core.LocaleHelper
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 /**
- * The location card composable shared by both the live camera overlay and the
- * off-screen overlay renderer. The same composable is used in both places so the
- * card burned into photos/videos matches what the user sees on screen.
+ * The location card composable shown over the capture preview.
+ *
+ * The card's appearance comes entirely from [GeoTagCardContent.template]: the shell
+ * is shared by every template via [GeoTagCardShell], the arrangement follows the
+ * template's [CardLayout] and its metrics come from that template's
+ * [GeoTagCardStyle]. The [CanvasGeoTagOverlayRenderer] follows the same structure so
+ * the card burnt into media matches what the user reviewed.
  *
  * When [mapBitmap] is provided it is drawn as the map thumbnail (burned media);
  * otherwise the static-map URL from [GeoTagCardContent.staticMapUrl] is loaded
  * asynchronously (live overlay).
+ *
+ * [scale] renders a genuine miniature of the card — every metric is scaled together
+ * so proportions match the real thing — which is how the template picker previews
+ * each design with the same composable the user sees in the camera.
  */
 @Composable
 fun GeoTagCard(
     content: GeoTagCardContent,
     modifier: Modifier = Modifier,
     mapBitmap: Bitmap? = null,
-    onEditClick: (() -> Unit)? = null
+    onEditClick: (() -> Unit)? = null,
+    scale: Float = 1f
 ) {
+    val template = content.template
+    val metrics = remember(template, scale) { template.metrics(scale) }
+
     val context = LocalContext.current
-    val englishContext = remember(context) {
-        LocaleHelper.englishContext(context)
+    val englishContext = remember(context) { LocaleHelper.englishContext(context) }
+    val dateFormat = remember { SimpleDateFormat(CARD_DATE_PATTERN, java.util.Locale.ENGLISH) }
+
+    val labels = remember(englishContext, content) {
+        CardLabels(
+            map = englishContext.getString(R.string.geotag_map),
+            staticMap = englishContext.getString(R.string.geotag_static_map),
+            logo = englishContext.getString(R.string.geotag_logo),
+            copy = content.toCardCopy(
+                fetchingText = englishContext.getString(R.string.geotag_fetching_location),
+                latLabel = englishContext.getString(R.string.geotag_latitude),
+                lngLabel = englishContext.getString(R.string.geotag_longitude),
+                dateFormatter = dateFormat
+            )
+        )
     }
-
-    val fetchingText =
-        englishContext.getString(R.string.geotag_fetching_location)
-    val latLabel =
-        englishContext.getString(R.string.geotag_latitude)
-    val lngLabel =
-        englishContext.getString(R.string.geotag_longitude)
-    val dateLabel =
-        englishContext.getString(R.string.geotag_date)
-    val staticMapLabel =
-        englishContext.getString(R.string.geotag_static_map)
-    val mapLabel =
-        englishContext.getString(R.string.geotag_map)
-    val logoLabel =
-        englishContext.getString(R.string.geotag_logo)
-
-    // The title degrades through progressively coarser location data so that a
-    // known address is never reported as "still fetching".
-    val cityText = content.cityString ?: content.fullAddress ?: fetchingText
-    val fullAddressText =
-        content.fullAddress ?: content.cityString ?: fetchingText
 
     Box(modifier = modifier) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
+                // The real card fills the width it is given, matching how it has
+                // always been framed on the camera. A scaled preview instead takes
+                // the shell's own width so it keeps the card's true proportions.
+                .then(
+                    if (scale == 1f) {
+                        Modifier.fillMaxWidth()
+                    } else {
+                        Modifier.width(metrics.cardWidthDp.dp)
+                    }
+                )
                 .background(
-                    Color(GeoTagCardSpec.CARD_BACKGROUND_COLOR),
-                    RoundedCornerShape(GeoTagCardSpec.CARD_CORNER_DP.dp)
+                    Color(metrics.cardBackgroundColor),
+                    RoundedCornerShape(metrics.cardCornerDp.dp)
                 )
                 .border(
-                    width = GeoTagCardSpec.CARD_BORDER_DP.dp,
-                    color = Color(GeoTagCardSpec.CARD_BORDER_COLOR),
-                    shape = RoundedCornerShape(GeoTagCardSpec.CARD_CORNER_DP.dp)
+                    width = metrics.cardBorderDp.dp,
+                    color = Color(metrics.cardBorderColor),
+                    shape = RoundedCornerShape(metrics.cardCornerDp.dp)
                 )
                 .padding(
-                    horizontal = GeoTagCardSpec.PADDING_HORIZONTAL_DP.dp,
-                    vertical = GeoTagCardSpec.PADDING_VERTICAL_DP.dp
+                    horizontal = metrics.paddingHorizontalDp.dp,
+                    vertical = metrics.paddingVerticalDp.dp
                 ),
             // Content hugs the card: it is bottom-aligned on one baseline (map, date
             // row and logo share the same bottom line) instead of being padded out to
             // a fixed height.
             verticalAlignment = Alignment.Bottom
         ) {
-
-
-        MapThumbnail(
-            image = mapBitmap ?: content.staticMapUrl,
-            staticMapLabel = staticMapLabel,
-            mapLabel = mapLabel
-        )
-
-        Spacer(modifier = Modifier.width(GeoTagCardSpec.SPACER_MAP_DETAILS_DP.dp))
-
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(vertical = GeoTagCardSpec.DETAILS_PADDING_VERTICAL_DP.dp),
-            verticalArrangement = Arrangement.spacedBy(GeoTagCardSpec.DETAILS_LINE_GAP_DP.dp)
-        ) {
-
-            // City
-            Text(
-                text = cityText,
-                color = Color(GeoTagCardSpec.TEXT_COLOR),
-                fontWeight = FontWeight.Bold,
-                fontSize = GeoTagCardSpec.CITY_TEXT_SIZE_SP.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            // Address
-            Row(
-                verticalAlignment = Alignment.Top
-            ) {
-                Image(
-                    painter = painterResource(
-                        R.drawable.ic_map
-                    ),
-                    contentDescription = mapLabel,
-                    modifier = Modifier.size(GeoTagCardSpec.ICON_SIZE_DP.dp)
-                )
-
-                Spacer(modifier = Modifier.width(GeoTagCardSpec.ICON_TEXT_GAP_DP.dp))
-
-                Text(
-                    text = fullAddressText,
-                    color = Color(GeoTagCardSpec.TEXT_SECONDARY_COLOR),
-                    fontSize = GeoTagCardSpec.ADDRESS_TEXT_SIZE_SP.sp,
-                    lineHeight = GeoTagCardSpec.ADDRESS_LINE_HEIGHT_SP.sp,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-
-            // Coordinates
-            Text(
-                text = buildString {
-                    append("$latLabel: ")
-                    append(
-                        content.latitude?.let {
-                            "%.4f°".format(it)
-                        } ?: "--"
-                    )
-
-                    append(" / ")
-
-                    append("$lngLabel: ")
-                    append(
-                        content.longitude?.let {
-                            "%.4f°".format(it)
-                        } ?: "--"
-                    )
-                },
-                color = Color(GeoTagCardSpec.TEXT_COLOR),
-                fontSize = GeoTagCardSpec.COORDINATES_TEXT_SIZE_SP.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            // Date
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Image(
-                    painter = painterResource(
-                        R.drawable.ic_calendar
-                    ),
-                    contentDescription = dateLabel,
-                    modifier = Modifier.size(GeoTagCardSpec.ICON_SIZE_DP.dp)
-                )
-
-                Spacer(modifier = Modifier.width(GeoTagCardSpec.ICON_TEXT_GAP_DP.dp))
-
-                val dateFormat = SimpleDateFormat(
-                    "EEEE, dd/MM/yyyy - h:mm a",
-                    Locale.ENGLISH
-                )
-
-                val currentDateTime =
-                    dateFormat.format(Date(content.timestamp))
-
-                Text(
-                    text = currentDateTime,
-                    color = Color(GeoTagCardSpec.TEXT_COLOR),
-                    fontSize = GeoTagCardSpec.DATE_TEXT_SIZE_SP.sp,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+            when (template.layout) {
+                CardLayout.MAP_LEFT -> MapLeftContent(
+                    copy = labels.copy,
+                    metrics = metrics,
+                    labels = labels,
+                    mapImage = mapBitmap ?: content.staticMapUrl
                 )
             }
         }
 
-        Spacer(modifier = Modifier.width(GeoTagCardSpec.SPACER_DETAILS_LOGO_DP.dp))
-
-        Box(
-            modifier = Modifier
-                .size(GeoTagCardSpec.LOGO_SIZE_DP.dp)
-                .clip(RoundedCornerShape(GeoTagCardSpec.LOGO_CORNER_DP.dp))
-                .background(Color(GeoTagCardSpec.LOGO_GREEN)),
-            contentAlignment = Alignment.Center
-        ) {
-            Image(
-                painter = painterResource(R.drawable.geo_snap_icon),
-                contentDescription = logoLabel,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.FillBounds
-            )
-        }
-    }
-    
-    if (onEditClick != null) {
-        androidx.compose.material3.IconButton(
-            onClick = onEditClick,
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(8.dp)
-                .size(24.dp)
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_edit_pencil),
-                contentDescription = stringResource(R.string.edit_location_title),
-                tint = Color.White
-            )
+        if (onEditClick != null) {
+            IconButton(
+                onClick = onEditClick,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(8.dp)
+                    .size(24.dp)
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_edit_pencil),
+                    contentDescription = stringResource(R.string.edit_location_title),
+                    tint = Color.White
+                )
+            }
         }
     }
 }
+
+/** Non-visual strings resolved once for a card, kept out of the layout branches. */
+private class CardLabels(
+    val map: String,
+    val staticMap: String,
+    val logo: String,
+    val copy: CardCopy
+)
+
+/**
+ * Map thumbnail on the left, text block in the middle, logo on the right.
+ *
+ * The three columns are bottom-aligned onto a single baseline so the map, the date
+ * row and the logo all end on the same line just above the card's bottom edge.
+ */
+@Composable
+private fun RowScope.MapLeftContent(
+    copy: CardCopy,
+    metrics: GeoTagCardMetrics,
+    labels: CardLabels,
+    mapImage: Any?
+) {
+    MapThumbnail(
+        image = mapImage,
+        metrics = metrics,
+        staticMapLabel = labels.staticMap,
+        mapLabel = labels.map
+    )
+
+    Spacer(modifier = Modifier.width(metrics.spacerMapDetailsDp.dp))
+
+    Column(
+        modifier = Modifier
+            .weight(1f)
+            .padding(vertical = metrics.detailsPaddingVerticalDp.dp),
+        verticalArrangement = Arrangement.spacedBy(metrics.detailsLineGapDp.dp)
+    ) {
+        Text(
+            text = copy.city,
+            color = Color(metrics.textColor),
+            fontWeight = FontWeight.Bold,
+            fontSize = metrics.cityTextSizeSp.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        Row(verticalAlignment = Alignment.Top) {
+            Image(
+                painter = painterResource(R.drawable.ic_map),
+                contentDescription = labels.map,
+                modifier = Modifier.size(metrics.iconSizeDp.dp)
+            )
+            Spacer(modifier = Modifier.width(metrics.iconTextGapDp.dp))
+            Text(
+                text = copy.address,
+                color = Color(metrics.textSecondaryColor),
+                fontSize = metrics.addressTextSizeSp.sp,
+                lineHeight = metrics.addressLineHeightSp.sp,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+
+        Text(
+            text = copy.coordinates,
+            color = Color(metrics.textColor),
+            fontSize = metrics.coordinatesTextSizeSp.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Image(
+                painter = painterResource(R.drawable.ic_calendar),
+                contentDescription = labels.map,
+                modifier = Modifier.size(metrics.iconSizeDp.dp)
+            )
+            Spacer(modifier = Modifier.width(metrics.iconTextGapDp.dp))
+            Text(
+                text = copy.date,
+                color = Color(metrics.textColor),
+                fontSize = metrics.dateTextSizeSp.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+
+    if (metrics.logoVisible) {
+        Spacer(modifier = Modifier.width(metrics.spacerDetailsLogoDp.dp))
+        LogoBadge(metrics = metrics, logoLabel = labels.logo)
+    }
+}
+
+@Composable
+private fun LogoBadge(metrics: GeoTagCardMetrics, logoLabel: String) {
+    Box(
+        modifier = Modifier
+            .size(metrics.logoSizeDp.dp)
+            .clip(RoundedCornerShape(metrics.logoCornerDp.dp))
+            .background(Color(metrics.logoBackgroundColor)),
+        contentAlignment = Alignment.Center
+    ) {
+        Image(
+            painter = painterResource(R.drawable.geo_snap_icon),
+            contentDescription = logoLabel,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.FillBounds
+        )
+    }
 }
 
 @Composable
 private fun MapThumbnail(
     image: Any?,
+    metrics: GeoTagCardMetrics,
     staticMapLabel: String,
     mapLabel: String
 ) {
     Box(
         modifier = Modifier
-            .width(GeoTagCardSpec.MAP_WIDTH_DP.dp)
-            .height(GeoTagCardSpec.MAP_HEIGHT_DP.dp)
-            .clip(
-                RoundedCornerShape(
-                    GeoTagCardSpec.MAP_CORNER_DP.dp
-                )
-            )
-            .background(
-                Color(GeoTagCardSpec.MAP_BACKGROUND_COLOR)
-            )
+            .width(metrics.mapWidthDp.dp)
+            .height(metrics.mapHeightDp.dp)
+            .clip(RoundedCornerShape(metrics.mapCornerDp.dp))
+            .background(Color(metrics.mapBackgroundColor))
     ) {
         when (image) {
-            is Bitmap -> {
-                Image(
-                    bitmap = image.asImageBitmap(),
-                    contentDescription = staticMapLabel,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-            }
+            is Bitmap -> Image(
+                bitmap = image.asImageBitmap(),
+                contentDescription = staticMapLabel,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
 
-            is String -> {
-                AsyncImage(
-                    model = image,
-                    contentDescription = staticMapLabel,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-            }
+            is String -> AsyncImage(
+                model = image,
+                contentDescription = staticMapLabel,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
 
-            else -> {
-                Text(
-                    text = mapLabel,
-                    modifier = Modifier.align(Alignment.Center),
-                    color = Color.White,
-                    fontSize = 10.sp
-                )
-            }
+            else -> Text(
+                text = mapLabel,
+                modifier = Modifier.align(Alignment.Center),
+                color = Color.White,
+                fontSize = 10.sp
+            )
         }
     }
 }

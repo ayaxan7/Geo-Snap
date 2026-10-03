@@ -57,17 +57,26 @@ class InMemoryPreferencesDataStore(
 /** Scripted PreferencesRepository for ViewModel tests. */
 class FakePreferencesRepository(
     initialOnboarding: Boolean = false,
-    initialLanguage: String? = null
+    initialLanguage: String? = null,
+    initialCardTemplateId: String? = null
 ) : PreferencesRepository {
 
     private val _onboarding = MutableStateFlow(initialOnboarding)
     private val _language = MutableStateFlow(initialLanguage)
+    private val _cardTemplateId = MutableStateFlow(initialCardTemplateId)
 
     override val hasCompletedOnboarding: Flow<Boolean> = _onboarding.asStateFlow()
     override val selectedLanguage: Flow<String?> = _language.asStateFlow()
+    override val selectedCardTemplateId: Flow<String?> = _cardTemplateId.asStateFlow()
 
     val onboardingValue: Boolean get() = _onboarding.value
     val languageValue: String? get() = _language.value
+    val cardTemplateValue: String? get() = _cardTemplateId.value
+
+    /** Simulates a persisted template written outside this ViewModel, e.g. by Settings. */
+    fun emitCardTemplateId(templateId: String?) {
+        _cardTemplateId.value = templateId
+    }
 
     override suspend fun setOnboardingCompleted() {
         _onboarding.value = true
@@ -75,6 +84,10 @@ class FakePreferencesRepository(
 
     override suspend fun setSelectedLanguage(languageCode: String) {
         _language.value = languageCode
+    }
+
+    override suspend fun setSelectedCardTemplateId(templateId: String) {
+        _cardTemplateId.value = templateId
     }
 }
 

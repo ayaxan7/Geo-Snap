@@ -13,6 +13,7 @@ import com.chirag.geosnap.data.maps.MapsApi
 import com.chirag.geosnap.domain.model.GeoCoordinate
 import com.chirag.geosnap.domain.repository.MediaRepository
 import com.chirag.geosnap.domain.usecase.GetCurrentLocationUseCase
+import com.chirag.geosnap.domain.usecase.GetSelectedCardTemplateUseCase
 import com.chirag.geosnap.domain.usecase.IsLocationEnabledUseCase
 import com.chirag.geosnap.presentation.core.hasMediaPermission
 import com.chirag.geosnap.presentation.navigation.Destination
@@ -53,7 +54,8 @@ class CameraViewModel @Inject constructor(
     private val getCurrentLocation: GetCurrentLocationUseCase,
     private val isLocationEnabled: IsLocationEnabledUseCase,
     private val geoTagOverlayRenderer: GeoTagOverlayRenderer,
-    private val mapsApi: MapsApi
+    private val mapsApi: MapsApi,
+    private val getSelectedCardTemplate: GetSelectedCardTemplateUseCase
 ) : ViewModel() {
 
     var mode: CameraMode = CameraMode.fromRoute(
@@ -68,6 +70,20 @@ class CameraViewModel @Inject constructor(
 
     init {
         checkLocationEnabled()
+        observeSelectedTemplate()
+    }
+
+    /**
+     * Keeps the geotag card template in sync with the persisted selection, so the
+     * template chosen from Settings or the camera top bar applies to the next
+     * capture without the user having to reopen the picker.
+     */
+    private fun observeSelectedTemplate() {
+        viewModelScope.launch {
+            getSelectedCardTemplate().collect { template ->
+                _uiState.update { it.copy(selectedTemplate = template) }
+            }
+        }
     }
 
     private var attachedEngine: CameraEngine? = null

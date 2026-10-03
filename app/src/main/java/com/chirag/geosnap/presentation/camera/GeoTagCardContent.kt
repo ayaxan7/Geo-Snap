@@ -7,6 +7,10 @@ import com.chirag.geosnap.domain.model.GeoCoordinate
  * Capture-time snapshot of the location card contents. This pure data holder is
  * what gets rendered into a [android.graphics.Bitmap] and burned into photos and
  * videos, so burning it never depends on live UI state.
+ *
+ * [template] is part of the snapshot for the same reason: the card the user picked
+ * before capturing is the card that gets burnt in, so switching templates
+ * afterwards cannot retroactively change an in-flight capture.
  */
 data class GeoTagCardContent(
     val cityString: String?,
@@ -14,7 +18,8 @@ data class GeoTagCardContent(
     val latitude: Double?,
     val longitude: Double?,
     val timestamp: Long,
-    val staticMapUrl: String?
+    val staticMapUrl: String?,
+    val template: CardTemplate = CardTemplates.DEFAULT
 )
 
 /** Static map thumbnail size for the on-screen card, as opposed to the burnt one. */
@@ -49,6 +54,37 @@ fun CameraUiState.toGeoTagCardContent(
         latitude = lat,
         longitude = lng,
         timestamp = coordinate?.timestamp ?: System.currentTimeMillis(),
-        staticMapUrl = staticMapUrl(lat, lng, mapSizePx)
+        staticMapUrl = staticMapUrl(lat, lng, mapSizePx),
+        template = selectedTemplate
     )
 }
+
+/** Date format used by the card, in both the preview and the burnt overlay. */
+internal const val CARD_DATE_PATTERN = "EEEE, dd/MM/yyyy - h:mm a"
+
+/**
+ * The card copy, resolved from a single place so the live [GeoTagCard] and the
+ * [CanvasGeoTagOverlayRenderer] cannot drift apart.
+ *
+ * The title degrades through progressively coarser location data so that a known
+ * address is never reported as "still fetching".
+ */
+internal class CardCopy(
+    val city: String,
+    val address: String,
+    val coordinates: String,
+    val date: String
+)
+
+internal fun GeoTagCardContent.toCardCopy(
+    fetchingText: String,
+    latLabel: String,
+    lngLabel: String,
+    dateFormatter: java.text.DateFormat
+): CardCopy = CardCopy(
+    city = cityString ?: fullAddress ?: fetchingText,
+    address = fullAddress ?: cityString ?: fetchingText,
+    coordinates = "$latLabel: ${latitude?.let { "%.4f\u00B0".format(it) } ?: "--"} / " +
+        "$lngLabel: ${longitude?.let { "%.4f\u00B0".format(it) } ?: "--"}",
+    date = dateFormatter.format(java.util.Date(timestamp))
+)

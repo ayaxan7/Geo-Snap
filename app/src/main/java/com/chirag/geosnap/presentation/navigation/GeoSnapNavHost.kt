@@ -39,6 +39,7 @@ import com.chirag.geosnap.presentation.main.MainViewModel
 import com.chirag.geosnap.presentation.onboarding.LanguageScreen
 import com.chirag.geosnap.presentation.onboarding.PermissionsScreen
 import com.chirag.geosnap.presentation.settings.SettingsScreen
+import com.chirag.geosnap.presentation.templates.TemplatesScreen
 
 /**
  * App root: observes the persisted onboarding state asynchronously and only
@@ -134,8 +135,13 @@ internal fun GeoSnapNavHost(startDestination: String, isAlreadyOnboarded: Boolea
         composable(Destination.Settings.route) {
             SettingsScreen(
                 onBack = navController::popBackStack,
-                onLanguageClick = navController::navigateToLanguage
+                onLanguageClick = navController::navigateToLanguage,
+                onTemplatesClick = navController::navigateToTemplates
             )
+        }
+
+        composable(Destination.Templates.route) {
+            TemplatesScreen(onBack = navController::popBackStack)
         }
 
         composable(Destination.Gallery.route) {
@@ -170,7 +176,8 @@ internal fun GeoSnapNavHost(startDestination: String, isAlreadyOnboarded: Boolea
             CameraScreen(
                 mode = mode,
                 onBack = navController::popBackStack,
-                onGallery = navController::navigateToGallery
+                onGallery = navController::navigateToGallery,
+                onTemplatesClick = navController::navigateToTemplates
             )
         }
     }

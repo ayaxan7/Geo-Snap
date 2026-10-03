@@ -2,6 +2,7 @@ package com.chirag.geosnap.di
 
 import android.content.Context
 import android.util.Log
+import com.chirag.geosnap.BuildConfig
 import com.chirag.geosnap.core.update.AppUpdateType
 import com.chirag.geosnap.core.update.InAppUpdateManager
 import com.chirag.geosnap.core.update.NoOpUpdateSignalSource
@@ -40,13 +41,19 @@ object AppUpdateModule {
     @Singleton
     fun providesUpdateSignalSource(
         @ApplicationContext context: Context
-    ): UpdateSignalSource = runCatching {
-        PlayUpdateSignalSource(AppUpdateManagerFactory.create(context))
-    }.getOrElse { error ->
-        // Sideloaded build, or no usable Play Store on this device. Reporting
-        // "nothing to do" keeps the rest of the app completely unaffected.
-        Log.w(TAG, "Play in-app update service unavailable", error)
-        NoOpUpdateSignalSource()
+    ): UpdateSignalSource {
+        if (BuildConfig.DEBUG) {
+            Log.i(TAG, "Debug build: in-app updates disabled")
+            return NoOpUpdateSignalSource()
+        }
+        return runCatching {
+            PlayUpdateSignalSource(AppUpdateManagerFactory.create(context))
+        }.getOrElse { error ->
+            // Sideloaded build, or no usable Play Store on this device. Reporting
+            // "nothing to do" keeps the rest of the app completely unaffected.
+            Log.w(TAG, "Play in-app update service unavailable", error)
+            NoOpUpdateSignalSource()
+        }
     }
 
     @Provides

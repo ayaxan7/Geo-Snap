@@ -39,6 +39,7 @@ fun CameraTopBar(
     hasFlash: Boolean,
     onBack: () -> Unit,
     onFlash: () -> Unit,
+    onTemplatesClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -56,12 +57,12 @@ fun CameraTopBar(
                 tint = Color.White
             )
         }
-        
-        // Grid icon
-        IconButton(onClick = { /* TODO */ }) {
+
+        // Geotag card template picker
+        IconButton(onClick = onTemplatesClick) {
             Icon(
-                painter = painterResource(R.drawable.ic_menu),
-                contentDescription = stringResource(R.string.camera_grid),
+                painter = painterResource(R.drawable.ic_templates),
+                contentDescription = stringResource(R.string.camera_templates),
                 tint = Color.White
             )
         }

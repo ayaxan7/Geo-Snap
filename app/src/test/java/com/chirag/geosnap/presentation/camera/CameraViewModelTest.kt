@@ -4,6 +4,7 @@ import android.content.ContextWrapper
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.chirag.geosnap.data.maps.MapsApi
+import com.chirag.geosnap.domain.usecase.GetSelectedCardTemplateUseCase
 import com.chirag.geosnap.domain.model.GeoCoordinate
 import com.chirag.geosnap.domain.usecase.GetCurrentLocationUseCase
 import com.chirag.geosnap.domain.usecase.IsLocationEnabledUseCase
@@ -12,6 +13,7 @@ import com.chirag.geosnap.testutils.FakeCameraEngine
 import com.chirag.geosnap.testutils.FakeGeoTagOverlayRenderer
 import com.chirag.geosnap.testutils.FakeLocationRepository
 import com.chirag.geosnap.testutils.FakeMapsApi
+import com.chirag.geosnap.testutils.FakePreferencesRepository
 import com.chirag.geosnap.testutils.FakeMediaRepository
 import com.chirag.geosnap.testutils.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -46,7 +48,8 @@ class CameraViewModelTest {
         media: FakeMediaRepository = FakeMediaRepository(),
         location: FakeLocationRepository = FakeLocationRepository(coordinate),
         renderer: FakeGeoTagOverlayRenderer = FakeGeoTagOverlayRenderer(),
-        mapsApi: MapsApi = FakeMapsApi()
+        mapsApi: MapsApi = FakeMapsApi(),
+        preferences: FakePreferencesRepository = FakePreferencesRepository()
     ): CameraViewModel {
         val viewModel = CameraViewModel(
             context = ContextWrapper(null),
@@ -55,7 +58,8 @@ class CameraViewModelTest {
             getCurrentLocation = GetCurrentLocationUseCase(location),
             isLocationEnabled = IsLocationEnabledUseCase(location),
             geoTagOverlayRenderer = renderer,
-            mapsApi = mapsApi
+            mapsApi = mapsApi,
+            getSelectedCardTemplate = GetSelectedCardTemplateUseCase(preferences)
         )
         viewModel.attachEngine(engine)
         return viewModel
@@ -667,6 +671,80 @@ class CameraViewModelTest {
 
             assertEquals(reviewed, vm.uiState.value.pendingPreview!!.cardContent)
             assertEquals(address, vm.uiState.value.fullAddress)
+            vm.detachEngine()
+        }
+
+    @Test
+    fun `camera state defaults to the default card template`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val vm = createViewModel()
+
+            assertEquals(CardTemplates.DEFAULT, vm.uiState.value.selectedTemplate)
+            vm.detachEngine()
+        }
+
+    @Test
+    fun `a persisted template reaches the captured card`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val preferences = FakePreferencesRepository(
+                initialCardTemplateId = CardTemplates.DEFAULT_ID
+            )
+            val mapsApi = FakeMapsApi().apply { formattedAddress = address }
+            val vm = createViewModel(mapsApi = mapsApi, preferences = preferences)
+
+            vm.capturePhoto()
+            advanceUntilIdle()
+
+            assertEquals(
+                CardTemplates.DEFAULT,
+                vm.uiState.value.pendingPreview!!.cardContent.template
+            )
+            vm.detachEngine()
+        }
+
+    @Test
+    fun `switching the template only affects captures taken afterwards`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val preferences = FakePreferencesRepository()
+            val mapsApi = FakeMapsApi().apply { formattedAddress = address }
+            val vm = createViewModel(mapsApi = mapsApi, preferences = preferences)
+
+            vm.capturePhoto()
+            advanceUntilIdle()
+            val firstCapture = vm.uiState.value.pendingPreview!!.cardContent.template
+
+            vm.discardPreview()
+            preferences.emitCardTemplateId("retired-template")
+            advanceUntilIdle()
+
+            // An unknown persisted id resolves to the default rather than breaking capture.
+            assertEquals(CardTemplates.DEFAULT, vm.uiState.value.selectedTemplate)
+            vm.capturePhoto()
+            advanceUntilIdle()
+            assertEquals(
+                CardTemplates.DEFAULT,
+                vm.uiState.value.pendingPreview!!.cardContent.template
+            )
+            assertEquals(CardTemplates.DEFAULT, firstCapture)
+            vm.detachEngine()
+        }
+
+    @Test
+    fun `an unknown persisted template falls back to the default without failing capture`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val preferences = FakePreferencesRepository(
+                initialCardTemplateId = "retired-template"
+            )
+            val mapsApi = FakeMapsApi().apply { formattedAddress = address }
+            val vm = createViewModel(mapsApi = mapsApi, preferences = preferences)
+
+            vm.capturePhoto()
+            advanceUntilIdle()
+
+            assertEquals(
+                CardTemplates.DEFAULT,
+                vm.uiState.value.pendingPreview!!.cardContent.template
+            )
             vm.detachEngine()
         }
 }
