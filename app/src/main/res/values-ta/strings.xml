@@ -174,4 +174,6 @@
     <string name="templates_applies_to_new_captures">புதிய படங்கள் மற்றும் வீடியோக்களுக்குப் பயன்படுத்தப்படும்</string>
     <string name="template_selected">தேர்ந்தெடுக்கப்பட்டது</string>
     <string name="template_not_selected">தேர்ந்தெடுக்கப்படவில்லை</string>
+    <string name="template_minimal">மினிமல்</string>
+    <string name="templates_save">சேமி</string>
 </resources>

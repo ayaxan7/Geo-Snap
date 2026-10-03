@@ -174,4 +174,6 @@
     <string name="templates_applies_to_new_captures">ಹೊಸ ಫೋಟೋ ಮತ್ತು ವಿಡಿಯೋಗಳಿಗೆ ಬಳಸಲಾಗುತ್ತದೆ</string>
     <string name="template_selected">ಆಯ್ಕೆಮಾಡಲಾಗಿದೆ</string>
     <string name="template_not_selected">ಆಯ್ಕೆಮಾಡಿಲ್ಲ</string>
+    <string name="template_minimal">ಮಿನಿಮಲ್</string>
+    <string name="templates_save">ಉಳಿಸಿ</string>
 </resources>

@@ -173,4 +173,6 @@
     <string name="templates_applies_to_new_captures">नई तस्वीरों और वीडियो के लिए उपयोग होगा</string>
     <string name="template_selected">चयनित</string>
     <string name="template_not_selected">चयनित नहीं</string>
+    <string name="template_minimal">मिनिमल</string>
+    <string name="templates_save">सहेजें</string>
 </resources>

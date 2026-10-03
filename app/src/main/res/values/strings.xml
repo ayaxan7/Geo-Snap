@@ -197,4 +197,6 @@
     <string name="templates_applies_to_new_captures">Used for new photos and videos</string>
     <string name="template_selected">Selected</string>
     <string name="template_not_selected">Not selected</string>
+    <string name="template_minimal">Minimal</string>
+    <string name="templates_save">Save</string>
 </resources>

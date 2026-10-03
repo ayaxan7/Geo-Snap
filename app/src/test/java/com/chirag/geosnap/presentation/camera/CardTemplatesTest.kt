@@ -1,7 +1,10 @@
 package com.chirag.geosnap.presentation.camera
 
+import androidx.compose.ui.graphics.toArgb
+import com.chirag.geosnap.ui.theme.PrimaryGreen
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertSame
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
@@ -74,5 +77,36 @@ class CardTemplatesTest {
         assertEquals(full.logoCornerDp * 0.5f, half.logoCornerDp, 0.001f)
         assertEquals(full.cardBackgroundColor, half.cardBackgroundColor)
         assertEquals(full.textColor, half.textColor)
+    }
+
+    @Test
+    fun `minimal template is registered under a stable id`() {
+        assertSame(CardTemplates.MINIMAL, CardTemplates.fromId("minimal"))
+        assertEquals(CardLayout.MINIMAL, CardTemplates.MINIMAL.layout)
+    }
+
+    @Test
+    fun `every template resolves an accent colour that is opaque`() {
+        CardTemplates.ALL.forEach { template ->
+            val accent = template.style.accentColor
+            assertTrue("${template.id} has a transparent accent", accent != 0L)
+            assertEquals("${template.id} accent alpha", 0xFFL, accent ushr 24 and 0xFFL)
+        }
+    }
+
+    @Test
+    fun `minimal accent is the theme green the preview draws`() {
+        val expected = PrimaryGreen.toArgb().toLong() and 0xFFFFFFFFL
+
+        assertEquals(expected, CardTemplates.MINIMAL.style.accentColor)
+        assertEquals(expected, CardTemplates.MINIMAL.metrics().accentColor)
+    }
+
+    @Test
+    fun `metrics carry the accent colour through unscaled`() {
+        val full = CardTemplates.MINIMAL.metrics()
+        val half = CardTemplates.MINIMAL.metrics(scale = 0.5f)
+
+        assertEquals(full.accentColor, half.accentColor)
     }
 }

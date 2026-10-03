@@ -52,6 +52,9 @@ android {
     }
     testOptions {
         unitTests.isReturnDefaultValues = true
+        // Required by Robolectric: merged resources/manifest must be visible to
+        // unit tests so card copy and drawables resolve off-device.
+        unitTests.isIncludeAndroidResources = true
     }
 }
 
@@ -128,10 +131,21 @@ dependencies {
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.robolectric)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
+}
+
+// Robolectric reaches into JDK internals to stand up the Android runtime, which
+// the module system blocks on JDK 16+ without these opens/exports.
+tasks.withType<Test>().configureEach {
+    jvmArgs(
+        "--add-exports=java.base/jdk.internal.access=ALL-UNNAMED",
+        "--add-opens=java.base/java.lang=ALL-UNNAMED",
+        "--add-opens=java.base/java.util=ALL-UNNAMED"
+    )
 }

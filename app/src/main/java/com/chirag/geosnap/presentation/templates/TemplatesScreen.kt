@@ -1,5 +1,6 @@
 package com.chirag.geosnap.presentation.templates
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -20,10 +21,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.outlined.RadioButtonUnchecked
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -45,6 +48,13 @@ import com.chirag.geosnap.R
 import com.chirag.geosnap.presentation.camera.CardTemplate
 import com.chirag.geosnap.presentation.camera.GeoTagCard
 import com.chirag.geosnap.ui.theme.PrimaryGreen
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clip
 
 /**
  * Lets the user pick the geotag card design applied to new captures.
@@ -82,6 +92,16 @@ fun TemplatesScreen(
                         )
                     }
                 },
+                actions = {
+                    OutlinedButton(
+                        onClick = onBack,
+                        border = BorderStroke(1.dp, PrimaryGreen),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = PrimaryGreen),
+                        modifier = Modifier.padding(end = 8.dp)
+                    ) {
+                        Text(stringResource(R.string.templates_save))
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
             )
         },
@@ -94,15 +114,10 @@ fun TemplatesScreen(
             contentPadding = PaddingValues(vertical = 8.dp)
         ) {
             items(uiState.templates, key = { it.id }) { template ->
-                TemplateRow(
+                TemplateCard(
                     template = template,
                     selected = template.id == uiState.selectedTemplateId,
                     onClick = { viewModel.selectTemplate(template) }
-                )
-                HorizontalDivider(
-                    color = Color(0xFFF0F0F0),
-                    thickness = 0.8f.dp,
-                    modifier = Modifier.padding(horizontal = 16.dp)
                 )
             }
         }
@@ -110,62 +125,55 @@ fun TemplatesScreen(
 }
 
 @Composable
-private fun TemplateRow(
+private fun TemplateCard(
     template: CardTemplate,
     selected: Boolean,
     onClick: () -> Unit
 ) {
-    Row(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .aspectRatio(1.5f)
+            .clip(RoundedCornerShape(12.dp))
+            .background(Color.DarkGray)
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .then(
+                if (selected) Modifier.border(3.dp, PrimaryGreen, RoundedCornerShape(12.dp))
+                else Modifier
+            )
     ) {
+        Image(
+            painter = painterResource(R.drawable.select_lang_bg),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
+
+        // Dark overlay
+        Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.3f)))
+
         Box(
             modifier = Modifier
-                .width(TEMPLATE_PREVIEW_WIDTH_DP.dp)
-                .background(Color(0xFFEFEFEF), RoundedCornerShape(8.dp))
-                .padding(horizontal = 6.dp, vertical = 5.dp),
-            contentAlignment = Alignment.CenterStart
+                .align(Alignment.Center)
+                .padding(horizontal = 24.dp)
         ) {
             GeoTagCard(
                 content = remember(template) { previewContent(template) },
-                scale = TEMPLATE_PREVIEW_SCALE
+                scale = 1f
             )
         }
-
-        Spacer(modifier = Modifier.width(16.dp))
-
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = stringResource(template.labelRes),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = stringResource(R.string.templates_applies_to_new_captures),
-                style = MaterialTheme.typography.bodySmall,
-                color = Color(0xFF6B6B6B)
-            )
-        }
-
-        Spacer(modifier = Modifier.width(8.dp))
 
         if (selected) {
             Icon(
                 imageVector = Icons.Filled.CheckCircle,
                 contentDescription = stringResource(R.string.template_selected),
                 tint = PrimaryGreen,
-                modifier = Modifier.size(24.dp)
-            )
-        } else {
-            Icon(
-                imageVector = Icons.Outlined.RadioButtonUnchecked,
-                contentDescription = stringResource(R.string.template_not_selected),
-                tint = Color(0xFFB0B0B0),
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(12.dp)
+                    .size(32.dp)
+                    .background(Color.White, androidx.compose.foundation.shape.CircleShape)
             )
         }
     }

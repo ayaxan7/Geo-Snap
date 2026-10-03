@@ -62,18 +62,30 @@ fun CameraUiState.toGeoTagCardContent(
 /** Date format used by the card, in both the preview and the burnt overlay. */
 internal const val CARD_DATE_PATTERN = "EEEE, dd/MM/yyyy - h:mm a"
 
+/** Glue between the date and time halves of [CARD_DATE_PATTERN]. */
+private const val CARD_DATE_TIME_GLUE = " - "
+
+/** Rendered between the time and date halves by templates that show both. */
+internal const val CARD_DATE_SEPARATOR = " | "
+
 /**
  * The card copy, resolved from a single place so the live [GeoTagCard] and the
  * [CanvasGeoTagOverlayRenderer] cannot drift apart.
  *
  * The title degrades through progressively coarser location data so that a known
  * address is never reported as "still fetching".
+ *
+ * [date] is the raw formatted timestamp for layouts that render it as one line.
+ * [dateLabel] and [timeLabel] are the same string already split into its two
+ * halves, so templates that show time and date separately do not each re-parse it.
  */
 internal class CardCopy(
     val city: String,
     val address: String,
     val coordinates: String,
-    val date: String
+    val date: String,
+    val dateLabel: String,
+    val timeLabel: String
 )
 
 internal fun GeoTagCardContent.toCardCopy(
@@ -81,10 +93,15 @@ internal fun GeoTagCardContent.toCardCopy(
     latLabel: String,
     lngLabel: String,
     dateFormatter: java.text.DateFormat
-): CardCopy = CardCopy(
-    city = cityString ?: fullAddress ?: fetchingText,
-    address = fullAddress ?: cityString ?: fetchingText,
-    coordinates = "$latLabel: ${latitude?.let { "%.4f\u00B0".format(it) } ?: "--"} / " +
-        "$lngLabel: ${longitude?.let { "%.4f\u00B0".format(it) } ?: "--"}",
-    date = dateFormatter.format(java.util.Date(timestamp))
-)
+): CardCopy {
+    val date = dateFormatter.format(java.util.Date(timestamp))
+    return CardCopy(
+        city = cityString ?: fullAddress ?: fetchingText,
+        address = fullAddress ?: cityString ?: fetchingText,
+        coordinates = "$latLabel: ${latitude?.let { "%.4f\u00B0".format(it) } ?: "--"} / " +
+            "$lngLabel: ${longitude?.let { "%.4f\u00B0".format(it) } ?: "--"}",
+        date = date,
+        dateLabel = date.substringBefore(CARD_DATE_TIME_GLUE, date),
+        timeLabel = date.substringAfter(CARD_DATE_TIME_GLUE, "")
+    )
+}

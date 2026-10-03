@@ -124,6 +124,10 @@ fun GeoTagCard(
                     labels = labels,
                     mapImage = mapBitmap ?: content.staticMapUrl
                 )
+                CardLayout.MINIMAL -> MinimalContent(
+                    copy = labels.copy,
+                    metrics = metrics
+                )
             }
         }
 
@@ -235,6 +239,65 @@ private fun RowScope.MapLeftContent(
     if (metrics.logoVisible) {
         Spacer(modifier = Modifier.width(metrics.spacerDetailsLogoDp.dp))
         LogoBadge(metrics = metrics, logoLabel = labels.logo)
+    }
+}
+
+@Composable
+private fun MinimalContent(
+    copy: CardCopy,
+    metrics: GeoTagCardMetrics
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(vertical = metrics.detailsPaddingVerticalDp.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(metrics.detailsLineGapDp.dp)
+    ) {
+        val datePart = copy.dateLabel
+        val timePart = copy.timeLabel
+
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (timePart.isNotEmpty()) {
+                Text(
+                    text = timePart,
+                    color = Color(metrics.textColor),
+                    fontSize = metrics.dateTextSizeSp.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = CARD_DATE_SEPARATOR,
+                    color = Color(metrics.accentColor),
+                    fontSize = metrics.dateTextSizeSp.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            Text(
+                text = datePart,
+                color = Color(metrics.textColor),
+                fontSize = metrics.dateTextSizeSp.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+        
+        Text(
+            text = "${copy.city}, ${copy.address}",
+            color = Color(metrics.textSecondaryColor),
+            fontSize = metrics.addressTextSizeSp.sp,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        Text(
+            text = copy.coordinates,
+            color = Color(metrics.textColor),
+            fontSize = metrics.coordinatesTextSizeSp.sp,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }
 

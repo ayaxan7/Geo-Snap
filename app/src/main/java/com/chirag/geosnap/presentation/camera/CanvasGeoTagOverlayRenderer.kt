@@ -11,9 +11,12 @@ import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.Typeface
 import android.text.Layout
+import android.text.SpannableStringBuilder
+import android.text.Spanned
 import android.text.StaticLayout
 import android.text.TextPaint
 import android.text.TextUtils
+import android.text.style.ForegroundColorSpan
 import androidx.core.graphics.withClip
 import com.chirag.geosnap.R
 import com.chirag.geosnap.core.LocaleHelper
@@ -23,6 +26,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -36,16 +40,27 @@ import kotlinx.coroutines.withContext
  * The bitmap is rendered at a fixed [RENDER_DENSITY] x [SUPERSAMPLE] resolution
  * that is independent of the device, so the burned card is deterministic and
  * stays crisp when scaled to any captured media size.
+ *
+ * [renderDispatcher] is only settable from tests, so that native graphics
+ * rendering stays on the thread that owns the graphics runtime. Production always
+ * renders on [Dispatchers.Default].
  */
 @Singleton
-class CanvasGeoTagOverlayRenderer @Inject constructor(
-    @ApplicationContext private val context: Context,
-    private val staticMapFetcher: StaticMapFetcher
+class CanvasGeoTagOverlayRenderer internal constructor(
+    private val context: Context,
+    private val staticMapFetcher: StaticMapFetcher,
+    private val renderDispatcher: CoroutineDispatcher
 ) : GeoTagOverlayRenderer {
+
+    @Inject
+    constructor(
+        @ApplicationContext context: Context,
+        staticMapFetcher: StaticMapFetcher
+    ) : this(context, staticMapFetcher, Dispatchers.Default)
 
     override suspend fun render(content: GeoTagCardContent): Bitmap? {
         val mapBitmap = staticMapFetcher.fetch(content.staticMapUrl)
-        return withContext(Dispatchers.Default) {
+        return withContext(renderDispatcher) {
             runCatching { renderCardToBitmap(content, mapBitmap) }.getOrNull()
         }
     }
@@ -69,6 +84,7 @@ class CanvasGeoTagOverlayRenderer @Inject constructor(
                 mapBitmap = mapBitmap,
                 mapLabel = englishContext.getString(R.string.geotag_map)
             )
+            CardLayout.MINIMAL -> renderMinimal(metrics = metrics, copy = copy)
         }
     }
 
@@ -123,27 +139,8 @@ class CanvasGeoTagOverlayRenderer @Inject constructor(
 
         val bitmap = Bitmap.createBitmap(cardWidth, cardHeight, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
-        val bounds = RectF(0f, 0f, bitmap.width.toFloat(), bitmap.height.toFloat())
 
-        val corner = dp(metrics.cardCornerDp).toFloat()
-        canvas.drawRoundRect(
-            bounds,
-            corner,
-            corner,
-            Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = metrics.cardBackgroundColor.toArgb()
-            }
-        )
-        canvas.drawRoundRect(
-            bounds,
-            corner,
-            corner,
-            Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = metrics.cardBorderColor.toArgb()
-                style = Paint.Style.STROKE
-                strokeWidth = dp(metrics.cardBorderDp).toFloat()
-            }
-        )
+        drawCardShell(canvas, bitmap, metrics)
 
         drawMapThumbnail(
             canvas = canvas,
@@ -202,6 +199,110 @@ class CanvasGeoTagOverlayRenderer @Inject constructor(
         return bitmap
     }
 
+    /**
+     * No map, no logo: one centred column of time, date, location and coordinates.
+     *
+     * The time comes first with the accent separator between the two date halves,
+     * mirroring [MinimalContent]. Because the separator is a styled span inside a
+     * single layout, it is measured and centred as one run of text rather than as
+     * three independently placed blocks.
+     */
+    private fun renderMinimal(metrics: GeoTagCardMetrics, copy: CardCopy): Bitmap {
+        val padV = dp(metrics.paddingVerticalDp)
+        val padH = dp(metrics.paddingHorizontalDp)
+        val cardWidth = dp(metrics.cardWidthDp)
+        val contentWidth = cardWidth - padH * 2
+
+        val datePaint = textPaint(metrics.textColor, metrics.dateTextSizeSp, bold = true)
+        val addressPaint = textPaint(metrics.textSecondaryColor, metrics.addressTextSizeSp)
+        val coordinatesPaint = textPaint(metrics.textColor, metrics.coordinatesTextSizeSp)
+
+        val dateLayout = buildLayout(
+            text = timeWithAccentSeparator(copy, metrics),
+            paint = datePaint,
+            width = contentWidth,
+            maxLines = 1,
+            alignment = Layout.Alignment.ALIGN_CENTER
+        )
+        val locationLayout = buildLayout(
+            text = "${copy.city}, ${copy.address}",
+            paint = addressPaint,
+            width = contentWidth,
+            maxLines = 2,
+            alignment = Layout.Alignment.ALIGN_CENTER
+        )
+        val coordinatesLayout = buildLayout(
+            text = copy.coordinates,
+            paint = coordinatesPaint,
+            width = contentWidth,
+            maxLines = 1,
+            alignment = Layout.Alignment.ALIGN_CENTER
+        )
+
+        val lineGap = dp(metrics.detailsLineGapDp)
+        val columnH = dateLayout.height + lineGap + locationLayout.height + lineGap +
+            coordinatesLayout.height
+        val cardHeight = padV + columnH + padV
+
+        val bitmap = Bitmap.createBitmap(cardWidth, cardHeight, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+
+        drawCardShell(canvas, bitmap, metrics)
+
+        var y = padV.toFloat()
+        canvas.drawLayout(dateLayout, 0f, y)
+        y += dateLayout.height + lineGap
+        canvas.drawLayout(locationLayout, 0f, y)
+        y += locationLayout.height + lineGap
+        canvas.drawLayout(coordinatesLayout, 0f, y)
+
+        return bitmap
+    }
+
+    /**
+     * The time, the accent separator and the date as a single spannable string, so
+     * the whole row centres as one unit. Falls back to the plain date when there
+     * is no time half to lead with.
+     */
+    private fun timeWithAccentSeparator(copy: CardCopy, metrics: GeoTagCardMetrics): CharSequence {
+        if (copy.timeLabel.isEmpty()) return copy.dateLabel
+        return SpannableStringBuilder(copy.timeLabel)
+            .append(CARD_DATE_SEPARATOR)
+            .append(copy.dateLabel)
+            .apply {
+                setSpan(
+                    ForegroundColorSpan(metrics.accentColor.toArgb()),
+                    copy.timeLabel.length,
+                    copy.timeLabel.length + CARD_DATE_SEPARATOR.length,
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+            }
+    }
+
+    /** The card background and border every layout shares. */
+    private fun drawCardShell(canvas: Canvas, bitmap: Bitmap, metrics: GeoTagCardMetrics) {
+        val bounds = RectF(0f, 0f, bitmap.width.toFloat(), bitmap.height.toFloat())
+        val corner = dp(metrics.cardCornerDp).toFloat()
+        canvas.drawRoundRect(
+            bounds,
+            corner,
+            corner,
+            Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = metrics.cardBackgroundColor.toArgb()
+            }
+        )
+        canvas.drawRoundRect(
+            bounds,
+            corner,
+            corner,
+            Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = metrics.cardBorderColor.toArgb()
+                style = Paint.Style.STROKE
+                strokeWidth = dp(metrics.cardBorderDp).toFloat()
+            }
+        )
+    }
+
     private fun textPaint(color: Long, textSizeSp: Float, bold: Boolean = false): TextPaint =
         TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
             this.color = color.toArgb()
@@ -210,14 +311,15 @@ class CanvasGeoTagOverlayRenderer @Inject constructor(
         }
 
     private fun buildLayout(
-        text: String,
+        text: CharSequence,
         paint: TextPaint,
         width: Int,
-        maxLines: Int
+        maxLines: Int,
+        alignment: Layout.Alignment = Layout.Alignment.ALIGN_NORMAL
     ): StaticLayout =
         StaticLayout.Builder
             .obtain(text, 0, text.length, paint, width)
-            .setAlignment(Layout.Alignment.ALIGN_NORMAL)
+            .setAlignment(alignment)
             .setMaxLines(maxLines)
             .setEllipsize(TextUtils.TruncateAt.END)
             .setIncludePad(false)

@@ -1,7 +1,9 @@
 package com.chirag.geosnap.presentation.camera
 
 import androidx.annotation.StringRes
+import androidx.compose.ui.graphics.toArgb
 import com.chirag.geosnap.R
+import com.chirag.geosnap.ui.theme.PrimaryGreen
 
 /**
  * How the pieces inside a geotag card are arranged relative to each other.
@@ -19,7 +21,12 @@ enum class CardLayout {
      * Map thumbnail on the left, text block in the middle, logo on the right, all
      * bottom-aligned onto one baseline.
      */
-    MAP_LEFT
+    MAP_LEFT,
+    
+    /**
+     * Minimal layout without map, centered text.
+     */
+    MINIMAL
 }
 
 /**
@@ -32,6 +39,7 @@ data class GeoTagCardStyle(
     val textColor: Long,
     val textSecondaryColor: Long,
     val iconAccentColor: Long,
+    val accentColor: Long,
     val logoBackgroundColor: Long,
     val logoVisible: Boolean,
     val mapBackgroundColor: Long,
@@ -87,6 +95,13 @@ object CardTemplates {
 
     const val DEFAULT_ID = "classic"
 
+    /**
+     * The one accent every template draws decorative marks with (currently just
+     * the separator in [CardLayout.MINIMAL]). Derived from the theme colour
+     * rather than copied as a literal so the card can never drift from the app.
+     */
+    private val ACCENT: Long = PrimaryGreen.toArgb().toLong() and 0xFFFFFFFFL
+
     /** The original card: dark shell, map on the left, logo on the right. */
     val DEFAULT = CardTemplate(
         id = DEFAULT_ID,
@@ -96,6 +111,7 @@ object CardTemplates {
             textColor = 0xFFFFFFFFL,
             textSecondaryColor = 0xD1FFFFFFL,
             iconAccentColor = 0xFFFF0000L,
+            accentColor = ACCENT,
             logoBackgroundColor = 0xFF0BA84AL,
             logoVisible = true,
             mapBackgroundColor = 0xFF808080L,
@@ -118,8 +134,39 @@ object CardTemplates {
         )
     )
 
+    val MINIMAL = CardTemplate(
+        id = "minimal",
+        labelRes = R.string.template_minimal,
+        layout = CardLayout.MINIMAL,
+        style = GeoTagCardStyle(
+            textColor = 0xFFFFFFFFL,
+            textSecondaryColor = 0xD1FFFFFFL,
+            iconAccentColor = 0x00000000L,
+            accentColor = ACCENT,
+            logoBackgroundColor = 0x00000000L,
+            logoVisible = false,
+            mapBackgroundColor = 0x00000000L,
+            mapWidthDp = 0f,
+            mapHeightDp = 0f,
+            mapCornerDp = 0f,
+            spacerMapDetailsDp = 0f,
+            spacerDetailsLogoDp = 0f,
+            detailsPaddingVerticalDp = 10f,
+            detailsLineGapDp = 5f,
+            iconTextGapDp = 0f,
+            cityTextSizeSp = 14f,
+            addressTextSizeSp = 11f,
+            addressLineHeightSp = 15f,
+            coordinatesTextSizeSp = 11f,
+            dateTextSizeSp = 14f,
+            iconSizeDp = 0f,
+            logoSizeDp = 0f,
+            logoCornerDp = 0f
+        )
+    )
+
     /** Every selectable template, in the order the picker lists them. */
-    val ALL: List<CardTemplate> = listOf(DEFAULT)
+    val ALL: List<CardTemplate> = listOf(DEFAULT, MINIMAL)
 
     /** Resolves a persisted [id], falling back to [DEFAULT] when it is unknown or absent. */
     fun fromId(id: String?): CardTemplate = ALL.firstOrNull { it.id == id } ?: DEFAULT
