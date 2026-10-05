@@ -41,6 +41,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.chirag.geosnap.R
@@ -105,10 +106,13 @@ fun TemplatesScreen(
                         ),
                         border = BorderStroke(1.dp, PrimaryGreen),
                         shape = RoundedCornerShape(12.dp),
-//                        contentPadding = PaddingValues,
+                        contentPadding = PaddingValues(
+                            horizontal = 16.dp,
+                            vertical = 0.dp
+                        ),
                         modifier = Modifier.height(36.dp)
                     ) {
-                        Text(stringResource(R.string.preview_save), fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.preview_save), fontWeight = FontWeight.Bold, lineHeight = 1.em)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
