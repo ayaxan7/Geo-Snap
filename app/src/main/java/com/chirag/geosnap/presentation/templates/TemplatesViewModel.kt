@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.chirag.geosnap.domain.usecase.GetSelectedCardTemplateUseCase
 import com.chirag.geosnap.domain.usecase.SetSelectedCardTemplateUseCase
 import com.chirag.geosnap.presentation.camera.CardTemplate
+import com.chirag.geosnap.presentation.camera.CardTemplates
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,9 +17,13 @@ import kotlinx.coroutines.launch
 /**
  * Drives the geotag card template picker.
  *
- * Selection is written straight through to preferences, which is what makes the
- * chosen card the default for subsequent captures: the camera observes the same
- * persisted value, so no extra in-memory hand-off is needed.
+ * The picker edits a draft: tapping a row moves [TemplatesUiState.pendingTemplateId]
+ * and writes nothing, while only [saveSelection] persists to DataStore. That makes
+ * Save the single commit point, so navigating back out of the screen leaves the
+ * stored default exactly as it was.
+ *
+ * The write is still what makes the chosen card the default for later captures:
+ * the camera observes the same persisted value, so no extra hand-off is needed.
  */
 @HiltViewModel
 class TemplatesViewModel @Inject constructor(
@@ -30,18 +35,43 @@ class TemplatesViewModel @Inject constructor(
     val uiState: StateFlow<TemplatesUiState> = _uiState.asStateFlow()
 
     init {
+        // Seed the saved value and the draft from whatever is already stored.
         viewModelScope.launch {
             getSelectedCardTemplate().collect { template ->
-                _uiState.update { it.copy(selectedTemplateId = template.id) }
+                _uiState.update { state ->
+                    val saved = state.copy(selectedTemplateId = template.id)
+                    if (state.hasPendingEdit) {
+                        // Every preference shares one DataStore, so an unrelated write
+                        // (a language change, say) re-emits this flow. It must not
+                        // silently discard the choice being made on screen.
+                        saved
+                    } else {
+                        saved.copy(pendingTemplateId = template.id)
+                    }
+                }
             }
         }
     }
 
-    /** Makes [template] the default card for future captures. */
+    /** Marks [template] as the pending choice without persisting it. */
     fun selectTemplate(template: CardTemplate) {
-        // Reflect the choice immediately so the row highlights without waiting for
-        // the preference write to round-trip back through the flow.
-        _uiState.update { it.copy(selectedTemplateId = template.id) }
-        viewModelScope.launch { setSelectedCardTemplate(template) }
+        _uiState.update { state ->
+            state.copy(
+                pendingTemplateId = template.id,
+                hasPendingEdit = template.id != state.selectedTemplateId
+            )
+        }
+    }
+
+    /**
+     * Commits the pending choice to preferences.
+     *
+     * Writes only when the draft actually differs from what is saved, so a Save
+     * with no changes is a no-op.
+     */
+    fun saveSelection() {
+        val pending = _uiState.value.pendingTemplate
+        if (!_uiState.value.hasPendingEdit) return
+        viewModelScope.launch { setSelectedCardTemplate(pending) }
     }
 }

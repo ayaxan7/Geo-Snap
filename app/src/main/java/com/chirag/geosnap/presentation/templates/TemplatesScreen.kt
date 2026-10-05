@@ -68,6 +68,9 @@ private const val TEMPLATE_PREVIEW_COUNT = 2
  * Each row shows a finished image of the template rather than rebuilding the card,
  * so what the user sees is the delivered artwork itself and the only dynamic part
  * of the row is its selection state.
+ *
+ * Tapping a row only moves the highlight; Save is what persists the choice, so
+ * backing out of the screen leaves the stored template unchanged.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -99,7 +102,10 @@ fun TemplatesScreen(
                 },
                 actions = {
                     OutlinedButton(
-                        onClick = onBack,
+                        onClick = {
+                            viewModel.saveSelection()
+                            onBack()
+                        },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.White,
                             contentColor = PrimaryGreen
@@ -110,6 +116,7 @@ fun TemplatesScreen(
                             horizontal = 16.dp,
                             vertical = 0.dp
                         ),
+                        enabled = uiState.hasPendingEdit,
                         modifier = Modifier.height(36.dp)
                     ) {
                         Text(stringResource(R.string.preview_save), fontWeight = FontWeight.Bold, lineHeight = 1.em)
@@ -132,7 +139,7 @@ fun TemplatesScreen(
             ) { index, template ->
                 TemplateCard(
                     imageRes = TEMPLATE_PREVIEW_IMAGES[index],
-                    selected = template.id == uiState.selectedTemplateId,
+                    selected = template.id == uiState.pendingTemplateId,
                     onClick = { viewModel.selectTemplate(template) }
                 )
             }
