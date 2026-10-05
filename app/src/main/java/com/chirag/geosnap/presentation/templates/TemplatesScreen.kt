@@ -15,11 +15,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -40,7 +40,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -85,8 +84,7 @@ fun TemplatesScreen(
                         text = stringResource(R.string.templates_title),
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(end = 48.dp),
+                            .fillMaxWidth(),
                         textAlign = TextAlign.Center
                     )
                 },
@@ -99,14 +97,15 @@ fun TemplatesScreen(
                     }
                 },
                 actions = {
-                    Button(
+                    OutlinedButton(
                         onClick = onBack,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.White,
                             contentColor = PrimaryGreen
                         ),
-                        shape = RoundedCornerShape(8.dp),
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
+                        border = BorderStroke(1.dp, PrimaryGreen),
+                        shape = RoundedCornerShape(12.dp),
+//                        contentPadding = PaddingValues,
                         modifier = Modifier.height(36.dp)
                     ) {
                         Text(stringResource(R.string.preview_save), fontWeight = FontWeight.Bold)
@@ -166,7 +165,7 @@ private fun TemplateCard(
     ) {
         Image(
             painter = painterResource(imageRes),
-            contentDescription = null,
+            contentDescription = "Template $imageRes",
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
         )

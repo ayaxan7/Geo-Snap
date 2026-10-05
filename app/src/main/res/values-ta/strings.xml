@@ -168,7 +168,7 @@
     <string name="update_downloaded_message">புதுப்பிப்பு தயாராக உள்ளது. அதை நிறுவியும் அப்ளிகேஷனை மீண்டும் தொடங்கவும்.</string>
     <string name="update_restart_action">மீண்டும் தொடங்கு</string>
 <!-- Geotag card templates -->
-    <string name="templates_title">அட்டை வார்ப்புருக்கள்</string>
+    <string name="templates_title">வார்ப்புருக்கள்</string>
     <string name="camera_templates">அட்டை வார்ப்புருக்கள்</string>
     <string name="template_classic">கிளாசிக்</string>
     <string name="templates_applies_to_new_captures">புதிய படங்கள் மற்றும் வீடியோக்களுக்குப் பயன்படுத்தப்படும்</string>

@@ -168,7 +168,7 @@
     <string name="update_downloaded_message">అప్‌డేట్ సిద్ధంగా ఉంది. దానిని ఇన్‌స్టాల్ చేయడానికి యాప్‌ను మళ్లీ ప్రారంభించండి.</string>
     <string name="update_restart_action">మళ్లీ ప్రారంభించు</string>
 <!-- Geotag card templates -->
-    <string name="templates_title">కార్డ్ టెంప్లేట్లు</string>
+    <string name="templates_title">టెంప్లేట్‌లు</string>
     <string name="camera_templates">కార్డ్ టెంప్లేట్లు</string>
     <string name="template_classic">క్లాసిక్</string>
     <string name="templates_applies_to_new_captures">కొత్త ఫోటోలు మరియు వీడియోలకు ఉపయోగిస్తారు</string>

@@ -191,7 +191,7 @@
     <string name="update_downloaded_message">Update ready. Restart to install it.</string>
     <string name="update_restart_action">Restart</string>
 <!-- Geotag card templates -->
-    <string name="templates_title">Card Templates</string>
+    <string name="templates_title">Templates</string>
     <string name="camera_templates">Card templates</string>
     <string name="template_classic">Classic</string>
     <string name="templates_applies_to_new_captures">Used for new photos and videos</string>
