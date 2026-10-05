@@ -51,6 +51,11 @@
     <string name="settings_auto_save_open_app_info">ಆ್ಯಪ್ ಮಾಹಿತಿ ತೆರೆಯಿರಿ</string>
     <string name="settings_auto_save_not_now">ಈಗಲ್ಲ</string>
     <string name="settings_notifications">ಅಧಿಸೂಚನೆಗಳು</string>
+    <string name="settings_notifications_revoke_title">ಅಧಿಸೂಚನೆಗಳನ್ನು ಆಫ್ ಮಾಡಬೇಕೇ?</string>
+    <string name="settings_notifications_revoke_message">Android-ನಲ್ಲಿ GeoSnap ಅಧಿಸೂಚನೆಗಳನ್ನು ಆಫ್ ಮಾಡಬಹುದಾದದ್ದು ಸಿಸ್ಟಂ ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಂದಲೇ. ಅಧಿಸೂಚನೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆದು, GeoSnap ಅಧಿಸೂಚನೆಗಳನ್ನು ಆಫ್ ಮಾಡಿ, ನಂತರ ಹಿಂದಿರುಗಿ — ಈ ಸ್ವಿಚ್ ತಾನಾಗಿಯೇ ನವೀಕರಿಸುತ್ತದೆ.</string>
+    <string name="settings_notifications_enable_title">ಅಧಿಸೂಚನೆಗಳನ್ನು ತಡೆಗಾರಿಸಲಾಗಿದೆ</string>
+    <string name="settings_notifications_enable_message">ಅಧಿಸೂಚನೆ ಅನುಮತಿಯನ್ನು ಶಾಶ್ವತವಾಗಿ ನಿರಾಕರಿಸಲಾಗಿದೆ. ಅಧಿಸೂಚನೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆದು ಅನುಮತಿ ನೀಡಿ; ಹೀಗೆ GeoSnap ನಿಮಗೆ ಅಧಿಸೂಚನೆಗಳನ್ನು ಕಳುಹಿಸಬಲ್ಲದು.</string>
+    <string name="settings_notifications_open_settings">ಅಧಿಸೂಚನೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ</string>
     <string name="settings_language">ಭಾಷೆ</string>
     <string name="settings_templates">ಟೆಂಪ್ಲೇಟ್‌ಗಳು</string>
     <string name="settings_subscription_plans">ಚಂದಾದಾರಿಕೆ ಯೋಜನೆಗಳು</string>

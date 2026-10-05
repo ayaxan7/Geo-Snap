@@ -20,6 +20,13 @@ class PermissionsViewModelTest {
         description = R.string.permission_location_description,
         iconRes = R.drawable.ic_location
     )
+    private val notifications = PermissionsViewModel.PermissionRequirement(
+        permission = "android.permission.POST_NOTIFICATIONS",
+        label = R.string.permission_notifications_label,
+        description = R.string.permission_notifications_description,
+        iconRes = R.drawable.ic_notification,
+        isOptional = true
+    )
     private val requirements = listOf(camera, location)
 
     @Test
@@ -81,5 +88,57 @@ class PermissionsViewModelTest {
         )
 
         assertTrue(vm.uiState.value.allGranted)
+    }
+
+    @Test
+    fun `denied optional permission still satisfies onboarding`() {
+        val vm = PermissionsViewModel()
+        vm.initialize(
+            requirements + notifications,
+            currentGrants = mapOf(camera.permission to true, location.permission to true)
+        )
+
+        assertFalse(vm.uiState.value.items.first { it.permission == notifications.permission }.granted)
+        assertTrue(vm.uiState.value.allGranted)
+    }
+
+    @Test
+    fun `denied optional permission is not requestable`() {
+        val vm = PermissionsViewModel()
+        vm.initialize(requirements + notifications, currentGrants = emptyMap())
+
+        assertFalse(vm.requestablePermissions.contains(notifications.permission))
+    }
+
+    @Test
+    fun `granted optional permission does not break allGranted`() {
+        val vm = PermissionsViewModel()
+        vm.initialize(
+            requirements + notifications,
+            currentGrants = mapOf(
+                camera.permission to true,
+                location.permission to true,
+                notifications.permission to true
+            )
+        )
+
+        assertTrue(vm.uiState.value.allGranted)
+    }
+
+    @Test
+    fun `permanently denied optional permission does not surface the settings prompt`() {
+        val vm = PermissionsViewModel()
+        vm.initialize(
+            requirements + notifications,
+            currentGrants = mapOf(camera.permission to true, location.permission to true)
+        )
+
+        vm.onPermissionResults(
+            results = mapOf(notifications.permission to false),
+            permanentlyDenied = setOf(notifications.permission)
+        )
+
+        assertTrue(vm.uiState.value.allGranted)
+        assertFalse(vm.uiState.value.canOpenSettings)
     }
 }

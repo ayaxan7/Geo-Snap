@@ -63,6 +63,79 @@ class SettingsViewModelTest {
 
         assertFalse(vm.uiState.value.showRevokeDialog)
         assertFalse(vm.uiState.value.showEnableDialog)
-        assertEquals(SettingsViewModel.OpenAppSettings, vm.navigation.first())
+        assertEquals(SettingsViewModel.NavigationTarget.AppInfo, vm.navigation.first())
+    }
+
+    @Test
+    fun `notifications mirror the reported permission state`() {
+        val vm = SettingsViewModel()
+
+        vm.setNotificationsEnabled(true)
+        assertTrue(vm.uiState.value.notificationsEnabled)
+
+        vm.setNotificationsEnabled(false)
+        assertFalse(vm.uiState.value.notificationsEnabled)
+    }
+
+    @Test
+    fun `notifications default to off`() {
+        assertFalse(SettingsViewModel().uiState.value.notificationsEnabled)
+    }
+
+    @Test
+    fun `requesting notification turn off shows only the notification dialog`() {
+        val vm = SettingsViewModel()
+
+        vm.requestTurnOffNotifications()
+
+        assertTrue(vm.uiState.value.showNotificationRevokeDialog)
+        assertFalse(vm.uiState.value.showNotificationEnableDialog)
+        assertFalse(vm.uiState.value.showRevokeDialog)
+        assertFalse(vm.uiState.value.showEnableDialog)
+    }
+
+    @Test
+    fun `permanent notification denial shows only the notification enable dialog`() {
+        val vm = SettingsViewModel()
+
+        vm.requestEnableNotificationsViaSettings()
+
+        assertTrue(vm.uiState.value.showNotificationEnableDialog)
+        assertFalse(vm.uiState.value.showNotificationRevokeDialog)
+    }
+
+    @Test
+    fun `dismissing clears the notification dialogs too`() {
+        val vm = SettingsViewModel()
+        vm.requestTurnOffNotifications()
+
+        vm.dismissDialogs()
+
+        assertFalse(vm.uiState.value.showNotificationRevokeDialog)
+        assertFalse(vm.uiState.value.showNotificationEnableDialog)
+    }
+
+    @Test
+    fun `confirming a notification dialog emits the notification target`() = runTest {
+        val vm = SettingsViewModel()
+        vm.requestTurnOffNotifications()
+
+        vm.confirmOpenNotificationSettings()
+
+        assertFalse(vm.uiState.value.showNotificationRevokeDialog)
+        assertEquals(SettingsViewModel.NavigationTarget.Notifications, vm.navigation.first())
+    }
+
+    @Test
+    fun `notification dialogs do not disturb the media dialog state`() {
+        val vm = SettingsViewModel()
+        vm.setAutoSaveToDevice(true)
+
+        vm.requestTurnOffNotifications()
+        vm.requestEnableViaSettings()
+
+        assertTrue(vm.uiState.value.showNotificationRevokeDialog)
+        assertTrue(vm.uiState.value.showEnableDialog)
+        assertTrue(vm.uiState.value.autoSaveToDevice)
     }
 }

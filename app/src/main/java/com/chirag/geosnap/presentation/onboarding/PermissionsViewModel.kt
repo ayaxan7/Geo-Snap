@@ -95,16 +95,26 @@ class PermissionsViewModel @Inject constructor() : ViewModel() {
         recompute()
     }
 
+    /**
+     * Derives the two gating flags.
+     *
+     * Both deliberately ignore optional rows: the app is usable without
+     * notifications or gallery access, so a user who skips or permanently denies
+     * them has still satisfied onboarding. Optional rows are still listed, and
+     * still individually requestable from their own row.
+     */
     private fun recompute() {
         _uiState.update { state ->
-            val allGranted = state.items.isNotEmpty() && state.items.all { it.granted }
-            val canOpenSettings = state.items.any { it.permanentlyDenied }
+            val required = state.items.filterNot { it.isOptional }
+            val allGranted = required.isNotEmpty() && required.all { it.granted }
+            val canOpenSettings = state.items.any { it.permanentlyDenied && !it.isOptional }
             state.copy(allGranted = allGranted, canOpenSettings = canOpenSettings)
         }
     }
 
+    /** Outstanding permissions worth prompting for: required ones only. */
     val requestablePermissions: List<String>
         get() = _uiState.value.items
-            .filter { !it.granted && !it.permanentlyDenied }
+            .filter { !it.granted && !it.permanentlyDenied && !it.isOptional }
             .map { it.permission }
 }

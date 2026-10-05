@@ -66,8 +66,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.chirag.geosnap.R
 import com.chirag.geosnap.presentation.core.findActivity
 import com.chirag.geosnap.presentation.core.hasMediaPermission
+import com.chirag.geosnap.presentation.core.hasNotificationPermission
 import com.chirag.geosnap.presentation.core.mediaPermissionsForSdk
+import com.chirag.geosnap.presentation.core.notificationPermissionsForSdk
 import com.chirag.geosnap.presentation.core.openAppSettings
+import com.chirag.geosnap.presentation.core.openNotificationSettings
 import com.chirag.geosnap.ui.theme.PrimaryGreen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -81,7 +84,6 @@ fun SettingsScreen(
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    var notificationsEnabled by remember { mutableStateOf(true) }
     var syncEnabled by remember { mutableStateOf(true) }
 
     val mediaPermissions = remember { mediaPermissionsForSdk() }
@@ -97,18 +99,38 @@ fun SettingsScreen(
         viewModel.setAutoSaveToDevice(context.hasMediaPermission())
     }
 
-    // Seed and re-sync the switch with the real media permission state. When the
-    // user comes back from App Info (having revoked or not), this is what flips
-    // the switch to match.
+    val notificationPermissions = remember { notificationPermissionsForSdk() }
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { results ->
+        val permanentlyDenied = results.filterValues { !it }.keys.filter { permission ->
+            context.findActivity()?.shouldShowRequestPermissionRationale(permission) == false
+        }.toSet()
+        if (permanentlyDenied.isNotEmpty()) {
+            viewModel.requestEnableNotificationsViaSettings()
+        }
+        viewModel.setNotificationsEnabled(context.hasNotificationPermission())
+    }
+
+    // Seed and re-sync the switches with the real permission states. When the user
+    // comes back from system settings (having revoked or not), this is what flips
+    // the switches to match.
     LaunchedEffect(context) {
         viewModel.setAutoSaveToDevice(context.hasMediaPermission())
+        viewModel.setNotificationsEnabled(context.hasNotificationPermission())
     }
     LifecycleResumeEffect(context) {
         viewModel.setAutoSaveToDevice(context.hasMediaPermission())
+        viewModel.setNotificationsEnabled(context.hasNotificationPermission())
         onPauseOrDispose { }
     }
     LaunchedEffect(Unit) {
-        viewModel.navigation.collect { context.openAppSettings() }
+        viewModel.navigation.collect { target ->
+            when (target) {
+                SettingsViewModel.NavigationTarget.AppInfo -> context.openAppSettings()
+                SettingsViewModel.NavigationTarget.Notifications -> context.openNotificationSettings()
+            }
+        }
     }
 
     when {
@@ -135,6 +157,38 @@ fun SettingsScreen(
             confirmButton = {
                 TextButton(onClick = viewModel::confirmOpenSettings) {
                     Text(stringResource(R.string.settings_auto_save_open_app_info))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = viewModel::dismissDialogs) {
+                    Text(stringResource(R.string.settings_auto_save_not_now))
+                }
+            }
+        )
+
+        uiState.showNotificationRevokeDialog -> AlertDialog(
+            onDismissRequest = viewModel::dismissDialogs,
+            title = { Text(stringResource(R.string.settings_notifications_revoke_title)) },
+            text = { Text(stringResource(R.string.settings_notifications_revoke_message)) },
+            confirmButton = {
+                TextButton(onClick = viewModel::confirmOpenNotificationSettings) {
+                    Text(stringResource(R.string.settings_notifications_open_settings))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = viewModel::dismissDialogs) {
+                    Text(stringResource(R.string.settings_auto_save_not_now))
+                }
+            }
+        )
+
+        uiState.showNotificationEnableDialog -> AlertDialog(
+            onDismissRequest = viewModel::dismissDialogs,
+            title = { Text(stringResource(R.string.settings_notifications_enable_title)) },
+            text = { Text(stringResource(R.string.settings_notifications_enable_message)) },
+            confirmButton = {
+                TextButton(onClick = viewModel::confirmOpenNotificationSettings) {
+                    Text(stringResource(R.string.settings_notifications_open_settings))
                 }
             },
             dismissButton = {
@@ -180,8 +234,27 @@ fun SettingsScreen(
             SettingsItemSwitch(
                 icon = R.drawable.ic_notification,
                 titleRes = R.string.settings_notifications,
-                checked = notificationsEnabled,
-                onCheckedChange = { notificationsEnabled = it }
+                checked = uiState.notificationsEnabled,
+                onCheckedChange = { enabled ->
+                    if (enabled) {
+                        // Android 13+ needs an explicit grant; below that notifications
+                        // are allowed by default so there is nothing to request.
+                        val missing = notificationPermissions.filter {
+                            ContextCompat.checkSelfPermission(context, it) !=
+                                PackageManager.PERMISSION_GRANTED
+                        }
+                        if (missing.isNotEmpty()) {
+                            notificationPermissionLauncher.launch(missing.toTypedArray())
+                        } else {
+                            viewModel.setNotificationsEnabled(context.hasNotificationPermission())
+                        }
+                    } else if (uiState.notificationsEnabled) {
+                        // The SDK gives apps no way to revoke their own grant, so send
+                        // the user to notification settings; LifecycleResumeEffect
+                        // re-reads the real state when they come back.
+                        viewModel.requestTurnOffNotifications()
+                    }
+                }
             )
             SettingsDivider()
             
@@ -316,7 +389,7 @@ private fun SettingsItemArrow(
             painter = painterResource(id = icon),
             contentDescription = title,
             tint = Color.Black,
-            modifier = Modifier.size(24.dp)
+            modifier = Modifier.size(18.dp)
         )
         Spacer(modifier = Modifier.padding(8.dp))
         Text(
@@ -352,7 +425,7 @@ private fun SettingsItemSwitch(
         Icon(
             painter = painterResource(id = icon),
             contentDescription = title,
-            modifier = Modifier.size(24.dp)
+            modifier = Modifier.size(18.dp)
         )
         Spacer(modifier = Modifier.padding(8.dp))
         Text(

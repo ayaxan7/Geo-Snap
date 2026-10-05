@@ -69,7 +69,11 @@ import com.chirag.geosnap.presentation.core.openAppSettings
 import com.chirag.geosnap.ui.theme.PrimaryGreen
 
 /**
- * Runtime permissions the app requires.
+ * Runtime permissions the app asks for during onboarding.
+ *
+ * Includes optional ones too: they are still worth offering on this screen rather
+ * than hiding until Settings, but [permissionsCopy] marks them `isOptional` so a
+ * denial never blocks the user from getting into the app.
  */
 fun requiredRuntimePermissions(): List<String> = buildList {
     add(Manifest.permission.CAMERA)
@@ -115,7 +119,8 @@ private fun permissionsCopy(permissions: List<String>): List<PermissionsViewMode
                 permission,
                 R.string.permission_notifications_label,
                 R.string.permission_notifications_description,
-                R.drawable.ic_notification
+                R.drawable.ic_notification,
+                isOptional = true
             )
 
             Manifest.permission.READ_MEDIA_IMAGES,
@@ -300,8 +305,14 @@ private fun PermissionsContent(
                 PermissionRow(
                     item = item,
                     onToggle = {
-                        if (!item.granted) {
-
+                        // Android stops showing the prompt once a permission has been
+                        // denied for good, so re-requesting would silently do nothing.
+                        // Send the user to system settings instead, which is the only
+                        // route left. Applies to optional rows too: the user chose to
+                        // grant one, so don't leave them tapping a dead switch.
+                        if (item.granted || item.permanentlyDenied) {
+                            onOpenSettings()
+                        } else {
                             val relatedPermissions = uiState.items
                                 .filter {
                                     it.label == item.label && !it.granted
@@ -315,9 +326,6 @@ private fun PermissionsContent(
                             } else {
                                 onRequest(listOf(item.permission))
                             }
-
-                        } else {
-                            onOpenSettings()
                         }
                     }
                 )

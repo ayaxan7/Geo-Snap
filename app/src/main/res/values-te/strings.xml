@@ -51,6 +51,11 @@
     <string name="settings_auto_save_open_app_info">యాప్ సమాచారం తెరవండి</string>
     <string name="settings_auto_save_not_now">ఇప్పుడు కాదు</string>
     <string name="settings_notifications">నోటిఫికేషన్లు</string>
+    <string name="settings_notifications_revoke_title">నోటిఫికేషన్లు ఆఫ్ చేయాలా?</string>
+    <string name="settings_notifications_revoke_message">Androidలో GeoSnap నోటిఫికేషన్లు ఆఫ్ చేయడం సిస్టమ్ సెట్టింగ్‌ల నుంచే సాధ్యం. నోటిఫికేషన్ సెట్టింగ్‌లు తెరిచి, GeoSnap నోటిఫికేషన్లు ఆఫ్ చేసి, తర్వాత తిరిగి రండి — ఈ స్విచ్ దానంతట తనను తాను అప్‌డేట్ అవుతుంది.</string>
+    <string name="settings_notifications_enable_title">నోటిఫికేషన్లు నిరోధించబడ్డాయి</string>
+    <string name="settings_notifications_enable_message">నోటిఫికేషన్ అనుమతి శాశ్వతంగా తిరస్కరించబడింది. నోటిఫికేషన్ సెట్టింగ్‌లు తెరిచి అనుమతించండి; అప్పుడు GeoSnap మీకు నోటిఫికేషన్లు పంపగలుగుతుంది.</string>
+    <string name="settings_notifications_open_settings">నోటిఫికేషన్ సెట్టింగ్‌లు తెరవండి</string>
     <string name="settings_language">భాష</string>
     <string name="settings_templates">టెంప్లేట్లు</string>
     <string name="settings_subscription_plans">సబ్‌స్క్రిప్షన్ ప్లాన్‌లు</string>
