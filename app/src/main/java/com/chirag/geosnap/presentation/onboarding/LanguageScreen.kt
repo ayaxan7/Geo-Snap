@@ -45,6 +45,8 @@ import com.chirag.geosnap.R
 import com.chirag.geosnap.ui.theme.GeoSnapTheme
 import com.chirag.geosnap.ui.theme.PrimaryGreen
 import androidx.compose.material3.RadioButton
+import androidx.compose.ui.graphics.graphicsLayer
+
 @Composable
 fun LanguageScreen(
     onBack: () -> Unit, onCompleted: () -> Unit, viewModel: LanguageViewModel = hiltViewModel()
@@ -142,24 +144,29 @@ private fun LanguageRow(
     selected: Boolean,
     onClick: () -> Unit
 ) {
+    val rowShape = RoundedCornerShape(12.dp)
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
+            .background(
+                color = if (selected) Color.White else Color.Transparent,
+                shape = rowShape
+            )
             .border(
                 border = BorderStroke(1.dp, Color.White),
-                shape = RoundedCornerShape(12.dp)
+                shape = rowShape
             )
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-
         RadioButton(
             selected = selected,
             onClick = onClick,
             colors = RadioButtonDefaults.colors(
-                selectedColor = Color.White,
+                selectedColor = PrimaryGreen,
                 unselectedColor = Color.White
             ),
             modifier = Modifier.size(20.dp)
@@ -173,39 +180,62 @@ private fun LanguageRow(
             Text(
                 text = stringResource(language.nativeNameRes),
                 style = MaterialTheme.typography.titleLarge,
-                color = Color.White,
+                color = if (selected) PrimaryGreen else Color.White,
                 fontWeight = FontWeight.Bold
             )
 
             Text(
                 text = stringResource(language.englishNameRes),
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color.White
+                color = if (selected) PrimaryGreen else Color.White
             )
         }
 
         Spacer(modifier = Modifier.width(16.dp))
 
-        val imageRes = getImageForLanguage(language.code)
+        val imageRes = getImageForLanguage(
+            code = language.code,
+            selected = selected
+        )
 
         Image(
             painter = painterResource(id = imageRes),
             contentDescription = stringResource(language.englishNameRes),
-            modifier = Modifier.height(48.dp)
+            modifier = Modifier
+                .padding(end = 16.dp)
+                .size(48.dp)
+                .graphicsLayer {
+                    scaleX = 1.9f
+                    scaleY = 1.9f
+                },
+            contentScale = ContentScale.Fit
         )
     }
 }
 
 // Function with assumption that images are in drawable folders
-private fun getImageForLanguage(code: String): Int {
-    // You can replace these placeholders with your actual drawable resources later
-    return when (code) {
-        "en" -> R.drawable.ic_english
-        "te" -> R.drawable.ic_telugu
-        "hi" -> R.drawable.ic_hindi
-        "ta" -> R.drawable.ic_tamil
-        "kn" -> R.drawable.ic_kannada
-        else -> R.drawable.ic_english
+private fun getImageForLanguage(
+    code: String,
+    selected: Boolean
+): Int {
+    return if (selected) {
+        when (code) {
+            "en" -> R.drawable.ic_english_selected
+            "te" -> R.drawable.ic_telugu_selected
+            "hi" -> R.drawable.ic_hindi_selected
+            "ta" -> R.drawable.ic_tamil_selected
+            "kn" -> R.drawable.ic_kannada_selected
+            else -> R.drawable.ic_english_selected
+        }
+    } else {
+        when (code) {
+            "en" -> R.drawable.ic_english
+            "te" -> R.drawable.ic_telugu
+            "hi" -> R.drawable.ic_hindi
+            "ta" -> R.drawable.ic_tamil
+            "kn" -> R.drawable.ic_kannada
+            else -> R.drawable.ic_english
+        }
     }
 }
 
