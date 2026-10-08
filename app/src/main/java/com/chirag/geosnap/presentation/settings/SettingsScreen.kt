@@ -18,24 +18,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ExitToApp
-import androidx.compose.material.icons.automirrored.filled.HelpOutline
-import androidx.compose.material.icons.automirrored.filled.ListAlt
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.CloudSync
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.LocalOffer
-import androidx.compose.material.icons.filled.NotificationsNone
-import androidx.compose.material.icons.filled.Security
-import androidx.compose.material.icons.filled.SpaceDashboard
-import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -52,7 +41,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -206,7 +194,9 @@ fun SettingsScreen(
                     Text(
                         text = stringResource(R.string.home_settings),
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.fillMaxWidth().padding(end = 48.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(end = 48.dp),
                         textAlign = androidx.compose.ui.text.style.TextAlign.Center
                     )
                 },
@@ -241,7 +231,7 @@ fun SettingsScreen(
                         // are allowed by default so there is nothing to request.
                         val missing = notificationPermissions.filter {
                             ContextCompat.checkSelfPermission(context, it) !=
-                                PackageManager.PERMISSION_GRANTED
+                                    PackageManager.PERMISSION_GRANTED
                         }
                         if (missing.isNotEmpty()) {
                             notificationPermissionLauncher.launch(missing.toTypedArray())
@@ -257,7 +247,7 @@ fun SettingsScreen(
                 }
             )
             SettingsDivider()
-            
+
             SettingsItemArrow(
                 icon = R.drawable.ic_language,
                 titleRes = R.string.settings_language,
@@ -294,7 +284,10 @@ fun SettingsScreen(
                 onCheckedChange = { enabled ->
                     if (enabled) {
                         val missing = mediaPermissions.filter {
-                            ContextCompat.checkSelfPermission(context, it) != PackageManager.PERMISSION_GRANTED
+                            ContextCompat.checkSelfPermission(
+                                context,
+                                it
+                            ) != PackageManager.PERMISSION_GRANTED
                         }
                         if (missing.isNotEmpty()) {
                             permissionLauncher.launch(missing.toTypedArray())
@@ -334,9 +327,9 @@ fun SettingsScreen(
 //                titleRes = R.string.settings_help_support,
 //                onClick = { }
 //            )
-            
+
             Spacer(modifier = Modifier.weight(1f))
-            
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
