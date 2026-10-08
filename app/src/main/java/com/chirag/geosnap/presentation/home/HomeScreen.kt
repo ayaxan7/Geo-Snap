@@ -73,16 +73,21 @@ fun HomeScreen(
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Image(
-                    painter = painterResource(R.drawable.geo_snap_icon),
+                    painter = painterResource(R.drawable.geo_snap_icon_with_text),
                     contentDescription = stringResource(R.string.home_logo),
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier
+                        .size(60.dp)
+                        .align(Alignment.Start),
+                    alignment = Alignment.CenterStart
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = stringResource(R.string.app_name),
+                    text = stringResource(R.string.home_made_for_bharat),
                     color = PrimaryGreen,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 8.sp,
+                    modifier = Modifier.align(Alignment.Start),
+                    textAlign = TextAlign.Start
                 )
             }
             IconButton(onClick = { onOpenSettings() }) {

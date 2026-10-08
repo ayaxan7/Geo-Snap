@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">GeoSnap</string>
+    <string name="app_name">PataShot</string>
 
     <!-- Loading / startup -->
     <string name="loading">Loading…</string>
@@ -45,6 +45,7 @@
     <string name="home_gallery">Gallery</string>
     <string name="home_gallery_desc">Customize your shot</string>
     <string name="home_logo">Logo</string>
+    <string name="home_made_for_bharat">Made in India. Made for Bharat 🇮🇳</string>
     <string name="home_settings">Settings</string>
     <string name="home_india_map">India Map</string>
 

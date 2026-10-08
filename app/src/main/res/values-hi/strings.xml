@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">GeoSnap</string>
+    <string name="app_name">PataShot</string>
 
     <string name="loading">लोड हो रहा है…</string>
 
@@ -40,6 +40,7 @@
     <string name="home_gallery">गैलरी</string>
     <string name="home_gallery_desc">अपना शॉट कस्टमाइज़ करें</string>
     <string name="home_logo">लोगो</string>
+    <string name="home_made_for_bharat">भारत में बना। भारत के लिए बनाया गया 🇮🇳</string>
     <string name="home_settings">सेटिंग</string>
     <string name="home_india_map">भारत का नक्शा</string>
 

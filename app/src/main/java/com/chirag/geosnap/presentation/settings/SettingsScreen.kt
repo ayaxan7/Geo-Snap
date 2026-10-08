@@ -345,10 +345,10 @@ fun SettingsScreen(
                 )
                 Spacer(modifier = Modifier.padding(4.dp))
                 Text(
-                    text = stringResource(R.string.settings_proudly_made_india),
+                    text = stringResource(R.string.home_made_for_bharat),
                     color = PrimaryGreen,
                     fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.Normal
                 )
             }
         }

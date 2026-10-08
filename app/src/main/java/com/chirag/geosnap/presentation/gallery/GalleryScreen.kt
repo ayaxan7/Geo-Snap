@@ -448,7 +448,8 @@ private fun MediaThumbnail(
                         false -> Unit
                     }
                 }
-            }) {
+            }
+            .background(Color.Transparent, RoundedCornerShape(8.dp))) {
         AsyncImage(
             model = media.uri,
             contentDescription = media.displayName,

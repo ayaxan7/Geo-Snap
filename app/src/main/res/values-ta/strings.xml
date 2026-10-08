@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">GeoSnap</string>
+    <string name="app_name">படாஷாட்</string>
 
     <string name="loading">ஏற்றுகிறது…</string>
 
@@ -40,6 +40,7 @@
     <string name="home_gallery">கேலரி</string>
     <string name="home_gallery_desc">உங்கள் ஷாட்டைத் தனிப்பயனாக்கு</string>
     <string name="home_logo">லோகோ</string>
+    <string name="home_made_for_bharat">இந்தியாவில் உருவானது. பாரதத்திற்காக உருவானது 🇮🇳</string>
     <string name="home_settings">அமைப்புகள்</string>
     <string name="home_india_map">இந்திய வரைபடம்</string>
 

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">GeoSnap</string>
+    <string name="app_name">పటాషాట్</string>
 
     <string name="loading">లోడ్ అవుతోంది…</string>
 
@@ -40,6 +40,7 @@
     <string name="home_gallery">గ్యాలరీ</string>
     <string name="home_gallery_desc">మీ షాట్‌ను అనుకూలీకరించండి</string>
     <string name="home_logo">లోగో</string>
+    <string name="home_made_for_bharat">భారతదేశంలో తయారు చేయబడింది. భారత్ కోసం తయారు చేయబడింది 🇮🇳</string>
     <string name="home_settings">సెట్టింగ్స్</string>
     <string name="home_india_map">ఇండియా మ్యాప్</string>
 
