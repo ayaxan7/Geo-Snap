@@ -172,6 +172,28 @@ class GalleryViewModelTest {
     }
 
     @Test
+    fun `enterSelection clears any previous selection`() = runTest(mainDispatcherRule.scheduler) {
+        val repo = FakeMediaRepository().apply {
+            media = mutableListOf(
+                media("content://geosnap.test/a", timestamp = 1),
+                media("content://geosnap.test/b", timestamp = 2)
+            )
+        }
+        val vm = GalleryViewModel(mediaRepository = repo)
+        advanceUntilIdle()
+
+        vm.startSelectionAt("content://geosnap.test/a")
+        vm.toggleSelection("content://geosnap.test/b")
+        assertEquals(2, vm.uiState.first().selection.size)
+
+        vm.exitSelection()
+        vm.enterSelection()
+
+        assertTrue(vm.uiState.first().selectionMode)
+        assertTrue(vm.uiState.first().selection.isEmpty())
+    }
+
+    @Test
     fun `toggleSelection is ignored outside selection mode`() = runTest(mainDispatcherRule.scheduler) {
         val repo = FakeMediaRepository().apply {
             media = mutableListOf(media("content://geosnap.test/a", timestamp = 1))

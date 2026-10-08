@@ -307,7 +307,7 @@ fun SettingsScreen(
                 onClick = { }
             )
 //            SettingsDivider()
-
+//
 //            SettingsItemArrow(
 //                icon = R.drawable.ic_terms,
 //                titleRes = R.string.settings_terms,

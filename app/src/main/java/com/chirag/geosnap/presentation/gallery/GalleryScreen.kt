@@ -20,7 +20,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -63,6 +65,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -150,21 +153,18 @@ private fun GalleryContent(
             onBack = onBack,
             selectionMode = uiState.selectionMode,
             selectedCount = selectedMedia.size,
-            onCancelSelection = onExitSelection
+            onCancelSelection = onExitSelection,
+            onEnterSelection = onEnterSelection
         )
     }, bottomBar = {
-        if (uiState.media.isNotEmpty() && uiState.selectionMode) {
+        // Hidden entirely until something is selected: a greyed-out pair of buttons
+        // invites a tap that does nothing, whereas nothing there is unambiguous.
+        if (uiState.selectionMode && selectedMedia.isNotEmpty()) {
             GalleryBottomBar(
-//                selectionMode = uiState.selectionMode,
-                canActOnSelection = canActOnSelection, onDeleteClick = {
-                    if (uiState.selectionMode) {
-                        if (selectedMedia.isNotEmpty()) showDeleteDialog = true
-                    } else {
-                        onEnterSelection()
-                    }
-                }, onShareClick = {
-                    if (uiState.selectionMode) shareSelected() else onEnterSelection()
-                })
+                canActOnSelection = canActOnSelection,
+                onDeleteClick = { showDeleteDialog = true },
+                onShareClick = { shareSelected() }
+            )
         }
     }) { paddingValues ->
         Box(
@@ -281,7 +281,11 @@ private fun GalleryContent(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun GalleryTopBar(
-    onBack: () -> Unit, selectionMode: Boolean, selectedCount: Int, onCancelSelection: () -> Unit
+    onBack: () -> Unit,
+    selectionMode: Boolean,
+    selectedCount: Int,
+    onCancelSelection: () -> Unit,
+    onEnterSelection: () -> Unit
 ) {
     TopAppBar(
         title = {
@@ -305,8 +309,49 @@ private fun GalleryTopBar(
                 }
             )
         }
+    }, actions = {
+        // Selection mode swaps this for the count in the title, so the button only
+        // appears alongside the plain gallery title.
+        if (!selectionMode) {
+            Row {
+                SelectActionButton(onClick = onEnterSelection)
+                Spacer(Modifier.width(8.dp))
+            }
+        }
     }, colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
     )
+}
+
+/**
+ * Enter-selection affordance for the gallery top bar.
+ *
+ * Matches the Save button on the Templates screen: outlined, 1dp primary-green
+ * border, 12dp corners, white ground and bold label, so the two top-bar actions
+ * read as the same control across the app.
+ */
+@Composable
+private fun SelectActionButton(onClick: () -> Unit) {
+    OutlinedButton(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.White,
+            contentColor = PrimaryGreen
+        ),
+        border = BorderStroke(1.dp, PrimaryGreen),
+        shape = RoundedCornerShape(12.dp),
+        contentPadding = PaddingValues(
+            horizontal = 16.dp,
+            vertical = 0.dp
+        ),
+        modifier = Modifier.height(36.dp)
+    ) {
+        Text(
+            text = stringResource(R.string.gallery_select),
+            fontWeight = FontWeight.Bold,
+            lineHeight = 1.em,
+            maxLines = 1
+        )
+    }
 }
 
 @Composable
@@ -320,7 +365,7 @@ private fun GalleryGrid(
     onStartSelection: (String) -> Unit
 ) {
     LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
+        columns = GridCells.Fixed(3),
         modifier = Modifier.fillMaxSize(),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -459,7 +504,6 @@ private fun MediaThumbnail(
 
 @Composable
 private fun GalleryBottomBar(
-//    selectionMode: Boolean,
     canActOnSelection: Boolean, onDeleteClick: () -> Unit, onShareClick: () -> Unit
 ) {
     Row(

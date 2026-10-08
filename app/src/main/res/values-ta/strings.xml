@@ -105,6 +105,7 @@
     <string name="gallery_delete_message_video">தேர்ந்தெடுத்த வீடியோவை நீக்குவது உறுதியா?</string>
     <string name="gallery_delete_error">இந்த மீடியாவை நீக்க முடியவில்லை.</string>
     <string name="gallery_selected_count">தேர்ந்தெடுக்கப்பட்டவை: %1$d</string>
+    <string name="gallery_select">தேர்ந்தெடுக்கவும்</string>
     <string name="gallery_section_today">இன்று</string>
     <string name="gallery_section_this_week">இந்த வாரம்</string>
     <string name="gallery_section_last_week">கடந்த வாரம்</string>

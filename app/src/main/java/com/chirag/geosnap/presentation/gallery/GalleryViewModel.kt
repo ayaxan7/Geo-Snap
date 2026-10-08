@@ -109,8 +109,15 @@ class GalleryViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Enter selection mode from the top bar's Select button.
+     *
+     * Always starts empty so the user picks deliberately rather than acting on a
+     * stale selection carried over from an earlier round, which would otherwise
+     * make an unattended tap on Delete destructive.
+     */
     fun enterSelection() {
-        _uiState.update { it.copy(selectionMode = true) }
+        _uiState.update { it.copy(selectionMode = true, selection = emptySet()) }
     }
 
     /**

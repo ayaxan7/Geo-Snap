@@ -105,6 +105,7 @@
     <string name="gallery_delete_message_video">ಆಯ್ಕೆ ಮಾಡಿದ ವೀಡಿಯೊವನ್ನು ಅಳಿಸಲು ನಿಮಗೆ ಖಚಿತವಾಗಿದೆಯೇ?</string>
     <string name="gallery_delete_error">ಈ ಮೀಡಿಯಾವನ್ನು ಅಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.</string>
     <string name="gallery_selected_count">ಆಯ್ಕೆ ಮಾಡಲಾಗಿದೆ: %1$d</string>
+    <string name="gallery_select">ಆಯ್ಕೆಮಾಡಿ</string>
     <string name="gallery_section_today">ಇಂದು</string>
     <string name="gallery_section_this_week">ಈ ವಾರ</string>
     <string name="gallery_section_last_week">ಕಳೆದ ವಾರ</string>
