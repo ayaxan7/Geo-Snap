@@ -9,7 +9,7 @@ plugins {
 }
 
 android {
-    namespace = "com.chirag.geosnap"
+    namespace = "com.patashot.myapp"
     compileSdk {
         version = release(37) {
             minorApiLevel = 0
@@ -17,7 +17,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.chirag.geosnap"
+        applicationId = "com.patashot.myapp"
         minSdk = 28
         targetSdk = 36
         versionCode = 1
