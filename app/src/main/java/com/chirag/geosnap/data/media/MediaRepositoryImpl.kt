@@ -47,6 +47,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
+import androidx.core.graphics.createBitmap
 
 /**
  * Media persistence for the app gallery.
@@ -429,11 +430,8 @@ private fun deleteAppCopy(contentUri: String) {
 
     /** Renders [source] onto a fresh bitmap through the color recipe. */
     private fun applyRecipe(source: Bitmap, recipe: FloatArray): Bitmap {
-        val filtered = Bitmap.createBitmap(
-            source.width,
-            source.height,
-            source.config ?: Bitmap.Config.ARGB_8888
-        )
+        val filtered =
+            createBitmap(source.width, source.height, source.config ?: Bitmap.Config.ARGB_8888)
         val paint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG).apply {
             colorFilter = ColorMatrixColorFilter(ColorMatrix(recipe))
         }
