@@ -307,7 +307,7 @@ private fun LogoBadge(metrics: GeoTagCardMetrics, logoLabel: String) {
         modifier = Modifier
             .size(metrics.logoSizeDp.dp)
             .clip(RoundedCornerShape(metrics.logoCornerDp.dp))
-            .background(Color(metrics.logoBackgroundColor)),
+            .background(Color.Transparent),
         contentAlignment = Alignment.Center
     ) {
         Image(

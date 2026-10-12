@@ -17,3 +17,4 @@ local.properties
 .kotlin/
 app/release
 Untitled.jks
+certificate.pem
