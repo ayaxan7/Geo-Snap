@@ -20,7 +20,7 @@ data class GeoTagCardContent(
     val timestamp: Long,
     val staticMapUrl: String?,
     val template: CardTemplate = CardTemplates.DEFAULT
-)
+) : java.io.Serializable
 
 /** Static map thumbnail size for the on-screen card, as opposed to the burnt one. */
 const val PREVIEW_MAP_SIZE_PX = 200

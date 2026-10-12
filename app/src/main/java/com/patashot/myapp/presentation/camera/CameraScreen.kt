@@ -46,7 +46,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -140,6 +139,12 @@ fun CameraScreen(
                         shareMediaChooser(context, it, isVideo = false)?.let(shareLauncher::launch)
                     }
                 }
+                is CameraEvent.SharePrepared -> {
+                    Uri.parse(event.uri)?.let { uri ->
+                        shareMediaChooser(context, uri, isVideo = event.isVideo)
+                            ?.let(previewShareLauncher::launch)
+                    }
+                }
             }
         }
     }
@@ -202,23 +207,12 @@ fun CameraScreen(
                         onRetake = viewModel::discardPreview,
                         onEdit = { /* this is the placeholder action in PreviewScreen */ },
                         onSaveToGallery = viewModel::savePreviewToGallery,
-                        onShare = {
-                            val uri = runCatching {
-                                FileProvider.getUriForFile(
-                                    context,
-                                    "${context.packageName}.fileprovider",
-                                    pendingPreview.file
-                                )
-                            }.getOrNull()
-                            if (uri == null) {
-                                viewModel.reportError(CameraError.SHARE_FAILED)
-                            } else {
-                                shareMediaChooser(context, uri, isVideo = pendingPreview.isVideo)
-                                    ?.let(previewShareLauncher::launch)
-                            }
-                        },
+                        // Burns the reviewed card, filter and GPS into a disposable
+                        // copy; the pending capture stays open for further edits.
+                        onShare = viewModel::sharePreview,
                         onBack = viewModel::discardPreview,
                         modifier = Modifier.fillMaxSize(),
+                        isProcessing = uiState.isProcessing,
                         filter = uiState.filter,
                         filterStrength = uiState.filterStrength,
                         onFilterChange = viewModel::setFilter,

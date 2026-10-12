@@ -8,4 +8,8 @@
     <files-path
         name="app_media"
         path="GeoSnap/" />
+    <!-- Burnt copies prepared for sharing (see MediaRepositoryImpl.prepareShareCopy). -->
+    <cache-path
+        name="share_cache"
+        path="share/" />
 </paths>

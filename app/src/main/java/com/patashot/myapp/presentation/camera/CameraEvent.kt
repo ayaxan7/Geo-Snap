@@ -7,4 +7,7 @@ sealed interface CameraEvent {
 
     /** A photo was saved and should be shared immediately (Quick Share). */
     data class QuickShareRequested(val uri: String) : CameraEvent
+
+    /** A burnt share copy is ready; the screen should open the share sheet. */
+    data class SharePrepared(val uri: String, val isVideo: Boolean) : CameraEvent
 }

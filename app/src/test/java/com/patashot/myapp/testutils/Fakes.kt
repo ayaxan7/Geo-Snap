@@ -120,10 +120,12 @@ data class SavedMedia(
 class FakeMediaRepository : MediaRepository {
 
     var failSave = false
+    var failShare = false
     var failGetAppMedia = false
     var failDelete = false
     val savedImages = mutableListOf<SavedMedia>()
     val savedVideos = mutableListOf<SavedMedia>()
+    val sharedCopies = mutableListOf<SavedMedia>()
     val deletedUris = mutableListOf<String>()
     var media = mutableListOf<GeoMedia>()
     private var nextId = 0
@@ -150,6 +152,24 @@ class FakeMediaRepository : MediaRepository {
         failSaveOnce()
         savedVideos += SavedMedia(file = sourceFile, coordinate = coordinate, overlay = overlay, filter = filter, saveToMediaStore = saveToMediaStore)
         return "content://myapp.test/videos/${nextId++}"
+    }
+
+    override suspend fun prepareShareCopy(
+        sourceFile: File,
+        coordinate: GeoCoordinate?,
+        overlay: Bitmap?,
+        filter: FloatArray?,
+        isVideo: Boolean
+    ): String {
+        if (failShare) throw IOException("simulated share failure")
+        sharedCopies += SavedMedia(
+            file = sourceFile,
+            coordinate = coordinate,
+            overlay = overlay,
+            filter = filter,
+            saveToMediaStore = false
+        )
+        return "content://myapp.test/share/${nextId++}?video=$isVideo"
     }
 
     override suspend fun getAppMedia(): List<GeoMedia> {

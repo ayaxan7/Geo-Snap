@@ -49,6 +49,24 @@ interface MediaRepository {
         saveToMediaStore: Boolean = true
     ): String
 
+    /**
+     * Burns [overlay] and [filter] into a disposable copy of [sourceFile] for
+     * sharing: the location card is composited into the media, the color recipe
+     * is applied, and (for images) GPS metadata is written from [coordinate].
+     * Nothing is persisted to the app gallery or MediaStore, and [sourceFile]
+     * itself is never modified, so a pending preview can still be edited,
+     * re-shared or saved afterwards.
+     *
+     * @return the `content://` URI of the shareable copy.
+     */
+    suspend fun prepareShareCopy(
+        sourceFile: File,
+        coordinate: GeoCoordinate?,
+        overlay: Bitmap? = null,
+        filter: FloatArray? = null,
+        isVideo: Boolean
+    ): String
+
     /** Queries the app gallery (Room-backed), newest first. */
     suspend fun getAppMedia(): List<GeoMedia>
 

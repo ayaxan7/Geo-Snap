@@ -36,6 +36,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
@@ -49,7 +51,7 @@ import kotlin.time.Duration.Companion.seconds
 @HiltViewModel
 class CameraViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    savedStateHandle: SavedStateHandle,
+    private val savedStateHandle: SavedStateHandle,
     private val mediaRepository: MediaRepository,
     private val getCurrentLocation: GetCurrentLocationUseCase,
     private val isLocationEnabled: IsLocationEnabledUseCase,
@@ -68,9 +70,28 @@ class CameraViewModel @Inject constructor(
         mode = newMode
     }
 
+    private var attachedEngine: CameraEngine? = null
+
+    private val _uiState = MutableStateFlow(
+        // Restored before anything observes the flow so a preview survives process death.
+        CameraUiState(
+            pendingPreview = restorePendingPreview(),
+            filter = restoreFilter(),
+            filterStrength = savedStateHandle[KEY_FILTER_STRENGTH] ?: FILTER_STRENGTH_NORMAL
+        )
+    )
+    val uiState: StateFlow<CameraUiState> = _uiState.asStateFlow()
+
+    private val _events = MutableSharedFlow<CameraEvent>(
+        replay = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+    val events: SharedFlow<CameraEvent> = _events.asSharedFlow()
+
     init {
         checkLocationEnabled()
         observeSelectedTemplate()
+        persistPreviewForProcessDeath()
     }
 
     /**
@@ -85,17 +106,6 @@ class CameraViewModel @Inject constructor(
             }
         }
     }
-
-    private var attachedEngine: CameraEngine? = null
-
-    private val _uiState = MutableStateFlow(CameraUiState())
-    val uiState: StateFlow<CameraUiState> = _uiState.asStateFlow()
-
-    private val _events = MutableSharedFlow<CameraEvent>(
-        replay = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST
-    )
-    val events: SharedFlow<CameraEvent> = _events.asSharedFlow()
 
     private var recordingElapsedJob: Job? = null
     private var locationUpdatesJob: Job? = null
@@ -281,7 +291,9 @@ class CameraViewModel @Inject constructor(
     }
     
     fun discardPreview() {
+        if (_uiState.value.isProcessing) return
         _uiState.value.pendingPreview?.file?.delete()
+        savedStateHandle[KEY_PENDING_PREVIEW] = null
         _uiState.update { it.copy(pendingPreview = null) }
     }
 
@@ -305,13 +317,30 @@ class CameraViewModel @Inject constructor(
             // Also refresh the thumbnail so the preview card shows the edited spot.
             staticMapUrl = staticMapUrl(lat, lng)
         )
-        _uiState.update { 
-            it.copy(pendingPreview = currentPreview.copy(cardContent = newContent)) 
+        // The edited pin is what gets reviewed, so it is also what gets written
+        // into the GPS EXIF on save/share; the original timestamp is kept so the
+        // card date and the GPS time stamp still agree.
+        val original = currentPreview.coordinate
+        val editedCoordinate = GeoCoordinate(
+            latitude = lat,
+            longitude = lng,
+            altitude = original?.altitude,
+            accuracy = original?.accuracy,
+            timestamp = original?.timestamp ?: System.currentTimeMillis()
+        )
+        _uiState.update {
+            it.copy(
+                pendingPreview = currentPreview.copy(
+                    cardContent = newContent,
+                    coordinate = editedCoordinate
+                )
+            )
         }
     }
     
     fun savePreviewToGallery() {
         val preview = _uiState.value.pendingPreview ?: return
+        if (_uiState.value.isProcessing) return
 
         // Auto Save to Device mirrors the media permission state: granted means
         // the save also goes to the phone gallery, revoked means app-only.
@@ -320,17 +349,7 @@ class CameraViewModel @Inject constructor(
         _uiState.update { it.copy(isProcessing = true) }
         viewModelScope.launch {
             try {
-                // The card the user reviewed is what gets burnt in, re-resolving
-                // from live state here could tag the capture with a later address.
-                val overlay = renderOverlay(
-                    preview.cardContent.copy(
-                        staticMapUrl = staticMapUrl(
-                            latitude = preview.cardContent.latitude,
-                            longitude = preview.cardContent.longitude,
-                            sizePx = BURN_MAP_SIZE_PX
-                        )
-                    )
-                )
+                val overlay = renderBurnOverlay(preview)
                 val uri = if (preview.isVideo) {
                     mediaRepository.saveCapturedVideo(
                         preview.file,
@@ -349,6 +368,7 @@ class CameraViewModel @Inject constructor(
                     )
                 }
                 preview.file.delete()
+                savedStateHandle[KEY_PENDING_PREVIEW] = null
                 _uiState.update {
                     it.copy(
                         isProcessing = false,
@@ -364,6 +384,80 @@ class CameraViewModel @Inject constructor(
             }
         }
     }
+
+    /**
+     * Burns the reviewed card and filter into a disposable copy and hands the
+     * screen a `content://` URI for the share sheet. The pending preview is left
+     * untouched, so returning from the share sheet keeps retake/edit/delete/save
+     * available.
+     */
+    fun sharePreview() {
+        val preview = _uiState.value.pendingPreview ?: return
+        if (_uiState.value.isProcessing) return
+
+        _uiState.update { it.copy(isProcessing = true) }
+        viewModelScope.launch {
+            try {
+                val overlay = renderBurnOverlay(preview)
+                val uri = mediaRepository.prepareShareCopy(
+                    sourceFile = preview.file,
+                    coordinate = preview.coordinate,
+                    overlay = overlay,
+                    filter = filterRecipe(uiState.value),
+                    isVideo = preview.isVideo
+                )
+                _uiState.update { it.copy(isProcessing = false) }
+                _events.tryEmit(CameraEvent.SharePrepared(uri, isVideo = preview.isVideo))
+            } catch (e: Exception) {
+                Log.e(TAG, "Share preparation failed", e)
+                _uiState.update { it.copy(isProcessing = false, error = CameraError.SHARE_FAILED) }
+            }
+        }
+    }
+
+    /**
+     * Renders the card the user reviewed for burning, re-resolving the static map
+     * at the on-disk burn size. Re-resolving from live state here could tag the
+     * capture with a later address, so the snapshot is taken from [preview].
+     */
+    private suspend fun renderBurnOverlay(preview: PreviewData): Bitmap? = renderOverlay(
+        preview.cardContent.copy(
+            staticMapUrl = staticMapUrl(
+                latitude = preview.cardContent.latitude,
+                longitude = preview.cardContent.longitude,
+                sizePx = BURN_MAP_SIZE_PX
+            )
+        )
+    )
+
+    /**
+     * Parks the pending preview (plus the in-progress filter) in [SavedStateHandle]
+     * so an Android process death while the user is in the share sheet does not
+     * lose the capture. On restore, a preview whose file has vanished from the
+     * cache is dropped silently.
+     */
+    private fun persistPreviewForProcessDeath() {
+        viewModelScope.launch {
+            // Projected so the 200ms recording-timer ticks do not rewrite the bundle.
+            _uiState
+                .map { Triple(it.pendingPreview, it.filter, it.filterStrength) }
+                .distinctUntilChanged()
+                .collect { (preview, filter, strength) ->
+                    savedStateHandle[KEY_PENDING_PREVIEW] = preview
+                    savedStateHandle[KEY_FILTER] = filter.name
+                    savedStateHandle[KEY_FILTER_STRENGTH] = strength
+                }
+        }
+    }
+
+    private fun restorePendingPreview(): PreviewData? =
+        savedStateHandle.get<PreviewData>(KEY_PENDING_PREVIEW)
+            ?.takeIf { it.file.exists() }
+
+    private fun restoreFilter(): CaptureFilter =
+        savedStateHandle.get<String>(KEY_FILTER)
+            ?.let { name -> CaptureFilter.entries.firstOrNull { it.name == name } }
+            ?: CaptureFilter.ORIGINAL
 
     fun clearError() {
         _uiState.update { it.copy(error = null) }
@@ -598,6 +692,11 @@ class CameraViewModel @Inject constructor(
         /** Static map thumbnail size used on the burnt card (pages the URL). */
         const val BURN_MAP_SIZE_PX = 320
         const val TAG = "CameraViewModel"
+
+        /** SavedStateHandle keys for surviving process death with a pending preview. */
+        const val KEY_PENDING_PREVIEW = "camera_pending_preview"
+        const val KEY_FILTER = "camera_filter"
+        const val KEY_FILTER_STRENGTH = "camera_filter_strength"
 
         /** How often the camera asks for a fresh fix. */
         val POLL_INTERVAL = 10.seconds

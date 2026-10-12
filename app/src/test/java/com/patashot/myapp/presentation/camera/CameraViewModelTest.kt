@@ -16,6 +16,7 @@ import com.patashot.myapp.testutils.FakeMapsApi
 import com.patashot.myapp.testutils.FakePreferencesRepository
 import com.patashot.myapp.testutils.FakeMediaRepository
 import com.patashot.myapp.testutils.MainDispatcherRule
+import java.io.File
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
@@ -745,6 +746,236 @@ class CameraViewModelTest {
                 CardTemplates.DEFAULT,
                 vm.uiState.value.pendingPreview!!.cardContent.template
             )
+            vm.detachEngine()
+        }
+
+    @Test
+    fun `sharing a preview prepares a burnt copy without saving and keeps the preview`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val media = FakeMediaRepository()
+            val renderer = FakeGeoTagOverlayRenderer()
+            val vm = createViewModel(
+                mode = CameraMode.PHOTO.routeName,
+                media = media,
+                renderer = renderer
+            )
+
+            vm.capturePhoto()
+            advanceUntilIdle()
+            val previewFile = vm.uiState.value.pendingPreview!!.file
+
+            vm.sharePreview()
+            advanceUntilIdle()
+
+            assertEquals(1, media.sharedCopies.size)
+            val shared = media.sharedCopies.first()
+            assertEquals(previewFile, shared.file)
+            assertEquals(coordinate, shared.coordinate)
+            // The card was rendered for burning...
+            assertEquals(1, renderer.rendered.size)
+            // ...but nothing was persisted to the gallery.
+            assertTrue(media.savedImages.isEmpty())
+            // The pending preview is untouched so the user can continue editing.
+            assertNotNull(vm.uiState.value.pendingPreview)
+            assertFalse(vm.uiState.value.isProcessing)
+            assertNull(vm.uiState.value.error)
+            val event = withTimeoutOrNull(1000.milliseconds) { vm.events.first() }
+            assertTrue(event is CameraEvent.SharePrepared)
+            assertFalse((event as CameraEvent.SharePrepared).isVideo)
+        }
+
+    @Test
+    fun `sharing a video emits SharePrepared with isVideo and saves nothing`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val media = FakeMediaRepository()
+            val vm = createViewModel(mode = CameraMode.VIDEO.routeName, media = media)
+
+            vm.startRecording()
+            runCurrent()
+            vm.stopRecording()
+            advanceUntilIdle()
+
+            vm.sharePreview()
+            advanceUntilIdle()
+
+            assertEquals(1, media.sharedCopies.size)
+            assertTrue(media.savedVideos.isEmpty())
+            assertNotNull(vm.uiState.value.pendingPreview)
+            val event = withTimeoutOrNull(1000.milliseconds) { vm.events.first() }
+            assertTrue(event is CameraEvent.SharePrepared)
+            assertTrue((event as CameraEvent.SharePrepared).isVideo)
+        }
+
+    @Test
+    fun `sharing forwards the selected filter recipe and keeps the edits for saving`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val media = FakeMediaRepository()
+            val vm = createViewModel(mode = CameraMode.PHOTO.routeName, media = media)
+
+            vm.capturePhoto()
+            advanceUntilIdle()
+            vm.setFilter(CaptureFilter.VIBRANT)
+            vm.setFilterStrength(1.5f)
+
+            vm.sharePreview()
+            advanceUntilIdle()
+
+            val shared = media.sharedCopies.single()
+            assertNotNull(shared.filter)
+            // 1.5 strength: halfway between the normal (sat 1.5) and max (sat 2.0)
+            // red diagonal: ((1-1.5)*0.213+1.5 + (1-2)*0.213+2) / 2.
+            assertEquals(1.59025f, shared.filter!![0], 1e-3f)
+            // State is retained: the user can still save after sharing.
+            assertNotNull(vm.uiState.value.pendingPreview)
+            assertEquals(CaptureFilter.VIBRANT, vm.uiState.value.filter)
+            assertEquals(1.5f, vm.uiState.value.filterStrength)
+
+            vm.savePreviewToGallery()
+            advanceUntilIdle()
+            assertEquals(1, media.savedImages.size)
+            assertNotNull(media.savedImages.first().filter)
+        }
+
+    @Test
+    fun `share failure maps to SHARE_FAILED and keeps the preview`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val vm = createViewModel(
+                media = FakeMediaRepository().apply { failShare = true }
+            )
+
+            vm.capturePhoto()
+            advanceUntilIdle()
+            vm.sharePreview()
+            advanceUntilIdle()
+
+            assertEquals(CameraError.SHARE_FAILED, vm.uiState.value.error)
+            assertNotNull(vm.uiState.value.pendingPreview)
+            assertFalse(vm.uiState.value.isProcessing)
+        }
+
+    @Test
+    fun `editing the location updates the coordinate used for geotagging`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val media = FakeMediaRepository()
+            val vm = createViewModel(mode = CameraMode.PHOTO.routeName, media = media)
+
+            vm.capturePhoto()
+            advanceUntilIdle()
+            val original = vm.uiState.value.pendingPreview!!.coordinate!!
+            assertEquals(coordinate.latitude, original.latitude, 1e-9)
+
+            vm.updatePendingLocation("New City", "9 New Street", 23.04, 72.59)
+            vm.savePreviewToGallery()
+            advanceUntilIdle()
+
+            val saved = media.savedImages.single()
+            assertEquals(23.04, saved.coordinate!!.latitude, 1e-9)
+            assertEquals(72.59, saved.coordinate!!.longitude, 1e-9)
+            // The capture-time timestamp is preserved for the GPS time stamp.
+            assertEquals(original.timestamp, saved.coordinate!!.timestamp)
+        }
+
+    @Test
+    fun `sharing uses the edited coordinate for the geotag`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val media = FakeMediaRepository()
+            val vm = createViewModel(mode = CameraMode.PHOTO.routeName, media = media)
+
+            vm.capturePhoto()
+            advanceUntilIdle()
+            vm.updatePendingLocation("New City", "9 New Street", 23.04, 72.59)
+
+            vm.sharePreview()
+            advanceUntilIdle()
+
+            val shared = media.sharedCopies.single()
+            assertEquals(23.04, shared.coordinate!!.latitude, 1e-9)
+            assertEquals(72.59, shared.coordinate!!.longitude, 1e-9)
+        }
+
+    @Test
+    fun `pending preview is restored from saved state when the file still exists`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val file = File.createTempFile("restored_capture", ".jpg").apply {
+                writeText("pending capture")
+                deleteOnExit()
+            }
+            val card = GeoTagCardContent(
+                cityString = "Testville",
+                fullAddress = address,
+                latitude = coordinate.latitude,
+                longitude = coordinate.longitude,
+                timestamp = coordinate.timestamp,
+                staticMapUrl = null
+            )
+            val handle = SavedStateHandle(
+                mapOf(
+                    Destination.Camera.ARGUMENT_MODE to CameraMode.PHOTO.routeName,
+                    "camera_pending_preview" to PreviewData(file, coordinate, false, card),
+                    "camera_filter" to CaptureFilter.VIBRANT.name,
+                    "camera_filter_strength" to 1.5f
+                )
+            )
+
+            val vm = CameraViewModel(
+                context = ContextWrapper(null),
+                savedStateHandle = handle,
+                mediaRepository = FakeMediaRepository(),
+                getCurrentLocation = GetCurrentLocationUseCase(FakeLocationRepository(coordinate)),
+                isLocationEnabled = IsLocationEnabledUseCase(FakeLocationRepository(coordinate)),
+                geoTagOverlayRenderer = FakeGeoTagOverlayRenderer(),
+                mapsApi = FakeMapsApi(),
+                getSelectedCardTemplate = GetSelectedCardTemplateUseCase(
+                    FakePreferencesRepository()
+                )
+            )
+
+            val preview = vm.uiState.value.pendingPreview
+            assertNotNull(preview)
+            assertEquals(file, preview!!.file)
+            assertEquals(coordinate, preview.coordinate)
+            assertEquals("Testville", preview.cardContent.cityString)
+            assertEquals(CaptureFilter.VIBRANT, vm.uiState.value.filter)
+            assertEquals(1.5f, vm.uiState.value.filterStrength)
+            vm.detachEngine()
+        }
+
+    @Test
+    fun `a restored preview whose file vanished is dropped silently`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val handle = SavedStateHandle(
+                mapOf(
+                    Destination.Camera.ARGUMENT_MODE to CameraMode.PHOTO.routeName,
+                    "camera_pending_preview" to PreviewData(
+                        file = File("cache_cleared_away.jpg"),
+                        coordinate = coordinate,
+                        isVideo = false,
+                        cardContent = GeoTagCardContent(
+                            cityString = null,
+                            fullAddress = null,
+                            latitude = null,
+                            longitude = null,
+                            timestamp = 0L,
+                            staticMapUrl = null
+                        )
+                    )
+                )
+            )
+
+            val vm = CameraViewModel(
+                context = ContextWrapper(null),
+                savedStateHandle = handle,
+                mediaRepository = FakeMediaRepository(),
+                getCurrentLocation = GetCurrentLocationUseCase(FakeLocationRepository(coordinate)),
+                isLocationEnabled = IsLocationEnabledUseCase(FakeLocationRepository(coordinate)),
+                geoTagOverlayRenderer = FakeGeoTagOverlayRenderer(),
+                mapsApi = FakeMapsApi(),
+                getSelectedCardTemplate = GetSelectedCardTemplateUseCase(
+                    FakePreferencesRepository()
+                )
+            )
+
+            assertNull(vm.uiState.value.pendingPreview)
             vm.detachEngine()
         }
 }

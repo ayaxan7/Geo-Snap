@@ -97,6 +97,7 @@ fun PreviewScreen(
     onShare: () -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    isProcessing: Boolean = false,
     filter: CaptureFilter = CaptureFilter.ORIGINAL,
     filterStrength: Float = 0f,
     onFilterChange: (CaptureFilter) -> Unit = {},
@@ -115,6 +116,7 @@ fun PreviewScreen(
             isVideo = isVideo,
             isMuted = isMuted,
             isEditing = isEditing,
+            isProcessing = isProcessing,
             onToggleMute = { isMuted = !isMuted },
             onShare = onShare,
             onSaveEdit = { isEditing = false },
@@ -198,6 +200,7 @@ fun PreviewScreen(
 
                 Button(
                     onClick = onSaveToGallery,
+                    enabled = !isProcessing,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(SAVE_BUTTON_HEIGHT),
@@ -226,6 +229,7 @@ private fun PreviewTopBar(
     isVideo: Boolean,
     isMuted: Boolean,
     isEditing: Boolean,
+    isProcessing: Boolean,
     onToggleMute: () -> Unit,
     onShare: () -> Unit,
     onSaveEdit: () -> Unit,
@@ -276,7 +280,7 @@ private fun PreviewTopBar(
                 Text(stringResource(R.string.preview_save), fontWeight = FontWeight.Bold)
             }
         } else {
-            IconButton(onClick = onShare) {
+            IconButton(onClick = onShare, enabled = !isProcessing) {
                 Icon(
                     painter = painterResource(R.drawable.ic_share),
                     contentDescription = stringResource(R.string.preview_share),

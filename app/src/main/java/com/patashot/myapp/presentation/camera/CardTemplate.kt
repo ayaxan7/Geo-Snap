@@ -34,6 +34,9 @@ enum class CardLayout {
  *
  * One instance describes a single template's appearance; [GeoTagCardShell] still
  * owns everything the templates have in common.
+ *
+ * Serializable so a template rides along inside [GeoTagCardContent] through
+ * `SavedStateHandle`.
  */
 data class GeoTagCardStyle(
     val textColor: Long,
@@ -69,7 +72,7 @@ data class GeoTagCardStyle(
     // Logo
     val logoSizeDp: Float,
     val logoCornerDp: Float
-)
+) : java.io.Serializable
 
 /**
  * A selectable geotag card design.
@@ -82,7 +85,7 @@ data class CardTemplate(
     @StringRes val labelRes: Int,
     val layout: CardLayout,
     val style: GeoTagCardStyle
-)
+) : java.io.Serializable
 
 /**
  * Registry of every geotag card template, and the lookup used to resolve a

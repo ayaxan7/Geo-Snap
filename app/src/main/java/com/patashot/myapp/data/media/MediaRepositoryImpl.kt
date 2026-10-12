@@ -188,6 +188,59 @@ class MediaRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun prepareShareCopy(
+        sourceFile: File,
+        coordinate: GeoCoordinate?,
+        overlay: Bitmap?,
+        filter: FloatArray?,
+        isVideo: Boolean
+    ): String = withContext(Dispatchers.IO) {
+        pruneShareCopies()
+        val ext = if (isVideo) "mp4" else "jpg"
+        val output = File(shareDir(), "share_${System.currentTimeMillis()}.$ext")
+        val burned = try {
+            when {
+                isVideo && (overlay != null || filter != null) ->
+                    transcodeWithOverlay(sourceFile, overlay, filter, output)
+                !isVideo && (overlay != null || filter != null) ->
+                    burnOverlayIntoImage(sourceFile, overlay, filter, coordinate, output)
+                else -> {
+                    // Nothing to burn: hand out a copy so the pending source file
+                    // is never mutated (or deleted) while the share sheet holds it.
+                    sourceFile.copyTo(output, overwrite = true)
+                    if (!isVideo && coordinate != null) writeGpsExifTo(output, coordinate)
+                    output
+                }
+            }
+        } catch (t: Throwable) {
+            Log.w(TAG, "Share burn failed, sharing the original", t)
+            output.delete()
+            // Fall back to the untouched source; the share sheet only reads it.
+            return@withContext FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.fileprovider",
+                sourceFile
+            ).toString()
+        }
+        FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider",
+            burned
+        ).toString()
+    }
+
+    private fun shareDir(): File = File(context.cacheDir, SHARE_DIR).apply { mkdirs() }
+
+    /** Share copies are disposable; anything older than [SHARE_COPY_TTL_MS] goes. */
+    private fun pruneShareCopies() {
+        val cutoff = System.currentTimeMillis() - SHARE_COPY_TTL_MS
+        runCatching {
+            shareDir().listFiles()?.forEach { file ->
+                if (file.lastModified() < cutoff) file.delete()
+            }
+        }
+    }
+
     override suspend fun getAppMedia(): List<GeoMedia> = withContext(Dispatchers.IO) {
         backfillFromMediaStore()
         capturedMediaDao.listActive()
@@ -367,7 +420,8 @@ private fun deleteAppCopy(contentUri: String) {
         sourceFile: File,
         overlay: Bitmap?,
         filter: FloatArray?,
-        coordinate: GeoCoordinate?
+        coordinate: GeoCoordinate?,
+        output: File = File(context.cacheDir, "burned_${System.currentTimeMillis()}.jpg")
     ): File {
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeFile(sourceFile.absolutePath, bounds)
@@ -417,7 +471,6 @@ private fun deleteAppCopy(contentUri: String) {
             )
         }
 
-        val output = File(context.cacheDir, "burned_${System.currentTimeMillis()}.jpg")
         FileOutputStream(output).use { stream ->
             base.compress(Bitmap.CompressFormat.JPEG, 90, stream)
         }
@@ -469,10 +522,10 @@ private fun deleteAppCopy(contentUri: String) {
     private suspend fun transcodeWithOverlay(
         sourceFile: File,
         overlay: Bitmap?,
-        filter: FloatArray?
+        filter: FloatArray?,
+        output: File = File(context.cacheDir, "burned_${System.currentTimeMillis()}.mp4")
     ): File =
         withContext(Dispatchers.Main.immediate) {
-            val output = File(context.cacheDir, "burned_${System.currentTimeMillis()}.mp4")
             val finished = CompletableDeferred<Unit>()
             val transformer = Transformer.Builder(context)
                 .addListener(object : Transformer.Listener {
@@ -637,6 +690,8 @@ private fun deleteAppCopy(contentUri: String) {
         const val TAG = "MediaRepositoryImpl"
         const val DIRECTORY_NAME = "GeoSnap"
         const val FILE_PREFIX = "GeoSnap"
+        const val SHARE_DIR = "share"
+        const val SHARE_COPY_TTL_MS = 24 * 60 * 60 * 1000L
         const val MAX_DECODE_EDGE = 4096
         const val CARD_WIDTH_FRACTION = 0.9f
         const val CARD_MARGIN_BOTTOM_FRACTION = 0.05f
