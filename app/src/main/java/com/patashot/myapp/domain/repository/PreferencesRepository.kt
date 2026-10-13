@@ -21,9 +21,13 @@ interface PreferencesRepository {
      */
     val selectedCardTemplateId: Flow<String?>
 
+    val isAutoSaveEnabled: Flow<Boolean>
+
     suspend fun setOnboardingCompleted()
 
     suspend fun setSelectedLanguage(languageCode: String)
 
     suspend fun setSelectedCardTemplateId(templateId: String)
+
+    suspend fun setAutoSaveEnabled(enabled: Boolean)
 }

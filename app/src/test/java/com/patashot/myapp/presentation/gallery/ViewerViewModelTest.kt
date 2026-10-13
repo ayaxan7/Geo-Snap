@@ -23,8 +23,8 @@ class ViewerViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private fun media(uri: String, timestamp: Long): GeoMedia =
-        GeoMedia(uri = TestUri(uri), type = MediaType.IMAGE, timestamp = timestamp)
+    private fun media(uri: String, timestamp: Long, type: MediaType = MediaType.IMAGE): GeoMedia =
+        GeoMedia(uri = TestUri(uri), type = type, timestamp = timestamp)
 
     private fun createViewModel(
         repo: FakeMediaRepository,
@@ -112,5 +112,40 @@ class ViewerViewModelTest {
         assertTrue(state.deleteError)
         assertEquals(1, state.media.size)
         assertTrue(repo.deletedUris.isEmpty())
+    }
+
+    @Test
+    fun `saveToDeviceGallery exports item and emits SavedToGallery event`() = runTest(mainDispatcherRule.scheduler) {
+        val repo = FakeMediaRepository().apply {
+            media = mutableListOf(media("content://myapp.test/photo", 100, MediaType.IMAGE))
+        }
+        val vm = createViewModel(repo)
+        advanceUntilIdle()
+
+        vm.saveToDeviceGallery(index = 0)
+        advanceUntilIdle()
+
+        assertEquals(1, repo.exportedToGallery.size)
+        assertEquals("content://myapp.test/photo", repo.exportedToGallery.first().uri.toString())
+        val event = vm.events.first()
+        assertTrue(event is ViewerViewModel.ViewerEvent.SavedToGallery)
+        assertFalse((event as ViewerViewModel.ViewerEvent.SavedToGallery).isVideo)
+    }
+
+    @Test
+    fun `saveToDeviceGallery surfaces SaveFailed event on failure`() = runTest(mainDispatcherRule.scheduler) {
+        val repo = FakeMediaRepository().apply {
+            media = mutableListOf(media("content://myapp.test/photo", 100, MediaType.IMAGE))
+            failSaveToDeviceGallery = true
+        }
+        val vm = createViewModel(repo)
+        advanceUntilIdle()
+
+        vm.saveToDeviceGallery(index = 0)
+        advanceUntilIdle()
+
+        assertTrue(repo.exportedToGallery.isEmpty())
+        val event = vm.events.first()
+        assertTrue(event is ViewerViewModel.ViewerEvent.SaveFailed)
     }
 }

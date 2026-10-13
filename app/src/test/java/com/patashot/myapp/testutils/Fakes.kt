@@ -57,16 +57,19 @@ class InMemoryPreferencesDataStore(
 class FakePreferencesRepository(
     initialOnboarding: Boolean = false,
     initialLanguage: String? = null,
-    initialCardTemplateId: String? = null
+    initialCardTemplateId: String? = null,
+    initialAutoSave: Boolean = false
 ) : PreferencesRepository {
 
     private val _onboarding = MutableStateFlow(initialOnboarding)
     private val _language = MutableStateFlow(initialLanguage)
     private val _cardTemplateId = MutableStateFlow(initialCardTemplateId)
+    private val _autoSave = MutableStateFlow(initialAutoSave)
 
     override val hasCompletedOnboarding: Flow<Boolean> = _onboarding.asStateFlow()
     override val selectedLanguage: Flow<String?> = _language.asStateFlow()
     override val selectedCardTemplateId: Flow<String?> = _cardTemplateId.asStateFlow()
+    override val isAutoSaveEnabled: Flow<Boolean> = _autoSave.asStateFlow()
 
     val onboardingValue: Boolean get() = _onboarding.value
     val languageValue: String? get() = _language.value
@@ -87,6 +90,10 @@ class FakePreferencesRepository(
 
     override suspend fun setSelectedCardTemplateId(templateId: String) {
         _cardTemplateId.value = templateId
+    }
+
+    override suspend fun setAutoSaveEnabled(enabled: Boolean) {
+        _autoSave.value = enabled
     }
 }
 
@@ -181,6 +188,15 @@ class FakeMediaRepository : MediaRepository {
         if (failDelete) return false
         deletedUris += contentUri
         media.removeAll { it.uri.toString() == contentUri }
+        return true
+    }
+
+    var failSaveToDeviceGallery = false
+    val exportedToGallery = mutableListOf<GeoMedia>()
+
+    override suspend fun saveToDeviceGallery(media: GeoMedia): Boolean {
+        if (failSaveToDeviceGallery) return false
+        exportedToGallery += media
         return true
     }
 

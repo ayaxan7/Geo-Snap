@@ -4,13 +4,17 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.patashot.myapp.domain.model.GeoMedia
+import com.patashot.myapp.domain.model.MediaType
 import com.patashot.myapp.domain.repository.MediaRepository
 import com.patashot.myapp.presentation.navigation.Destination
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -33,11 +37,20 @@ class ViewerViewModel @Inject constructor(
         val loading: Boolean = true,
         val loadingError: Boolean = false,
         val deleting: Boolean = false,
-        val deleteError: Boolean = false
+        val deleteError: Boolean = false,
+        val saving: Boolean = false
     )
+
+    sealed interface ViewerEvent {
+        data class SavedToGallery(val isVideo: Boolean) : ViewerEvent
+        data object SaveFailed : ViewerEvent
+    }
 
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+
+    private val _events = Channel<ViewerEvent>(Channel.BUFFERED)
+    val events: Flow<ViewerEvent> = _events.receiveAsFlow()
 
     init {
         load()
@@ -79,5 +92,23 @@ class ViewerViewModel @Inject constructor(
 
     fun clearDeleteError() {
         _uiState.update { it.copy(deleteError = false) }
+    }
+
+    /**
+     * Saves the item at [index] to the device gallery (MediaStore).
+     */
+    fun saveToDeviceGallery(index: Int) {
+        val item = _uiState.value.media.getOrNull(index) ?: return
+        if (_uiState.value.saving) return
+        viewModelScope.launch {
+            _uiState.update { it.copy(saving = true) }
+            val success = runCatching { mediaRepository.saveToDeviceGallery(item) }.getOrDefault(false)
+            _uiState.update { it.copy(saving = false) }
+            if (success) {
+                _events.trySend(ViewerEvent.SavedToGallery(item.type == MediaType.VIDEO))
+            } else {
+                _events.trySend(ViewerEvent.SaveFailed)
+            }
+        }
     }
 }

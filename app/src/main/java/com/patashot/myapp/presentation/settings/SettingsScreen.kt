@@ -84,7 +84,11 @@ fun SettingsScreen(
         if (permanentlyDenied.isNotEmpty()) {
             viewModel.requestEnableViaSettings()
         }
-        viewModel.setAutoSaveToDevice(context.hasMediaPermission())
+        val hasPermission = context.hasMediaPermission()
+        viewModel.setAutoSaveToDevice(hasPermission)
+        if (hasPermission) {
+            viewModel.setAutoSaveEnabled(true)
+        }
     }
 
     val notificationPermissions = remember { notificationPermissionsForSdk() }
@@ -293,9 +297,10 @@ fun SettingsScreen(
                             permissionLauncher.launch(missing.toTypedArray())
                         } else {
                             viewModel.setAutoSaveToDevice(true)
+                            viewModel.setAutoSaveEnabled(true)
                         }
-                    } else if (uiState.autoSaveToDevice) {
-                        viewModel.requestTurnOff()
+                    } else {
+                        viewModel.setAutoSaveEnabled(false)
                     }
                 }
             )

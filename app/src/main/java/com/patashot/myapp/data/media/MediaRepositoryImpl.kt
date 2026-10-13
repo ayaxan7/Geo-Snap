@@ -255,6 +255,71 @@ override suspend fun deleteMedia(contentUri: String): Boolean = withContext(Disp
     }.isSuccess
 }
 
+    override suspend fun saveToDeviceGallery(media: GeoMedia): Boolean = withContext(Dispatchers.IO) {
+        runCatching {
+            val resolver = context.contentResolver
+            val isVideo = media.type == MediaType.VIDEO
+            val collection = if (isVideo) {
+                MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+            } else {
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+            }
+            val relativeFolder = if (isVideo) "Movies" else "Pictures"
+            val publicDir = if (isVideo) Environment.DIRECTORY_MOVIES else Environment.DIRECTORY_PICTURES
+            val mimeType = if (isVideo) "video/mp4" else "image/jpeg"
+            val extension = if (isVideo) "mp4" else "jpg"
+            val displayName = media.displayName?.takeIf { it.isNotBlank() }
+                ?: "${FILE_PREFIX}_${timestampText(media.timestamp)}.$extension"
+            val now = media.timestamp
+
+            val values = ContentValues().apply {
+                put(MediaStore.MediaColumns.DISPLAY_NAME, displayName)
+                put(MediaStore.MediaColumns.MIME_TYPE, mimeType)
+                put(MediaStore.MediaColumns.DATE_ADDED, now / 1000)
+                put(MediaStore.MediaColumns.DATE_TAKEN, now)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    put(MediaStore.MediaColumns.RELATIVE_PATH, "$relativeFolder/$DIRECTORY_NAME")
+                    put(MediaStore.MediaColumns.IS_PENDING, 1)
+                } else {
+                    @Suppress("DEPRECATION")
+                    val pubDir = Environment.getExternalStoragePublicDirectory(publicDir)
+                    @Suppress("DEPRECATION")
+                    val targetDir = File(pubDir, DIRECTORY_NAME).apply { mkdirs() }
+                    @Suppress("DEPRECATION")
+                    put(MediaStore.MediaColumns.DATA, File(targetDir, displayName).absolutePath)
+                }
+            }
+
+            val targetUri = resolver.insert(collection, values)
+                ?: throw IOException("MediaStore insert failed")
+
+            val inserted = runCatching {
+                resolver.openInputStream(media.uri)?.use { input ->
+                    resolver.openOutputStream(targetUri, "w")?.use { output ->
+                        input.copyTo(output)
+                    } ?: throw IOException("Could not open output stream for $targetUri")
+                } ?: throw IOException("Could not open input stream for ${media.uri}")
+            }
+
+            if (inserted.isFailure) {
+                resolver.delete(targetUri, null, null)
+                throw inserted.exceptionOrNull() ?: IOException("Insert failed")
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                resolver.update(
+                    targetUri,
+                    ContentValues().apply { put(MediaStore.MediaColumns.IS_PENDING, 0) },
+                    null,
+                    null
+                )
+            }
+            true
+        }.onFailure {
+            Log.e(TAG, "saveToDeviceGallery failed", it)
+        }.getOrDefault(false)
+    }
+
 /**
  * Physically removes the app's private copy of [contentUri] (if the URI points
  * at one). MediaStore copies are deliberately left untouched.

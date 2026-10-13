@@ -60,7 +60,8 @@ class CameraViewModelTest {
             isLocationEnabled = IsLocationEnabledUseCase(location),
             geoTagOverlayRenderer = renderer,
             mapsApi = mapsApi,
-            getSelectedCardTemplate = GetSelectedCardTemplateUseCase(preferences)
+            getSelectedCardTemplate = GetSelectedCardTemplateUseCase(preferences),
+            preferencesRepository = preferences
         )
         viewModel.attachEngine(engine)
         return viewModel
@@ -927,7 +928,8 @@ class CameraViewModelTest {
                 mapsApi = FakeMapsApi(),
                 getSelectedCardTemplate = GetSelectedCardTemplateUseCase(
                     FakePreferencesRepository()
-                )
+                ),
+                preferencesRepository = FakePreferencesRepository()
             )
 
             val preview = vm.uiState.value.pendingPreview
@@ -972,7 +974,8 @@ class CameraViewModelTest {
                 mapsApi = FakeMapsApi(),
                 getSelectedCardTemplate = GetSelectedCardTemplateUseCase(
                     FakePreferencesRepository()
-                )
+                ),
+                preferencesRepository = FakePreferencesRepository()
             )
 
             assertNull(vm.uiState.value.pendingPreview)

@@ -83,6 +83,8 @@ import androidx.media3.ui.PlayerView
 import coil3.compose.AsyncImage
 import com.patashot.myapp.R
 import com.patashot.myapp.domain.model.MediaType
+import com.patashot.myapp.presentation.core.hasMediaPermission
+import com.patashot.myapp.presentation.core.mediaPermissionsForSdk
 import com.patashot.myapp.presentation.sharing.shareMediaChooser
 import kotlinx.coroutines.launch
 
@@ -117,11 +119,32 @@ fun MediaViewerScreen(
     ) { }
 
     val deleteErrorText = stringResource(R.string.gallery_delete_error)
+    val imageSavedText = stringResource(R.string.gallery_image_saved_success)
+    val videoSavedText = stringResource(R.string.gallery_video_saved_success)
+    val saveErrorText = stringResource(R.string.gallery_save_error)
+
     LaunchedEffect(uiState.deleteError) {
         if (uiState.deleteError) {
             snackbarHostState.currentSnackbarData?.dismiss()
             snackbarHostState.showSnackbar(deleteErrorText)
             viewModel.clearDeleteError()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is ViewerViewModel.ViewerEvent.SavedToGallery -> {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(
+                        if (event.isVideo) videoSavedText else imageSavedText
+                    )
+                }
+                is ViewerViewModel.ViewerEvent.SaveFailed -> {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(saveErrorText)
+                }
+            }
         }
     }
 
@@ -156,6 +179,15 @@ fun MediaViewerScreen(
             val pagerState = rememberPagerState(
                 initialPage = initialIndex.coerceIn(0, pageCount - 1)
             ) { pageCount }
+
+            val mediaPermissions = remember { mediaPermissionsForSdk() }
+            val savePermissionLauncher = rememberLauncherForActivityResult(
+                ActivityResultContracts.RequestMultiplePermissions()
+            ) { results ->
+                if (context.hasMediaPermission() || results.values.any { it }) {
+                    viewModel.saveToDeviceGallery(pagerState.currentPage)
+                }
+            }
 
             // Keep the current page in range after an item is deleted.
             LaunchedEffect(pageCount) {
@@ -203,9 +235,17 @@ fun MediaViewerScreen(
                     ViewerTopBar(
                         current = pagerState.currentPage + 1,
                         total = pageCount,
+                        saveEnabled = currentMedia != null && !uiState.saving,
                         shareEnabled = currentMedia != null,
                         deleteEnabled = currentMedia != null && !uiState.deleting,
                         onBack = onBack,
+                        onSave = {
+                            if (context.hasMediaPermission()) {
+                                viewModel.saveToDeviceGallery(pagerState.currentPage)
+                            } else {
+                                savePermissionLauncher.launch(mediaPermissions.toTypedArray())
+                            }
+                        },
                         onShare = {
                             currentMedia?.let {
                                 shareMediaChooser(
@@ -308,9 +348,11 @@ fun MediaViewerScreen(
 private fun ViewerTopBar(
     current: Int,
     total: Int,
+    saveEnabled: Boolean,
     shareEnabled: Boolean,
     deleteEnabled: Boolean,
     onBack: () -> Unit,
+    onSave: () -> Unit,
     onShare: () -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier
@@ -335,6 +377,13 @@ private fun ViewerTopBar(
             textAlign = TextAlign.Center,
             modifier = Modifier.weight(1f)
         )
+        IconButton(onClick = onSave, enabled = saveEnabled) {
+            Icon(
+                painter = painterResource(R.drawable.ic_download),
+                contentDescription = stringResource(R.string.gallery_save_to_device),
+                tint = Color.White
+            )
+        }
         IconButton(onClick = onShare, enabled = shareEnabled) {
             Icon(
                 painter = painterResource(android.R.drawable.ic_menu_share),

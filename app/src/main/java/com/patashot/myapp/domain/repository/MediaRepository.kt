@@ -78,4 +78,11 @@ interface MediaRepository {
      * @return true when the media was removed successfully.
      */
     suspend fun deleteMedia(contentUri: String): Boolean
+
+    /**
+     * Exports a media item from the app's gallery to the public device gallery (MediaStore).
+     *
+     * @return true when the media was exported successfully.
+     */
+    suspend fun saveToDeviceGallery(media: GeoMedia): Boolean
 }

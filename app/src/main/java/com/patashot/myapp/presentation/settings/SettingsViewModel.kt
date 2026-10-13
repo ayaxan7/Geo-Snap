@@ -1,6 +1,8 @@
 package com.patashot.myapp.presentation.settings
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.patashot.myapp.domain.repository.PreferencesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
@@ -10,21 +12,20 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 /**
  * Drives the "Auto Save to Device" and "Notifications" settings.
  *
- * Both switches are strictly permission-driven (there is intentionally no app-side
- * "off" preference): each is on exactly when Android says the app is allowed to do
- * the thing. Turning one off can only succeed by the user revoking it in system
- * settings; the screen re-checks on resume and flips the switch to match whatever
- * they actually did.
- *
- * Permission checks happen in the UI layer (they need a Context), which then
- * feeds the boolean result via [setAutoSaveToDevice] and [setNotificationsEnabled].
+ * Auto Save combines both system media permissions and a persisted user preference
+ * in DataStore (default false). When the user turns Auto Save on, permissions are
+ * requested if needed, and DataStore is updated to true upon grant. When turned off,
+ * the DataStore preference is set to false directly.
  */
 @HiltViewModel
-class SettingsViewModel @Inject constructor() : ViewModel() {
+class SettingsViewModel @Inject constructor(
+    private val preferencesRepository: PreferencesRepository
+) : ViewModel() {
 
     data class UiState(
         val autoSaveToDevice: Boolean = false,
@@ -35,14 +36,8 @@ class SettingsViewModel @Inject constructor() : ViewModel() {
         val showNotificationEnableDialog: Boolean = false
     )
 
-    /** Emitted when the user confirms navigation to the system App Info screen. */
-    data object OpenAppSettings
-
-    /** Emitted when the user confirms navigation to the system notification settings. */
-    data object OpenNotificationSettings
-
-    /** Where [confirmOpenSettings] should send the user, for the open dialog. */
-    private enum class SettingsTarget { APP_INFO, NOTIFICATIONS }
+    private var hasMediaPermission = false
+    private var autoSavePreference = false
 
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
@@ -56,9 +51,33 @@ class SettingsViewModel @Inject constructor() : ViewModel() {
         data object Notifications : NavigationTarget
     }
 
+    /** Where [confirmOpenSettings] should send the user, for the open dialog. */
+    private enum class SettingsTarget { APP_INFO, NOTIFICATIONS }
+
+    init {
+        viewModelScope.launch {
+            preferencesRepository.isAutoSaveEnabled.collect { pref ->
+                autoSavePreference = pref
+                updateAutoSaveState()
+            }
+        }
+    }
+
+    private fun updateAutoSaveState() {
+        _uiState.update { it.copy(autoSaveToDevice = hasMediaPermission && autoSavePreference) }
+    }
+
     /** Re-syncs the switch with the real media permission state. */
     fun setAutoSaveToDevice(granted: Boolean) {
-        _uiState.update { it.copy(autoSaveToDevice = granted) }
+        hasMediaPermission = granted
+        updateAutoSaveState()
+    }
+
+    /** Updates the auto save preference in DataStore. */
+    fun setAutoSaveEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            preferencesRepository.setAutoSaveEnabled(enabled)
+        }
     }
 
     /** Re-syncs the switch with the real notification permission state. */

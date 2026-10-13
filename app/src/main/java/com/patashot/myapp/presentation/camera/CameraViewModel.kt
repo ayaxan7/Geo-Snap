@@ -12,6 +12,8 @@ import com.patashot.myapp.BuildConfig
 import com.patashot.myapp.data.maps.MapsApi
 import com.patashot.myapp.domain.model.GeoCoordinate
 import com.patashot.myapp.domain.repository.MediaRepository
+import com.patashot.myapp.domain.repository.PreferencesRepository
+import kotlinx.coroutines.flow.first
 import com.patashot.myapp.domain.usecase.GetCurrentLocationUseCase
 import com.patashot.myapp.domain.usecase.GetSelectedCardTemplateUseCase
 import com.patashot.myapp.domain.usecase.IsLocationEnabledUseCase
@@ -57,7 +59,8 @@ class CameraViewModel @Inject constructor(
     private val isLocationEnabled: IsLocationEnabledUseCase,
     private val geoTagOverlayRenderer: GeoTagOverlayRenderer,
     private val mapsApi: MapsApi,
-    private val getSelectedCardTemplate: GetSelectedCardTemplateUseCase
+    private val getSelectedCardTemplate: GetSelectedCardTemplateUseCase,
+    private val preferencesRepository: PreferencesRepository
 ) : ViewModel() {
 
     var mode: CameraMode = CameraMode.fromRoute(
@@ -350,13 +353,13 @@ class CameraViewModel @Inject constructor(
         val preview = _uiState.value.pendingPreview ?: return
         if (_uiState.value.isProcessing) return
 
-        // Auto Save to Device mirrors the media permission state: granted means
-        // the save also goes to the phone gallery, revoked means app-only.
         val hasMediaPermission = context.hasMediaPermission()
 
         _uiState.update { it.copy(isProcessing = true) }
         viewModelScope.launch {
             try {
+                val isAutoSaveEnabled = preferencesRepository.isAutoSaveEnabled.first()
+                val shouldSaveToDevice = hasMediaPermission && isAutoSaveEnabled
                 val overlay = renderBurnOverlay(preview)
                 val uri = if (preview.isVideo) {
                     mediaRepository.saveCapturedVideo(
@@ -364,7 +367,7 @@ class CameraViewModel @Inject constructor(
                         preview.coordinate,
                         overlay,
                         filterRecipe(uiState.value),
-                        hasMediaPermission
+                        shouldSaveToDevice
                     )
                 } else {
                     mediaRepository.saveCapturedImage(
@@ -372,7 +375,7 @@ class CameraViewModel @Inject constructor(
                         preview.coordinate,
                         overlay,
                         filterRecipe(uiState.value),
-                        hasMediaPermission
+                        shouldSaveToDevice
                     )
                 }
                 preview.file.delete()

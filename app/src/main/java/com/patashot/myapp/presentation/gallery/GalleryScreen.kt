@@ -78,6 +78,7 @@ import com.patashot.myapp.domain.model.MediaType
 import com.patashot.myapp.presentation.sharing.shareMediaChooser
 import com.patashot.myapp.ui.theme.GeoSnapTheme
 import com.patashot.myapp.ui.theme.PrimaryGreen
+import androidx.core.net.toUri
 
 private const val LONG_HOLD_MILLIS = 1000L
 
@@ -625,14 +626,14 @@ private fun ErrorContent(onRetry: () -> Unit) {
 private fun GalleryScreenPreview() {
     val sampleMedia = listOf(
         GeoMedia(
-            uri = Uri.parse("file:///sample1.jpg"),
+            uri = "file:///sample1.jpg".toUri(),
             type = MediaType.IMAGE,
             timestamp = System.currentTimeMillis(),
             latitude = 37.7749,
             longitude = -122.4194,
             displayName = "Sample Image 1"
         ), GeoMedia(
-            uri = Uri.parse("file:///sample2.mp4"),
+            uri = "file:///sample2.mp4".toUri(),
             type = MediaType.VIDEO,
             timestamp = System.currentTimeMillis() - 86400000L * 2,
             displayName = "Sample Video 1"

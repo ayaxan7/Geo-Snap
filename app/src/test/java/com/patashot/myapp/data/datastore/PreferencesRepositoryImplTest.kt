@@ -12,11 +12,21 @@ import org.junit.Test
 class PreferencesRepositoryImplTest {
 
     @Test
-    fun `onboarding defaults to false and language to null`() = runTest {
+    fun `onboarding defaults to false, language to null, and auto save to false`() = runTest {
         val repository = PreferencesRepositoryImpl(InMemoryPreferencesDataStore())
 
         assertFalse(repository.hasCompletedOnboarding.first())
         assertNull(repository.selectedLanguage.first())
+        assertFalse(repository.isAutoSaveEnabled.first())
+    }
+
+    @Test
+    fun `enabling auto save persists true`() = runTest {
+        val repository = PreferencesRepositoryImpl(InMemoryPreferencesDataStore())
+
+        repository.setAutoSaveEnabled(true)
+
+        assertTrue(repository.isAutoSaveEnabled.first())
     }
 
     @Test
