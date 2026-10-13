@@ -23,5 +23,8 @@ data class CameraUiState(
     // 1 = the filter at its normal (slider-center) strength.
     val filterStrength: Float = 1f,
     // The geotag card design applied to captures taken from now on.
-    val selectedTemplate: CardTemplate = CardTemplates.DEFAULT
+    val selectedTemplate: CardTemplate = CardTemplates.DEFAULT,
+    val timerSeconds: Int = 0,
+    val countdownSeconds: Int? = null,
+    val isCountdownActive: Boolean = false
 )

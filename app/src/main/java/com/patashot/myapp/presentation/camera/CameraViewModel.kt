@@ -127,7 +127,7 @@ class CameraViewModel @Inject constructor(
         locationUpdatesJob?.cancel()
         locationUpdatesJob = null
         _uiState.update {
-            it.copy(isReady = false, isRecording = false, recordingElapsedMs = 0L)
+            it.copy(isReady = false, isRecording = false, recordingElapsedMs = 0L, countdownSeconds = null, isCountdownActive = false)
         }
         stopRecordingTimer()
     }
@@ -204,38 +204,40 @@ class CameraViewModel @Inject constructor(
 
     fun capturePhoto() {
         val engine = attachedEngine ?: return
-        if (_uiState.value.isProcessing) return
+        if (_uiState.value.isProcessing || _uiState.value.isCountdownActive) return
 
         _uiState.update { it.copy(isProcessing = true, error = null) }
         viewModelScope.launch {
             try {
                 val coordinate = fetchCoordinateForTagging()
-                val file = engine.capturePhoto()
-                val cardContent = resolveCardContent(coordinate)
+                executeWithTimer(_uiState.value.timerSeconds) {
+                    val file = engine.capturePhoto()
+                    val cardContent = resolveCardContent(coordinate)
 
-                if (mode == CameraMode.QUICK_SHARE) {
-                    val uri = try {
-                        mediaRepository.saveCapturedImage(
-                            sourceFile = file,
-                            coordinate = coordinate,
-                            overlay = renderOverlay(cardContent),
-                            saveToMediaStore = false
-                        )
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Photo save failed", e)
-                        throw CaptureException(CameraError.SAVE_FAILED)
-                    }
-                    file.delete()
-                    _uiState.update { it.copy(isProcessing = false) }
-                    _events.tryEmit(CameraEvent.QuickShareRequested(uri))
-                } else {
-                    _uiState.update {
-                        it.copy(
-                            isProcessing = false,
-                            filter = CaptureFilter.ORIGINAL,
-                            filterStrength = FILTER_STRENGTH_NORMAL,
-                            pendingPreview = PreviewData(file, coordinate, false, cardContent)
-                        )
+                    if (mode == CameraMode.QUICK_SHARE) {
+                        val uri = try {
+                            mediaRepository.saveCapturedImage(
+                                sourceFile = file,
+                                coordinate = coordinate,
+                                overlay = renderOverlay(cardContent),
+                                saveToMediaStore = false
+                            )
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Photo save failed", e)
+                            throw CaptureException(CameraError.SAVE_FAILED)
+                        }
+                        file.delete()
+                        _uiState.update { it.copy(isProcessing = false) }
+                        _events.tryEmit(CameraEvent.QuickShareRequested(uri))
+                    } else {
+                        _uiState.update {
+                            it.copy(
+                                isProcessing = false,
+                                filter = CaptureFilter.ORIGINAL,
+                                filterStrength = FILTER_STRENGTH_NORMAL,
+                                pendingPreview = PreviewData(file, coordinate, false, cardContent)
+                            )
+                        }
                     }
                 }
             } catch (e: CaptureException) {
@@ -250,15 +252,17 @@ class CameraViewModel @Inject constructor(
 
     fun startRecording() {
         val engine = attachedEngine ?: return
-        if (_uiState.value.isRecording || _uiState.value.isProcessing) return
+        if (_uiState.value.isRecording || _uiState.value.isProcessing || _uiState.value.isCountdownActive) return
 
         _uiState.update { it.copy(isProcessing = true, error = null) }
         viewModelScope.launch {
             try {
                 pendingCoordinate = fetchCoordinateForTagging()
-                val file = engine.startRecording()
-                pendingRecordingFile = file
-                _uiState.update { it.copy(isProcessing = false) }
+                executeWithTimer(_uiState.value.timerSeconds) {
+                    val file = engine.startRecording()
+                    pendingRecordingFile = file
+                    _uiState.update { it.copy(isProcessing = false) }
+                }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isProcessing = false, error = CameraError.RECORD_FAILED) }
             }
@@ -306,7 +310,11 @@ class CameraViewModel @Inject constructor(
     fun setFilterStrength(strength: Float) {
         _uiState.update { it.copy(filterStrength = strength.coerceIn(0f, FILTER_STRENGTH_MAX)) }
     }
-    
+
+    fun setTimerSeconds(seconds: Int) {
+        _uiState.update { it.copy(timerSeconds = seconds.coerceIn(0, 10)) }
+    }
+
     fun updatePendingLocation(city: String?, address: String?, lat: Double, lng: Double) {
         val currentPreview = _uiState.value.pendingPreview ?: return
         val newContent = currentPreview.cardContent.copy(
@@ -337,7 +345,7 @@ class CameraViewModel @Inject constructor(
             )
         }
     }
-    
+
     fun savePreviewToGallery() {
         val preview = _uiState.value.pendingPreview ?: return
         if (_uiState.value.isProcessing) return
@@ -479,6 +487,24 @@ class CameraViewModel @Inject constructor(
         } else {
             null
         }
+
+    private suspend fun executeWithTimer(
+        timerSeconds: Int,
+        capture: suspend () -> Unit
+    ) {
+        try {
+            if (timerSeconds > 0) {
+                _uiState.update { it.copy(isCountdownActive = true) }
+                for (remaining in timerSeconds downTo 1) {
+                    _uiState.update { it.copy(countdownSeconds = remaining) }
+                    delay(1000L)
+                }
+            }
+            capture()
+        } finally {
+            _uiState.update { it.copy(countdownSeconds = null, isCountdownActive = false) }
+        }
+    }
 
     private suspend fun fetchCoordinateForTagging(): GeoCoordinate? = try {
         getCurrentLocation()

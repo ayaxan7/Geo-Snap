@@ -39,6 +39,7 @@ fun CameraTopBar(
     onBack: () -> Unit,
     onFlash: () -> Unit,
     onTemplatesClick: () -> Unit,
+    onTimerClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -49,7 +50,7 @@ fun CameraTopBar(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         // Timer icon
-        IconButton(onClick = { /* TODO */ }) {
+        IconButton(onClick = onTimerClick) {
             Icon(
                 painter = painterResource(R.drawable.ic_timer),
                 contentDescription = stringResource(R.string.camera_timer),

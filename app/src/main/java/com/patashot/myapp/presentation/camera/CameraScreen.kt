@@ -54,6 +54,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patashot.myapp.R
 import com.patashot.myapp.presentation.camera.components.CameraBottomControls
 import com.patashot.myapp.presentation.camera.components.CameraTopBar
+import com.patashot.myapp.presentation.camera.components.CountdownOverlay
+import com.patashot.myapp.presentation.camera.components.TimerWheelPicker
 import com.patashot.myapp.presentation.sharing.shareMediaChooser
 
 @Composable
@@ -182,6 +184,7 @@ fun CameraScreen(
         Box(modifier = Modifier.fillMaxSize()) {
             val pendingPreview = uiState.pendingPreview
             var showEditLocation by remember { mutableStateOf(false) }
+            var showTimerPicker by remember { mutableStateOf(false) }
 
             if (pendingPreview != null) {
                 if (showEditLocation) {
@@ -257,6 +260,7 @@ fun CameraScreen(
                     onBack = onBack,
                     onFlash = viewModel::toggleFlash,
                     onTemplatesClick = onTemplatesClick,
+                    onTimerClick = { showTimerPicker = true },
                     modifier = Modifier
                         .fillMaxWidth()
                         .align(Alignment.TopCenter)
@@ -296,6 +300,24 @@ fun CameraScreen(
                         },
                         onFlip = viewModel::flipLensFacing,
                         onGallery = onGallery
+                    )
+                }
+
+                if (uiState.countdownSeconds != null) {
+                    CountdownOverlay(
+                        seconds = uiState.countdownSeconds,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+
+                if (showTimerPicker) {
+                    TimerWheelPicker(
+                        selectedSeconds = uiState.timerSeconds,
+                        onConfirm = { seconds ->
+                            viewModel.setTimerSeconds(seconds)
+                            showTimerPicker = false
+                        },
+                        onDismiss = { showTimerPicker = false }
                     )
                 }
             }
