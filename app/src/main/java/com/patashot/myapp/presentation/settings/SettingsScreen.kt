@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -348,12 +349,13 @@ fun SettingsScreen(
                     tint = PrimaryGreen,
                     modifier = Modifier.size(20.dp)
                 )
-                Spacer(modifier = Modifier.padding(4.dp))
+                Spacer(modifier = Modifier.padding(2.dp))
                 Text(
                     text = stringResource(R.string.home_made_for_bharat),
                     color = PrimaryGreen,
                     fontSize = 14.sp,
-                    fontWeight = FontWeight.Normal
+                    fontWeight = FontWeight.Bold,
+                    fontStyle = FontStyle.Italic
                 )
             }
         }

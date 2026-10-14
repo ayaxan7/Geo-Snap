@@ -84,10 +84,11 @@ fun HomeScreen(
                 Text(
                     text = stringResource(R.string.home_made_for_bharat),
                     color = PrimaryGreen,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 8.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize =10.sp,
                     modifier = Modifier.align(Alignment.Start),
-                    textAlign = TextAlign.Start
+                    textAlign = TextAlign.Left,
+                    fontStyle = FontStyle.Italic
                 )
             }
             IconButton(onClick = { onOpenSettings() }) {
