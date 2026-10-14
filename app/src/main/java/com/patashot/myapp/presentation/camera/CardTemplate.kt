@@ -26,7 +26,12 @@ enum class CardLayout {
     /**
      * Minimal layout without map, centered text.
      */
-    MINIMAL
+    MINIMAL,
+
+    /**
+     * QR code on the left with location link embedded, details on the right.
+     */
+    QR_CODE
 }
 
 /**
@@ -168,8 +173,42 @@ object CardTemplates {
         )
     )
 
+    const val QR_CODE_ID = "qrcode"
+
+    /** The QR code card: dark shell, white QR code badge on left, details on right. */
+    val QR_CODE = CardTemplate(
+        id = QR_CODE_ID,
+        labelRes = R.string.template_qrcode,
+        layout = CardLayout.QR_CODE,
+        style = GeoTagCardStyle(
+            textColor = 0xFFFFFFFFL,
+            textSecondaryColor = 0xD1FFFFFFL,
+            iconAccentColor = 0xFFFF0000L,
+            accentColor = ACCENT,
+            logoBackgroundColor = 0x00000000L,
+            logoVisible = false,
+            mapBackgroundColor = 0xFFFFFFFFL,
+            mapWidthDp = 70f,
+            mapHeightDp = 70f,
+            mapCornerDp = 8f,
+            spacerMapDetailsDp = 14f,
+            spacerDetailsLogoDp = 0f,
+            detailsPaddingVerticalDp = 2f,
+            detailsLineGapDp = 4f,
+            iconTextGapDp = 6f,
+            cityTextSizeSp = 15f,
+            addressTextSizeSp = 11f,
+            addressLineHeightSp = 15f,
+            coordinatesTextSizeSp = 11f,
+            dateTextSizeSp = 11f,
+            iconSizeDp = 13f,
+            logoSizeDp = 0f,
+            logoCornerDp = 0f
+        )
+    )
+
     /** Every selectable template, in the order the picker lists them. */
-    val ALL: List<CardTemplate> = listOf(DEFAULT, MINIMAL)
+    val ALL: List<CardTemplate> = listOf(DEFAULT, MINIMAL, QR_CODE)
 
     /** Resolves a persisted [id], falling back to [DEFAULT] when it is unknown or absent. */
     fun fromId(id: String?): CardTemplate = ALL.firstOrNull { it.id == id } ?: DEFAULT

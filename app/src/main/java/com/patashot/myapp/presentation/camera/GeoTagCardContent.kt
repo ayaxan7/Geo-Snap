@@ -38,6 +38,16 @@ fun staticMapUrl(latitude: Double?, longitude: Double?, sizePx: Int = PREVIEW_MA
 }
 
 /**
+ * Builds the Google Maps location link embedded into QR code templates.
+ */
+fun locationUrl(latitude: Double?, longitude: Double?): String {
+    if (latitude == null || longitude == null) return "https://maps.google.com"
+    return "https://maps.google.com/?q=$latitude,$longitude"
+}
+
+fun GeoTagCardContent.locationUrl(): String = locationUrl(latitude, longitude)
+
+/**
  * Snapshots the current UI state into a burnable card. The preferred
  * coordinates come from the [coordinate] captured at capture time, falling back
  * to the most recent fix held on the UI state.

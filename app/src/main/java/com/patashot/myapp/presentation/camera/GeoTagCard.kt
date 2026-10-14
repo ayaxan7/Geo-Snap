@@ -128,6 +128,12 @@ fun GeoTagCard(
                     copy = labels.copy,
                     metrics = metrics
                 )
+                CardLayout.QR_CODE -> QrCodeContent(
+                    copy = labels.copy,
+                    metrics = metrics,
+                    locationUrl = content.locationUrl(),
+                    scale = scale
+                )
             }
         }
 
@@ -298,6 +304,95 @@ private fun MinimalContent(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
+    }
+}
+
+@Composable
+private fun RowScope.QrCodeContent(
+    copy: CardCopy,
+    metrics: GeoTagCardMetrics,
+    locationUrl: String,
+    scale: Float
+) {
+    QrCodeBadge(
+        locationUrl = locationUrl,
+        metrics = metrics,
+        scale = scale
+    )
+
+    Spacer(modifier = Modifier.width(metrics.spacerMapDetailsDp.dp))
+
+    Column(
+        modifier = Modifier
+            .weight(1f)
+            .padding(vertical = metrics.detailsPaddingVerticalDp.dp),
+        verticalArrangement = Arrangement.spacedBy(metrics.detailsLineGapDp.dp)
+    ) {
+        Text(
+            text = copy.city,
+            color = Color(metrics.textColor),
+            fontWeight = FontWeight.Bold,
+            fontSize = metrics.cityTextSizeSp.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        Text(
+            text = copy.address,
+            color = Color(metrics.textSecondaryColor),
+            fontSize = metrics.addressTextSizeSp.sp,
+            lineHeight = metrics.addressLineHeightSp.sp,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Image(
+                painter = painterResource(R.drawable.ic_calendar),
+                contentDescription = null,
+                modifier = Modifier.size(metrics.iconSizeDp.dp)
+            )
+            Spacer(modifier = Modifier.width(metrics.iconTextGapDp.dp))
+            Text(
+                text = copy.date,
+                color = Color(metrics.textColor),
+                fontSize = metrics.dateTextSizeSp.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+@Composable
+private fun QrCodeBadge(
+    locationUrl: String,
+    metrics: GeoTagCardMetrics,
+    scale: Float
+) {
+    val qrSizePx = remember(metrics.mapWidthDp, scale) {
+        ((metrics.mapWidthDp * scale) * 3f).toInt().coerceAtLeast(120)
+    }
+    val qrBitmap = remember(locationUrl, qrSizePx) {
+        QrCodeGenerator.generateQrBitmap(locationUrl, qrSizePx)
+    }
+
+    Box(
+        modifier = Modifier
+            .size(metrics.mapWidthDp.dp, metrics.mapHeightDp.dp)
+            .clip(RoundedCornerShape(metrics.mapCornerDp.dp))
+            .background(Color.White)
+            .padding(4.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        if (qrBitmap != null) {
+            Image(
+                bitmap = qrBitmap.asImageBitmap(),
+                contentDescription = stringResource(R.string.template_qrcode),
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Fit
+            )
+        }
     }
 }
 

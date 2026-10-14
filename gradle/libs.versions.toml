@@ -26,6 +26,7 @@ okhttp = "4.12.0"
 moshi = "1.15.1"
 playAppUpdate = "2.1.0"
 robolectric = "4.17"
+zxing = "3.5.3"
 
 [libraries]
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
@@ -109,6 +110,9 @@ play-app-update-ktx = { group = "com.google.android.play", name = "app-update-kt
 
 # Robolectric (4.17 is the release built against AGP 9.2.x and supports API 37)
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
+
+# ZXing QR code generation
+zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxing" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

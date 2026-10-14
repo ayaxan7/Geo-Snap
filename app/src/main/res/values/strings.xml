@@ -209,5 +209,6 @@
     <string name="template_selected">Selected</string>
     <string name="template_not_selected">Not selected</string>
     <string name="template_minimal">Minimal</string>
+    <string name="template_qrcode">QR Code</string>
     <string name="templates_save">Save</string>
 </resources>

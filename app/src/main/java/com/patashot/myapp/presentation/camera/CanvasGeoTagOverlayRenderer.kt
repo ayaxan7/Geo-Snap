@@ -86,6 +86,7 @@ class CanvasGeoTagOverlayRenderer internal constructor(
                 mapLabel = englishContext.getString(R.string.geotag_map)
             )
             CardLayout.MINIMAL -> renderMinimal(metrics = metrics, copy = copy)
+            CardLayout.QR_CODE -> renderQrCode(metrics = metrics, copy = copy, content = content)
         }
     }
 
@@ -196,6 +197,99 @@ class CanvasGeoTagOverlayRenderer internal constructor(
                 metrics = metrics
             )
         }
+
+        return bitmap
+    }
+
+    /**
+     * QR code card: dark shell, white QR code box on the left embedding location link,
+     * details (city, address, date with calendar icon) on the right.
+     */
+    private fun renderQrCode(
+        metrics: GeoTagCardMetrics,
+        copy: CardCopy,
+        content: GeoTagCardContent
+    ): Bitmap {
+        val padTop = dp(metrics.paddingVerticalDp)
+        val padBottom = dp(metrics.paddingVerticalDp)
+        val padH = dp(metrics.paddingHorizontalDp)
+        val cardWidth = dp(metrics.cardWidthDp)
+        val qrBoxWidth = dp(metrics.mapWidthDp)
+        val qrBoxHeight = dp(metrics.mapHeightDp)
+        val qrLeft = padH
+        val textLeft = qrLeft + qrBoxWidth + dp(metrics.spacerMapDetailsDp)
+        val detailsWidth = cardWidth - padH - textLeft
+
+        val cityPaint = textPaint(metrics.textColor, metrics.cityTextSizeSp, bold = true)
+        val addressPaint = textPaint(metrics.textSecondaryColor, metrics.addressTextSizeSp)
+        val datePaint = textPaint(metrics.textColor, metrics.dateTextSizeSp)
+
+        val cityLayout = buildLayout(copy.city, cityPaint, detailsWidth, maxLines = 1)
+        val addressLayout = buildLayout(copy.address, addressPaint, detailsWidth, maxLines = 2)
+
+        val iconSize = dp(metrics.iconSizeDp)
+        val iconGap = iconSize + dp(metrics.iconTextGapDp)
+        val dateLayoutWidth = (detailsWidth - iconGap).coerceAtLeast(1)
+        val dateLayout = buildLayout(copy.date, datePaint, dateLayoutWidth, maxLines = 1)
+
+        val dateRowH = maxOf(iconSize, dateLayout.height)
+        val detailsVPad = dp(metrics.detailsPaddingVerticalDp)
+        val lineGap = dp(metrics.detailsLineGapDp)
+        val columnH = detailsVPad * 2 + cityLayout.height + lineGap + addressLayout.height + lineGap + dateRowH
+
+        val innerH = maxOf(qrBoxHeight, columnH)
+        val cardHeight = padTop + innerH + padBottom
+        val baseline = padTop + innerH
+
+        val bitmap = Bitmap.createBitmap(cardWidth, cardHeight, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+
+        drawCardShell(canvas, bitmap, metrics)
+
+        val corner = dp(metrics.mapCornerDp).toFloat()
+        val qrRect = RectF(
+            qrLeft.toFloat(),
+            (baseline - qrBoxHeight).toFloat(),
+            (qrLeft + qrBoxWidth).toFloat(),
+            baseline.toFloat()
+        )
+        canvas.drawRoundRect(
+            qrRect,
+            corner,
+            corner,
+            Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.WHITE }
+        )
+
+        val innerPadding = dp(4f)
+        val qrBitmapSize = (qrBoxWidth - innerPadding * 2).coerceAtLeast(1)
+        val qrCodeBitmap = QrCodeGenerator.generateQrBitmap(content.locationUrl(), qrBitmapSize)
+        if (qrCodeBitmap != null) {
+            val qrDestRect = Rect(
+                qrLeft + innerPadding,
+                (baseline - qrBoxHeight) + innerPadding,
+                qrLeft + qrBoxWidth - innerPadding,
+                baseline - innerPadding
+            )
+            canvas.drawBitmap(qrCodeBitmap, null, qrDestRect, Paint(Paint.FILTER_BITMAP_FLAG))
+        }
+
+        var y = baseline - columnH + detailsVPad
+
+        canvas.drawLayout(cityLayout, textLeft.toFloat(), y.toFloat())
+        y += cityLayout.height + lineGap
+
+        canvas.drawLayout(addressLayout, textLeft.toFloat(), y.toFloat())
+        y += addressLayout.height + lineGap
+
+        val dateTextTop = y + (dateRowH - dateLayout.height) / 2
+        val dateIconTop = y + (dateRowH - iconSize) / 2
+        drawIcon(
+            canvas = canvas,
+            drawableId = R.drawable.ic_calendar,
+            rect = Rect(textLeft, dateIconTop, textLeft + iconSize, dateIconTop + iconSize),
+            tint = metrics.textColor.toArgb()
+        )
+        canvas.drawLayout(dateLayout, (textLeft + iconGap).toFloat(), dateTextTop.toFloat())
 
         return bitmap
     }

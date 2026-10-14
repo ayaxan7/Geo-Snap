@@ -186,5 +186,6 @@
     <string name="template_selected">தேர்ந்தெடுக்கப்பட்டது</string>
     <string name="template_not_selected">தேர்ந்தெடுக்கப்படவில்லை</string>
     <string name="template_minimal">மினிமல்</string>
+    <string name="template_qrcode">க்யூஆர் குறியீடு</string>
     <string name="templates_save">சேமி</string>
 </resources>

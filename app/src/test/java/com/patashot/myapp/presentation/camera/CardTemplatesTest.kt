@@ -109,4 +109,11 @@ class CardTemplatesTest {
 
         assertEquals(full.accentColor, half.accentColor)
     }
+
+    @Test
+    fun `qrcode template is registered under a stable id`() {
+        assertSame(CardTemplates.QR_CODE, CardTemplates.fromId("qrcode"))
+        assertEquals(CardLayout.QR_CODE, CardTemplates.QR_CODE.layout)
+    }
 }
+

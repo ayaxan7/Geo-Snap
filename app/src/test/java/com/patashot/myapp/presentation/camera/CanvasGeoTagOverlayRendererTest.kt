@@ -297,6 +297,25 @@ class CanvasGeoTagOverlayRendererTest {
         }
     }
 
+    @Test
+    fun `qrcode layout renders successfully with location`() {
+        val bitmap = renderOrFail(
+            content(
+                template = CardTemplates.QR_CODE,
+                city = "Vijayawada, Andhra Pradesh",
+                address = "Flat No. 302, Sai Heights, Eluru",
+                lat = 16.5062,
+                lng = 80.6480
+            )
+        )
+
+        assertTrue(bitmap.width > 1 && bitmap.height > 1)
+        val pixels = IntArray(bitmap.width * bitmap.height)
+        bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
+        assertTrue("QR code card should contain black pixels", pixels.any { it == android.graphics.Color.BLACK })
+        assertTrue("QR code card should contain white pixels", pixels.any { it == android.graphics.Color.WHITE })
+    }
+
     private companion object {
         /** Anything drawn over the card background (alpha 0xB3) is content. */
         const val INK_ALPHA_THRESHOLD = 185

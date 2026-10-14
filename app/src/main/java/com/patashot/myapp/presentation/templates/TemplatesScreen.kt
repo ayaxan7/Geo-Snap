@@ -56,11 +56,12 @@ import com.patashot.myapp.ui.theme.PrimaryGreen
  */
 private val TEMPLATE_PREVIEW_IMAGES: List<Int> = listOf(
     R.drawable.ic_template_1,
-    R.drawable.ic_template_2
+    R.drawable.ic_template_2,
+    R.drawable.ic_template_3
 )
 
 /** How many previews exist to show. The picker renders exactly these many rows. */
-private const val TEMPLATE_PREVIEW_COUNT = 2
+private const val TEMPLATE_PREVIEW_COUNT = 3
 
 /**
  * Lets the user pick the geotag card design applied to new captures.
