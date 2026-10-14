@@ -16,7 +16,7 @@
     <string name="permission_microphone_label">ಮೈಕ್ರೊಫೋನ್</string>
     <string name="permission_microphone_description">ನೀವು ವೀಡಿಯೋಗಳನ್ನು ಕ್ಯಾಪ್ಚರ್ ಮಾಡುವಾಗ PataShot ಆಡಿಯೋವನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲು ಅನುಮತಿಸುತ್ತದೆ. ಈ ಅನುಮತಿಯನ್ನು ಧ್ವನಿಯೊಂದಿಗೆ ವೀಡಿಯೋ ರೆಕಾರ್ಡ್ ಮಾಡುವಾಗ ಮಾತ್ರ ಬಳಸಲಾಗುತ್ತದೆ.</string>
     <string name="permission_location_label">ಸ್ಥಳ ಪ್ರವೇಶ</string>
-    <string name="permission_location_description">ನಿಮ್ಮ ಪ್ರಸ್ತುತ ಸ್ಥಳವನ್ನು ಪತ್ತೆಹಚ್ಚಲು ಮತ್ತು ನಿಮ್ಮ ವಿಳಾಸ, ನಿರ್ದೇಶಾಂಕಗಳು ಮತ್ತು GPS ನಿಖರತೆಯಂತಹ ವಿವರಗಳನ್ನು ನಿಮ್ಮ ಫೋಟೋಗಳು ಮತ್ತು ವೀಡಿಯೋಗಳಿಗೆ ಸೇರಿಸಲು GeoSnapಗೆ ಅನುಮತಿಸುತ್ತದೆ.</string>
+    <string name="permission_location_description">ನಿಮ್ಮ ಪ್ರಸ್ತುತ ಸ್ಥಳವನ್ನು ಪತ್ತೆಹಚ್ಚಲು ಮತ್ತು ನಿಮ್ಮ ವಿಳಾಸ, ನಿರ್ದೇಶಾಂಕಗಳು ಮತ್ತು GPS ನಿಖರತೆಯಂತಹ ವಿವರಗಳನ್ನು ನಿಮ್ಮ ಫೋಟೋಗಳು ಮತ್ತು ವೀಡಿಯೋಗಳಿಗೆ ಸೇರಿಸಲು PataShotಗೆ ಅನುಮತಿಸುತ್ತದೆ.</string>
     <string name="permission_storage_label">ಫೋಟೋ &amp; ಮೀಡಿಯಾ ಪ್ರವೇಶ</string>
     <string name="permission_storage_description">ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿದ ಫೋಟೋಗಳನ್ನು ಮತ್ತು ವೀಡಿಯೋಗಳನ್ನು ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಉಳಿಸಲು ಮತ್ತು ಎಡಿಟಿಂಗ್, ಸ್ಥಳ ನವೀಕರಣಗಳು ಅಥವಾ ಹಂಚಿಕೆಗಾಗಿ ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಫೋಟೋಗಳನ್ನು ಆಯ್ಕೆ ಮಾಡಲು ನಿಮಗೆ ಅನುಮತಿಸುತ್ತದೆ.</string>
     <string name="permission_notifications_label">ಅಧಿಸೂಚನೆಗಳು</string>
