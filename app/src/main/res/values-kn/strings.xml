@@ -4,26 +4,26 @@
     <string name="loading">ಲೋಡ್ ಆಗುತ್ತಿದೆ…</string>
 
     <string name="permissions_title">ಅಪ್ ಅನುಮತಿಗಳು</string>
-    <string name="permissions_subtitle_header">GeoSnap ಬಳಸಲು ನಮಗೆ ಈ ಕೆಳಗಿನ ಅನುಮತಿಗಳು ಬೇಕಾಗುತ್ತವೆ</string>
-    <string name="permissions_subtitle">ಈ ಅನುಮತಿಗಳು GeoSnap ನಿಖರವಾದ ಸ್ಥಳ ವಿವರಗಳೊಂದಿಗೆ ಫೋಟೋಗಳು ಮತ್ತು ವೀಡಿಯೋಗಳನ್ನು ಕ್ಯಾಪ್ಚರ್ ಮಾಡಲು ಸಹಾಯ ಮಾಡುತ್ತವೆ.</string>
+    <string name="permissions_subtitle_header">PataShot ಬಳಸಲು ನಮಗೆ ಈ ಕೆಳಗಿನ ಅನುಮತಿಗಳು ಬೇಕಾಗುತ್ತವೆ</string>
+    <string name="permissions_subtitle">ಈ ಅನುಮತಿಗಳು PataShot ನಿಖರವಾದ ಸ್ಥಳ ವಿವರಗಳೊಂದಿಗೆ ಫೋಟೋಗಳು ಮತ್ತು ವೀಡಿಯೋಗಳನ್ನು ಕ್ಯಾಪ್ಚರ್ ಮಾಡಲು ಸಹಾಯ ಮಾಡುತ್ತವೆ.</string>
     <string name="permissions_open_settings">ಸೆಟ್ಟಿಂಗ್ಸ್ ತೆರೆಯಿರಿ</string>
     <string name="permissions_permanently_denied">ಶಾಶ್ವತವಾಗಿ ನಿರಾಕರಿಸಲಾಗಿದೆ — ಸೆಟ್ಟಿಂಗ್ಸ್ನಲ್ಲಿ ಇದನ್ನು ಆನ್ ಮಾಡಿ</string>
     <string name="permissions_agree">ಅನುಮತಿಗಳು, ನಿಯಮಗಳು &amp; ಷರತ್ತುಗಳು ಮತ್ತು ಗೌಪ್ಯತಾ ನೀತಿಗೆ ನಾನು ಒಪ್ಪುತ್ತೇನೆ.</string>
     <string name="permissions_get_started">ಪ್ರಾರಂಭಿಸೋಣ</string>
 
     <string name="permission_camera_label">ಕ್ಯಾಮೆರಾ</string>
-    <string name="permission_camera_description">ಫೋಟೋಗಳನ್ನು ತೆಗೆಯಲು ಮತ್ತು ವೀಡಿಯೋಗಳನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲು GeoSnap ನಿಮ್ಮ ಕ್ಯಾಮೆರಾವನ್ನು ಬಳಸಲು ಅನುಮತಿಸುತ್ತದೆ. ಅಪ್‌ನ ಮುಖ್ಯ ಕ್ಯಾಮೆರಾ ವೈಶಿಷ್ಟ್ಯಗಳಿಗೆ ಈ ಅನುಮತಿ ಅಗತ್ಯ.</string>
+    <string name="permission_camera_description">ಫೋಟೋಗಳನ್ನು ತೆಗೆಯಲು ಮತ್ತು ವೀಡಿಯೋಗಳನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲು PataShot ನಿಮ್ಮ ಕ್ಯಾಮೆರಾವನ್ನು ಬಳಸಲು ಅನುಮತಿಸುತ್ತದೆ. ಅಪ್‌ನ ಮುಖ್ಯ ಕ್ಯಾಮೆರಾ ವೈಶಿಷ್ಟ್ಯಗಳಿಗೆ ಈ ಅನುಮತಿ ಅಗತ್ಯ.</string>
     <string name="permission_microphone_label">ಮೈಕ್ರೊಫೋನ್</string>
-    <string name="permission_microphone_description">ನೀವು ವೀಡಿಯೋಗಳನ್ನು ಕ್ಯಾಪ್ಚರ್ ಮಾಡುವಾಗ GeoSnap ಆಡಿಯೋವನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲು ಅನುಮತಿಸುತ್ತದೆ. ಈ ಅನುಮತಿಯನ್ನು ಧ್ವನಿಯೊಂದಿಗೆ ವೀಡಿಯೋ ರೆಕಾರ್ಡ್ ಮಾಡುವಾಗ ಮಾತ್ರ ಬಳಸಲಾಗುತ್ತದೆ.</string>
+    <string name="permission_microphone_description">ನೀವು ವೀಡಿಯೋಗಳನ್ನು ಕ್ಯಾಪ್ಚರ್ ಮಾಡುವಾಗ PataShot ಆಡಿಯೋವನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲು ಅನುಮತಿಸುತ್ತದೆ. ಈ ಅನುಮತಿಯನ್ನು ಧ್ವನಿಯೊಂದಿಗೆ ವೀಡಿಯೋ ರೆಕಾರ್ಡ್ ಮಾಡುವಾಗ ಮಾತ್ರ ಬಳಸಲಾಗುತ್ತದೆ.</string>
     <string name="permission_location_label">ಸ್ಥಳ ಪ್ರವೇಶ</string>
     <string name="permission_location_description">ನಿಮ್ಮ ಪ್ರಸ್ತುತ ಸ್ಥಳವನ್ನು ಪತ್ತೆಹಚ್ಚಲು ಮತ್ತು ನಿಮ್ಮ ವಿಳಾಸ, ನಿರ್ದೇಶಾಂಕಗಳು ಮತ್ತು GPS ನಿಖರತೆಯಂತಹ ವಿವರಗಳನ್ನು ನಿಮ್ಮ ಫೋಟೋಗಳು ಮತ್ತು ವೀಡಿಯೋಗಳಿಗೆ ಸೇರಿಸಲು GeoSnapಗೆ ಅನುಮತಿಸುತ್ತದೆ.</string>
     <string name="permission_storage_label">ಫೋಟೋ &amp; ಮೀಡಿಯಾ ಪ್ರವೇಶ</string>
     <string name="permission_storage_description">ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿದ ಫೋಟೋಗಳನ್ನು ಮತ್ತು ವೀಡಿಯೋಗಳನ್ನು ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಉಳಿಸಲು ಮತ್ತು ಎಡಿಟಿಂಗ್, ಸ್ಥಳ ನವೀಕರಣಗಳು ಅಥವಾ ಹಂಚಿಕೆಗಾಗಿ ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಫೋಟೋಗಳನ್ನು ಆಯ್ಕೆ ಮಾಡಲು ನಿಮಗೆ ಅನುಮತಿಸುತ್ತದೆ.</string>
     <string name="permission_notifications_label">ಅಧಿಸೂಚನೆಗಳು</string>
-    <string name="permission_notifications_description">ಪ್ರಮುಖ ನವೀಕರಣಗಳು, ಜ್ಞಾಪನೆಗಳು ಮತ್ತು ಚಂದಾದಾರಿಕೆ ಮಾಹಿತಿಯನ್ನು ಕಳುಹಿಸಲು GeoSnap ಅನುಮತಿಸುತ್ತದೆ</string>
+    <string name="permission_notifications_description">ಪ್ರಮುಖ ನವೀಕರಣಗಳು, ಜ್ಞಾಪನೆಗಳು ಮತ್ತು ಚಂದಾದಾರಿಕೆ ಮಾಹಿತಿಯನ್ನು ಕಳುಹಿಸಲು PataShot ಅನುಮತಿಸುತ್ತದೆ</string>
 
     <string name="location_dialog_title">ಸ್ಥಳ ಆಫ್ ಆಗಿದೆ</string>
-    <string name="location_dialog_message">ಫೋಟೋಗಳು ಮತ್ತು ವೀಡಿಯೋಗಳನ್ನು GPS ನಿರ್ದೇಶಾಂಕಗಳೊಂದಿಗೆ ಟ್ಯಾಗ್ ಮಾಡಲು GeoSnap ಗೆ ನಿಮ್ಮ ಸಾಧನದ ಸ್ಥಳ ಅಗತ್ಯವಿದೆ. ಮುಂದುವರಿಯಲು ಸ್ಥಳವನ್ನು ಆನ್ ಮಾಡಿ.</string>
+    <string name="location_dialog_message">ಫೋಟೋಗಳು ಮತ್ತು ವೀಡಿಯೋಗಳನ್ನು GPS ನಿರ್ದೇಶಾಂಕಗಳೊಂದಿಗೆ ಟ್ಯಾಗ್ ಮಾಡಲು PataShot ಗೆ ನಿಮ್ಮ ಸಾಧನದ ಸ್ಥಳ ಅಗತ್ಯವಿದೆ. ಮುಂದುವರಿಯಲು ಸ್ಥಳವನ್ನು ಆನ್ ಮಾಡಿ.</string>
     <string name="location_dialog_turn_on">ಆನ್ ಮಾಡಿ</string>
     <string name="location_dialog_not_now">ಈಗಲ್ಲ</string>
 
@@ -46,16 +46,16 @@
 
     <string name="settings_auto_save_title">ಸಾಧನದಲ್ಲಿ ಸ್ವಯಂ ಉಳಿಸುವಿಕೆ</string>
     <string name="settings_auto_save_revoke_title">ಸಾಧನದಲ್ಲಿ ಸ್ವಯಂ ಉಳಿಸುವಿಕೆ ಆಫ್ ಮಾಡಬೇಕೇ?</string>
-    <string name="settings_auto_save_revoke_message">ಇದನ್ನು ಆಫ್ ಮಾಡಲು ನೀವು ಆ್ಯಪ್ ಮಾಹಿತಿ ತೆರೆದು, ಅನುಮತಿಗಳಿಗೆ ಹೋಗಿ \"ಫೋಟೋಗಳು ಮತ್ತು ವೀಡಿಯೋಗಳು\" ಆಫ್ ಆಗಿಸಬೇಕು. ನೀವು ಮರಳಿದಾಗ GeoSnap ಪರಿಶೀಲಿಸಿ ಸ್ವಿಚ್ ಆಫ್ ಮಾಡುತ್ತದೆ.</string>
+    <string name="settings_auto_save_revoke_message">ಇದನ್ನು ಆಫ್ ಮಾಡಲು ನೀವು ಆ್ಯಪ್ ಮಾಹಿತಿ ತೆರೆದು, ಅನುಮತಿಗಳಿಗೆ ಹೋಗಿ \"ಫೋಟೋಗಳು ಮತ್ತು ವೀಡಿಯೋಗಳು\" ಆಫ್ ಆಗಿಸಬೇಕು. ನೀವು ಮರಳಿದಾಗ PataShot ಪರಿಶೀಲಿಸಿ ಸ್ವಿಚ್ ಆಫ್ ಮಾಡುತ್ತದೆ.</string>
     <string name="settings_auto_save_enable_title">ಫೋಟೋ ಮತ್ತು ಮೀಡಿಯಾ ಪ್ರವೇಶ ಅಗತ್ಯ</string>
-    <string name="settings_auto_save_enable_message">ಈ ಅನುಮತಿಯನ್ನು ಶಾಶ್ವತವಾಗಿ ನಿರಾಕರಿಸಲಾಗಿದೆ. ಆ್ಯಪ್ ಮಾಹಿತಿ ತೆರೆದು, ಅನುಮತಿಗಳಿಗೆ ಹೋಗಿ \"ಫೋಟೋಗಳು ಮತ್ತು ವೀಡಿಯೋಗಳು\"ಗೆ ಅನುಮತಿ ನೀಡಿ, ಹೀಗೆ GeoSnap ನಿಮ್ಮ ಸಾಧನದ ಗ್ಯಾಲರಿಯಲ್ಲಿ ನಕಲುಗಳನ್ನು ಉಳಿಸಬಲ್ಲವು.</string>
+    <string name="settings_auto_save_enable_message">ಈ ಅನುಮತಿಯನ್ನು ಶಾಶ್ವತವಾಗಿ ನಿರಾಕರಿಸಲಾಗಿದೆ. ಆ್ಯಪ್ ಮಾಹಿತಿ ತೆರೆದು, ಅನುಮತಿಗಳಿಗೆ ಹೋಗಿ \"ಫೋಟೋಗಳು ಮತ್ತು ವೀಡಿಯೋಗಳು\"ಗೆ ಅನುಮತಿ ನೀಡಿ, ಹೀಗೆ PataShot ನಿಮ್ಮ ಸಾಧನದ ಗ್ಯಾಲರಿಯಲ್ಲಿ ನಕಲುಗಳನ್ನು ಉಳಿಸಬಲ್ಲವು.</string>
     <string name="settings_auto_save_open_app_info">ಆ್ಯಪ್ ಮಾಹಿತಿ ತೆರೆಯಿರಿ</string>
     <string name="settings_auto_save_not_now">ಈಗಲ್ಲ</string>
     <string name="settings_notifications">ಅಧಿಸೂಚನೆಗಳು</string>
     <string name="settings_notifications_revoke_title">ಅಧಿಸೂಚನೆಗಳನ್ನು ಆಫ್ ಮಾಡಬೇಕೇ?</string>
-    <string name="settings_notifications_revoke_message">Android-ನಲ್ಲಿ GeoSnap ಅಧಿಸೂಚನೆಗಳನ್ನು ಆಫ್ ಮಾಡಬಹುದಾದದ್ದು ಸಿಸ್ಟಂ ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಂದಲೇ. ಅಧಿಸೂಚನೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆದು, GeoSnap ಅಧಿಸೂಚನೆಗಳನ್ನು ಆಫ್ ಮಾಡಿ, ನಂತರ ಹಿಂದಿರುಗಿ — ಈ ಸ್ವಿಚ್ ತಾನಾಗಿಯೇ ನವೀಕರಿಸುತ್ತದೆ.</string>
+    <string name="settings_notifications_revoke_message">Android-ನಲ್ಲಿ PataShot ಅಧಿಸೂಚನೆಗಳನ್ನು ಆಫ್ ಮಾಡಬಹುದಾದದ್ದು ಸಿಸ್ಟಂ ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಂದಲೇ. ಅಧಿಸೂಚನೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆದು, PataShot ಅಧಿಸೂಚನೆಗಳನ್ನು ಆಫ್ ಮಾಡಿ, ನಂತರ ಹಿಂದಿರುಗಿ — ಈ ಸ್ವಿಚ್ ತಾನಾಗಿಯೇ ನವೀಕರಿಸುತ್ತದೆ.</string>
     <string name="settings_notifications_enable_title">ಅಧಿಸೂಚನೆಗಳನ್ನು ತಡೆಗಾರಿಸಲಾಗಿದೆ</string>
-    <string name="settings_notifications_enable_message">ಅಧಿಸೂಚನೆ ಅನುಮತಿಯನ್ನು ಶಾಶ್ವತವಾಗಿ ನಿರಾಕರಿಸಲಾಗಿದೆ. ಅಧಿಸೂಚನೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆದು ಅನುಮತಿ ನೀಡಿ; ಹೀಗೆ GeoSnap ನಿಮಗೆ ಅಧಿಸೂಚನೆಗಳನ್ನು ಕಳುಹಿಸಬಲ್ಲದು.</string>
+    <string name="settings_notifications_enable_message">ಅಧಿಸೂಚನೆ ಅನುಮತಿಯನ್ನು ಶಾಶ್ವತವಾಗಿ ನಿರಾಕರಿಸಲಾಗಿದೆ. ಅಧಿಸೂಚನೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆದು ಅನುಮತಿ ನೀಡಿ; ಹೀಗೆ PataShot ನಿಮಗೆ ಅಧಿಸೂಚನೆಗಳನ್ನು ಕಳುಹಿಸಬಲ್ಲದು.</string>
     <string name="settings_notifications_open_settings">ಅಧಿಸೂಚನೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ</string>
     <string name="settings_language">ಭಾಷೆ</string>
     <string name="settings_templates">ಟೆಂಪ್ಲೇಟ್‌ಗಳು</string>

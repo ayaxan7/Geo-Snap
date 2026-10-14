@@ -26,7 +26,7 @@
 
     <!-- Location disabled dialog -->
     <string name="location_dialog_title">Location is turned off</string>
-    <string name="location_dialog_message">GeoSnap needs your device location to tag photos and videos with GPS coordinates. Turn on location to continue.</string>
+    <string name="location_dialog_message">PataShot needs your device location to tag photos and videos with GPS coordinates. Turn on location to continue.</string>
     <string name="location_dialog_turn_on">Turn On</string>
     <string name="location_dialog_not_now">Not Now</string>
 
@@ -52,15 +52,15 @@
     <!-- Settings screen -->
     <string name="settings_auto_save_title">Auto Save to Device</string>
     <string name="settings_auto_save_revoke_title">Turn off Auto Save?</string>
-    <string name="settings_auto_save_revoke_message">To turn this off you\'ll need to open App Info, go to Permissions and switch off \"Photos and videos\". When you come back, GeoSnap will check and turn the switch off.</string>
+    <string name="settings_auto_save_revoke_message">To turn this off you\'ll need to open App Info, go to Permissions and switch off \"Photos and videos\". When you come back, PataShot will check and turn the switch off.</string>
     <string name="settings_auto_save_enable_title">Photos &amp; media access required</string>
-    <string name="settings_auto_save_enable_message">The permission was permanently denied. Open App Info, go to Permissions and allow \"Photos and videos\" so GeoSnap can save copies to your device gallery.</string>
+    <string name="settings_auto_save_enable_message">The permission was permanently denied. Open App Info, go to Permissions and allow \"Photos and videos\" so PataShot can save copies to your device gallery.</string>
     <string name="settings_auto_save_open_app_info">Open App Info</string>
     <string name="settings_auto_save_not_now">Not Now</string>
     <string name="settings_notifications_revoke_title">Turn off notifications?</string>
-    <string name="settings_notifications_revoke_message">Android only lets you switch notifications off for GeoSnap from system settings. Open notification settings, switch GeoSnap notifications off, then come back — this switch will update itself.</string>
+    <string name="settings_notifications_revoke_message">Android only lets you switch notifications off for PataShot from system settings. Open notification settings, switch PataShot notifications off, then come back — this switch will update itself.</string>
     <string name="settings_notifications_enable_title">Notifications are blocked</string>
-    <string name="settings_notifications_enable_message">Notifications were permanently denied. Open notification settings for GeoSnap and allow them so GeoSnap can send you updates.</string>
+    <string name="settings_notifications_enable_message">Notifications were permanently denied. Open notification settings for PataShot and allow them so PataShot can send you updates.</string>
     <string name="settings_notifications_open_settings">Open notification settings</string>
     <string name="settings_notifications">Notifications</string>
     <string name="settings_language">Language</string>

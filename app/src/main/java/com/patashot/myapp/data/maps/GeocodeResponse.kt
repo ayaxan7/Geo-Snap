@@ -3,7 +3,7 @@ package com.patashot.myapp.data.maps
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
-/** Subset of the Google Geocoding API response GeoSnap actually needs. */
+/** Subset of the Google Geocoding API response PataShot actually needs. */
 @JsonClass(generateAdapter = true)
 data class GeocodeResponse(
     val status: String?,

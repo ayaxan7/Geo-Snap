@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 
 /**
- * Decides what GeoSnap should do about Google Play in-app updates.
+ * Decides what PataShot should do about Google Play in-app updates.
  *
  * All policy lives here and no Play Core types cross this boundary, so the
  * behaviour is unit testable without a device or a Play Store. The dialogs

@@ -4,26 +4,26 @@
     <string name="loading">లోడ్ అవుతోంది…</string>
 
     <string name="permissions_title">యాప్ అనుమతులు</string>
-    <string name="permissions_subtitle_header">GeoSnap ను ఉపయోగించడానికి మాకు ఈ క్రింది అనుమతులు అవసరం</string>
-    <string name="permissions_subtitle">ఈ అనుమతులు GeoSnap ఖచ్చితమైన స్థల వివరాలతో ఫోటోలు మరియు వీడియోలను క్యాప్చర్ చేయడానికి సహాయపడతాయి.</string>
+    <string name="permissions_subtitle_header">PataShot ను ఉపయోగించడానికి మాకు ఈ క్రింది అనుమతులు అవసరం</string>
+    <string name="permissions_subtitle">ఈ అనుమతులు PataShot ఖచ్చితమైన స్థల వివరాలతో ఫోటోలు మరియు వీడియోలను క్యాప్చర్ చేయడానికి సహాయపడతాయి.</string>
     <string name="permissions_open_settings">సెట్టింగ్స్ తెరవండి</string>
     <string name="permissions_permanently_denied">శాశ్వతంగా తిరస్కరించారు — సెట్టింగ్స్లో దీన్ని ఆన్ చేయండి</string>
     <string name="permissions_agree">అనుమతులు, నిబంధనలు &amp; షరతులు మరియు గోప్యతా విధానానికి నేను అంగీకరిస్తున్నాను.</string>
     <string name="permissions_get_started">ప్రారంభిద్దాం</string>
 
     <string name="permission_camera_label">కెమెరా</string>
-    <string name="permission_camera_description">GeoSnap మీ కెమెరాను ఉపయోగించి ఫోటోలు తీయడానికి మరియు వీడియోలను రికార్డ్ చేయడానికి అనుమతిస్తుంది. యాప్ యొక్క ప్రధాన కెమెరా ఫీచర్లకు ఈ అనుమతి అవసరం.</string>
+    <string name="permission_camera_description">PataShot మీ కెమెరాను ఉపయోగించి ఫోటోలు తీయడానికి మరియు వీడియోలను రికార్డ్ చేయడానికి అనుమతిస్తుంది. యాప్ యొక్క ప్రధాన కెమెరా ఫీచర్లకు ఈ అనుమతి అవసరం.</string>
     <string name="permission_microphone_label">మైక్రోఫోన్</string>
-    <string name="permission_microphone_description">మీరు వీడియోలు క్యాప్చర్ చేసేటప్పుడు GeoSnap ఆడియోను రికార్డ్ చేయడానికి అనుమతిస్తుంది. ఈ అనుమతి ధ్వనితో వీడియో రికార్డ్ చేసేటప్పుడు మాత్రమే ఉపయోగించబడుతుంది.</string>
+    <string name="permission_microphone_description">మీరు వీడియోలు క్యాప్చర్ చేసేటప్పుడు PataShot ఆడియోను రికార్డ్ చేయడానికి అనుమతిస్తుంది. ఈ అనుమతి ధ్వనితో వీడియో రికార్డ్ చేసేటప్పుడు మాత్రమే ఉపయోగించబడుతుంది.</string>
     <string name="permission_location_label">లొకేషన్ యాక్సెస్</string>
-    <string name="permission_location_description">GeoSnap మీ ప్రస్తుత లొకేషన్‌ను గుర్తించడానికి మరియు మీ ఫోటోలు, వీడియోలకు మీ చిరునామా, నిర్దేశాంకాలు మరియు GPS ఖచ్చితత్వం వంటి వివరాలను జోడించడానికి అనుమతిస్తుంది.</string>
+    <string name="permission_location_description">PataShot మీ ప్రస్తుత లొకేషన్‌ను గుర్తించడానికి మరియు మీ ఫోటోలు, వీడియోలకు మీ చిరునామా, నిర్దేశాంకాలు మరియు GPS ఖచ్చితత్వం వంటి వివరాలను జోడించడానికి అనుమతిస్తుంది.</string>
     <string name="permission_storage_label">ఫోటోలు &amp; మీడియా యాక్సెస్</string>
     <string name="permission_storage_description">క్యాప్చర్ చేసిన ఫోటోలను మరియు వీడియోలను మీ పరికరంలో సేవ్ చేయడానికి మరియు ఎడిటింగ్, లొకేషన్ అప్డేట్స్ లేదా షేరింగ్ కోసం ఇప్పటికే ఉన్న ఫోటోలను ఎంచుకోవడానికి మిమ్మల్ని అనుమతిస్తుంది.</string>
     <string name="permission_notifications_label">నోటిఫికేషన్లు</string>
-    <string name="permission_notifications_description">GeoSnap ముఖ్యమైన అప్డేట్లు, రిమైండర్లు మరియు సబ్స్క్రిప్షన్ సమాచారాన్ని పంపడానికి అనుమతిస్తుంది</string>
+    <string name="permission_notifications_description">PataShot ముఖ్యమైన అప్డేట్లు, రిమైండర్లు మరియు సబ్స్క్రిప్షన్ సమాచారాన్ని పంపడానికి అనుమతిస్తుంది</string>
 
     <string name="location_dialog_title">లొకేషన్ ఆఫ్ చేయబడింది</string>
-    <string name="location_dialog_message">GeoSnap ఫోటోలు మరియు వీడియోలను GPS నిర్దేశాంకాలతో ట్యాగ్ చేయడానికి మీ పరికరం లొకేషన్ అవసరం. కొనసాగించడానికి లొకేషన్‌ను ఆన్ చేయండి.</string>
+    <string name="location_dialog_message">PataShot ఫోటోలు మరియు వీడియోలను GPS నిర్దేశాంకాలతో ట్యాగ్ చేయడానికి మీ పరికరం లొకేషన్ అవసరం. కొనసాగించడానికి లొకేషన్‌ను ఆన్ చేయండి.</string>
     <string name="location_dialog_turn_on">ఆన్ చేయండి</string>
     <string name="location_dialog_not_now">ఇప్పుడు కాదు</string>
 
@@ -46,16 +46,16 @@
 
     <string name="settings_auto_save_title">పరికరంలో ఆటో సేవ్ చేయండి</string>
     <string name="settings_auto_save_revoke_title">ఆటో సేవ్ ఆఫ్ చేయాలా?</string>
-    <string name="settings_auto_save_revoke_message">దీన్ని ఆఫ్ చేయడానికి మీరు యాప్ సమాచారం తెరిచి, అనుమతులకు వెళ్లి \"ఫోటోలు మరియు వీడియోలు\" అని ఆఫ్ చేయాలి. మీరు తిరిగి వచ్చినప్పుడు GeoSnap పరీక్షించి స్విచ్ ఆఫ్ చేస్తుంది.</string>
+    <string name="settings_auto_save_revoke_message">దీన్ని ఆఫ్ చేయడానికి మీరు యాప్ సమాచారం తెరిచి, అనుమతులకు వెళ్లి \"ఫోటోలు మరియు వీడియోలు\" అని ఆఫ్ చేయాలి. మీరు తిరిగి వచ్చినప్పుడు PataShot పరీక్షించి స్విచ్ ఆఫ్ చేస్తుంది.</string>
     <string name="settings_auto_save_enable_title">ఫోటో మరియు మీడియా యాక్సెస్ అవసరం</string>
-    <string name="settings_auto_save_enable_message">ఈ అనుమతి శాశ్వతంగా తిరస్కరించబడింది. యాప్ సమాచారం తెరిచి, అనుమతులకు వెళ్లి \"ఫోటోలు మరియు వీడియోలు\"కు అనుమతించండి; అప్పుడు GeoSnap మీ పరికర గ్యాలరీలో కాపీలను సేవ్ చేయగలదు.</string>
+    <string name="settings_auto_save_enable_message">ఈ అనుమతి శాశ్వతంగా తిరస్కరించబడింది. యాప్ సమాచారం తెరిచి, అనుమతులకు వెళ్లి \"ఫోటోలు మరియు వీడియోలు\"కు అనుమతించండి; అప్పుడు PataShot మీ పరికర గ్యాలరీలో కాపీలను సేవ్ చేయగలదు.</string>
     <string name="settings_auto_save_open_app_info">యాప్ సమాచారం తెరవండి</string>
     <string name="settings_auto_save_not_now">ఇప్పుడు కాదు</string>
     <string name="settings_notifications">నోటిఫికేషన్లు</string>
     <string name="settings_notifications_revoke_title">నోటిఫికేషన్లు ఆఫ్ చేయాలా?</string>
-    <string name="settings_notifications_revoke_message">Androidలో GeoSnap నోటిఫికేషన్లు ఆఫ్ చేయడం సిస్టమ్ సెట్టింగ్‌ల నుంచే సాధ్యం. నోటిఫికేషన్ సెట్టింగ్‌లు తెరిచి, GeoSnap నోటిఫికేషన్లు ఆఫ్ చేసి, తర్వాత తిరిగి రండి — ఈ స్విచ్ దానంతట తనను తాను అప్‌డేట్ అవుతుంది.</string>
+    <string name="settings_notifications_revoke_message">Androidలో PataShot నోటిఫికేషన్లు ఆఫ్ చేయడం సిస్టమ్ సెట్టింగ్‌ల నుంచే సాధ్యం. నోటిఫికేషన్ సెట్టింగ్‌లు తెరిచి, PataShot నోటిఫికేషన్లు ఆఫ్ చేసి, తర్వాత తిరిగి రండి — ఈ స్విచ్ దానంతట తనను తాను అప్‌డేట్ అవుతుంది.</string>
     <string name="settings_notifications_enable_title">నోటిఫికేషన్లు నిరోధించబడ్డాయి</string>
-    <string name="settings_notifications_enable_message">నోటిఫికేషన్ అనుమతి శాశ్వతంగా తిరస్కరించబడింది. నోటిఫికేషన్ సెట్టింగ్‌లు తెరిచి అనుమతించండి; అప్పుడు GeoSnap మీకు నోటిఫికేషన్లు పంపగలుగుతుంది.</string>
+    <string name="settings_notifications_enable_message">నోటిఫికేషన్ అనుమతి శాశ్వతంగా తిరస్కరించబడింది. నోటిఫికేషన్ సెట్టింగ్‌లు తెరిచి అనుమతించండి; అప్పుడు PataShot మీకు నోటిఫికేషన్లు పంపగలుగుతుంది.</string>
     <string name="settings_notifications_open_settings">నోటిఫికేషన్ సెట్టింగ్‌లు తెరవండి</string>
     <string name="settings_language">భాష</string>
     <string name="settings_templates">టెంప్లేట్లు</string>

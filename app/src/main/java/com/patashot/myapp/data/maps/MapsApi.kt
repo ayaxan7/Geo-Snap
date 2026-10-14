@@ -7,7 +7,7 @@ import retrofit2.http.Streaming
 import retrofit2.http.Url
 
 /**
- * Retrofit surface for the Google Maps endpoints GeoSnap calls: reverse
+ * Retrofit surface for the Google Maps endpoints PataShot calls: reverse
  * geocoding (JSON) for the location card address and static-map images
  * (fetched by full url so [staticMapUrl] stays the single source of truth
  * for map thumbnail requests).
