@@ -105,6 +105,10 @@
     <string name="gallery_delete_message_photo">தேர்ந்தெடுத்த புகைப்படத்தை நீக்குவது உறுதியா?</string>
     <string name="gallery_delete_message_video">தேர்ந்தெடுத்த வீடியோவை நீக்குவது உறுதியா?</string>
     <string name="gallery_delete_error">இந்த மீடியாவை நீக்க முடியவில்லை.</string>
+    <string name="gallery_save_to_device">கேலரியில் சேமிக்கவும்</string>
+    <string name="gallery_image_saved_success">புகைப்படம் உங்கள் கேலரியில் சேமிக்கப்பட்டது</string>
+    <string name="gallery_video_saved_success">வீடியோ உங்கள் கேலரியில் சேமிக்கப்பட்டது</string>
+    <string name="gallery_save_error">கேலரியில் சேமிக்க முடியவில்லை</string>
     <string name="gallery_selected_count">தேர்ந்தெடுக்கப்பட்டவை: %1$d</string>
     <string name="gallery_select">தேர்ந்தெடுக்கவும்</string>
     <string name="gallery_section_today">இன்று</string>

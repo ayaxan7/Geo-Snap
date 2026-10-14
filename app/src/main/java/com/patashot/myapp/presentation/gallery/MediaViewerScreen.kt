@@ -386,14 +386,14 @@ private fun ViewerTopBar(
         }
         IconButton(onClick = onShare, enabled = shareEnabled) {
             Icon(
-                painter = painterResource(android.R.drawable.ic_menu_share),
+                painter = painterResource(R.drawable.ic_share),
                 contentDescription = stringResource(R.string.gallery_share),
                 tint = Color.White
             )
         }
         IconButton(onClick = onDelete, enabled = deleteEnabled) {
             Icon(
-                painter = painterResource(android.R.drawable.ic_menu_delete),
+                painter = painterResource(R.drawable.ic_delete),
                 contentDescription = stringResource(R.string.gallery_delete_confirm),
                 tint = Color.White
             )

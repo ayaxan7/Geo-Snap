@@ -115,7 +115,7 @@ object CardTemplates {
             textSecondaryColor = 0xD1FFFFFFL,
             iconAccentColor = 0xFFFF0000L,
             accentColor = ACCENT,
-            logoBackgroundColor = 0xFF0BA84AL,
+            logoBackgroundColor = 0x00000000L,
             logoVisible = true,
             mapBackgroundColor = 0xFF808080L,
             mapWidthDp = 80f,

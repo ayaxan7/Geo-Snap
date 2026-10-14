@@ -105,6 +105,10 @@
     <string name="gallery_delete_message_photo">ಆಯ್ಕೆ ಮಾಡಿದ ಫೋಟೋವನ್ನು ಅಳಿಸಲು ನಿಮಗೆ ಖಚಿತವಾಗಿದೆಯೇ?</string>
     <string name="gallery_delete_message_video">ಆಯ್ಕೆ ಮಾಡಿದ ವೀಡಿಯೊವನ್ನು ಅಳಿಸಲು ನಿಮಗೆ ಖಚಿತವಾಗಿದೆಯೇ?</string>
     <string name="gallery_delete_error">ಈ ಮೀಡಿಯಾವನ್ನು ಅಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.</string>
+    <string name="gallery_save_to_device">ಗ್ಯಾಲರಿಯಲ್ಲಿ ಉಳಿಸಿ</string>
+    <string name="gallery_image_saved_success">ಚಿತ್ರವು ನಿಮ್ಮ ಗ್ಯಾಲರಿಯಲ್ಲಿ ಉಳಿಸಲಾಗಿದೆ</string>
+    <string name="gallery_video_saved_success">ವೀಡಿಯೊ ನಿಮ್ಮ ಗ್ಯಾಲರಿಯಲ್ಲಿ ಉಳಿಸಲಾಗಿದೆ</string>
+    <string name="gallery_save_error">ಗ್ಯಾಲರಿಯಲ್ಲಿ ಉಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ</string>
     <string name="gallery_selected_count">ಆಯ್ಕೆ ಮಾಡಲಾಗಿದೆ: %1$d</string>
     <string name="gallery_select">ಆಯ್ಕೆಮಾಡಿ</string>
     <string name="gallery_section_today">ಇಂದು</string>

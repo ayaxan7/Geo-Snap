@@ -105,6 +105,10 @@
     <string name="gallery_delete_message_photo">क्या आप वाकई चयनित फ़ोटो हटाना चाहते हैं?</string>
     <string name="gallery_delete_message_video">क्या आप वाकई चयनित वीडियो हटाना चाहते हैं?</string>
     <string name="gallery_delete_error">यह मीडिया हटाया नहीं जा सका।</string>
+    <string name="gallery_save_to_device">गैलरी में सेव करें</string>
+    <string name="gallery_image_saved_success">फ़ोटो आपकी गैलरी में सेव हो गई है</string>
+    <string name="gallery_video_saved_success">वीडियो आपकी गैलरी में सेव हो गया है</string>
+    <string name="gallery_save_error">गैलरी में सेव नहीं किया जा सका</string>
     <string name="gallery_selected_count">चयनित: %1$d</string>
     <string name="gallery_select">चुनें</string>
     <string name="gallery_section_today">आज</string>

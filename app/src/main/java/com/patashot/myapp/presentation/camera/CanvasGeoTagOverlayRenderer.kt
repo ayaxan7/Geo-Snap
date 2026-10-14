@@ -3,6 +3,7 @@ package com.patashot.myapp.presentation.camera
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.PorterDuff
@@ -383,12 +384,15 @@ class CanvasGeoTagOverlayRenderer internal constructor(
 
     private fun drawLogo(canvas: Canvas, rect: RectF, metrics: GeoTagCardMetrics) {
         val corner = dp(metrics.logoCornerDp).toFloat()
-        canvas.drawRoundRect(
-            rect,
-            corner,
-            corner,
-            Paint(Paint.ANTI_ALIAS_FLAG).apply { color = metrics.logoBackgroundColor.toArgb() }
-        )
+        val bgColor = metrics.logoBackgroundColor.toArgb()
+        if (Color.alpha(bgColor) > 0) {
+            canvas.drawRoundRect(
+                rect,
+                corner,
+                corner,
+                Paint(Paint.ANTI_ALIAS_FLAG).apply { color = bgColor }
+            )
+        }
         val drawable = runCatching { context.getDrawable(R.drawable.geo_snap_icon) }.getOrNull()
             ?: return
         canvas.withClip(Path().apply { addRoundRect(rect, corner, corner, Path.Direction.CW) }) {
