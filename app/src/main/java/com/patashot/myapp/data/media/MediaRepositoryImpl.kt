@@ -40,6 +40,7 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CompletableDeferred
@@ -88,11 +89,11 @@ class MediaRepositoryImpl @Inject constructor(
                 burnOverlayIntoImage(sourceFile, overlay, filter, coordinate)
             } catch (t: Throwable) {
                 Log.w(TAG, "Image processing failed, saving original", t)
-                if (coordinate != null) writeGpsExifTo(sourceFile, coordinate)
+                writeGpsExifTo(sourceFile, coordinate, now)
                 sourceFile
             }
         } else {
-            if (coordinate != null) writeGpsExifTo(sourceFile, coordinate)
+            writeGpsExifTo(sourceFile, coordinate, now)
             sourceFile
         }
         try {
@@ -208,7 +209,7 @@ class MediaRepositoryImpl @Inject constructor(
                     // Nothing to burn: hand out a copy so the pending source file
                     // is never mutated (or deleted) while the share sheet holds it.
                     sourceFile.copyTo(output, overwrite = true)
-                    if (!isVideo && coordinate != null) writeGpsExifTo(output, coordinate)
+                    if (!isVideo) writeGpsExifTo(output, coordinate)
                     output
                 }
             }
@@ -304,6 +305,24 @@ override suspend fun deleteMedia(contentUri: String): Boolean = withContext(Disp
             if (inserted.isFailure) {
                 resolver.delete(targetUri, null, null)
                 throw inserted.exceptionOrNull() ?: IOException("Insert failed")
+            }
+
+            if (!isVideo) {
+                runCatching {
+                    resolver.openFileDescriptor(targetUri, "rw")?.use { pfd ->
+                        val exif = ExifInterface(pfd.fileDescriptor)
+                        writeExifMetadata(
+                            exif = exif,
+                            latitude = media.latitude,
+                            longitude = media.longitude,
+                            altitude = null,
+                            timestamp = now
+                        )
+                        exif.saveAttributes()
+                    }
+                }.onFailure {
+                    Log.w(TAG, "Failed to write EXIF attributes to MediaStore image", it)
+                }
             }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -457,19 +476,61 @@ private fun deleteAppCopy(contentUri: String) {
         )
     }
 
-    private fun writeGpsExifTo(file: File, coordinate: GeoCoordinate) {
-        runCatching {
-            val dateTime = SimpleDateFormat("yyyy:MM:dd HH:mm:ss", Locale.US)
-                .format(Date(coordinate.timestamp))
-            val gpsDate = dateTime.substringBefore(' ')
-            val gpsTime = dateTime.substringAfter(' ')
+    private fun writeExifMetadata(
+        exif: ExifInterface,
+        latitude: Double?,
+        longitude: Double?,
+        altitude: Double? = null,
+        timestamp: Long = System.currentTimeMillis(),
+        timeZone: TimeZone = TimeZone.getDefault()
+    ) {
+        val localFormat = SimpleDateFormat("yyyy:MM:dd HH:mm:ss", Locale.US).apply {
+            this.timeZone = timeZone
+        }
+        val localDateTime = localFormat.format(Date(timestamp))
+        exif.setAttribute(ExifInterface.TAG_DATETIME_ORIGINAL, localDateTime)
+        exif.setAttribute(ExifInterface.TAG_DATETIME, localDateTime)
+        exif.setAttribute(ExifInterface.TAG_DATETIME_DIGITIZED, localDateTime)
 
-            val exif = ExifInterface(file.absolutePath)
-            exif.setLatLong(coordinate.latitude, coordinate.longitude)
+        // Dynamic ISO-8601 offset (e.g. "+05:30", "-04:00") matching the active timezone
+        val offsetFormat = SimpleDateFormat("XXX", Locale.US).apply {
+            this.timeZone = timeZone
+        }
+        val offsetString = offsetFormat.format(Date(timestamp))
+        exif.setAttribute(ExifInterface.TAG_OFFSET_TIME_ORIGINAL, offsetString)
+        exif.setAttribute(ExifInterface.TAG_OFFSET_TIME, offsetString)
+        exif.setAttribute(ExifInterface.TAG_OFFSET_TIME_DIGITIZED, offsetString)
+
+        if (latitude != null && longitude != null) {
+            val utcFormat = SimpleDateFormat("yyyy:MM:dd HH:mm:ss", Locale.US).apply {
+                this.timeZone = TimeZone.getTimeZone("UTC")
+            }
+            val utcDateTime = utcFormat.format(Date(timestamp))
+            val gpsDate = utcDateTime.substringBefore(' ')
+            val gpsTime = utcDateTime.substringAfter(' ')
+
+            exif.setLatLong(latitude, longitude)
             exif.setAttribute(ExifInterface.TAG_GPS_DATESTAMP, gpsDate)
             exif.setAttribute(ExifInterface.TAG_GPS_TIMESTAMP, gpsTime)
             exif.setAttribute(ExifInterface.TAG_GPS_PROCESSING_METHOD, DIRECTORY_NAME)
-            coordinate.altitude?.let { exif.setAltitude(it) }
+            altitude?.let { exif.setAltitude(it) }
+        }
+    }
+
+    private fun writeGpsExifTo(
+        file: File,
+        coordinate: GeoCoordinate?,
+        timestamp: Long = coordinate?.timestamp ?: System.currentTimeMillis()
+    ) {
+        runCatching {
+            val exif = ExifInterface(file.absolutePath)
+            writeExifMetadata(
+                exif = exif,
+                latitude = coordinate?.latitude,
+                longitude = coordinate?.longitude,
+                altitude = coordinate?.altitude,
+                timestamp = timestamp
+            )
             exif.saveAttributes()
         }
     }
@@ -540,9 +601,7 @@ private fun deleteAppCopy(contentUri: String) {
             base.compress(Bitmap.CompressFormat.JPEG, 90, stream)
         }
         base.recycle()
-        if (coordinate != null) {
-            writeGpsExifTo(output, coordinate)
-        }
+        writeGpsExifTo(output, coordinate, coordinate?.timestamp ?: System.currentTimeMillis())
         return output
     }
 
