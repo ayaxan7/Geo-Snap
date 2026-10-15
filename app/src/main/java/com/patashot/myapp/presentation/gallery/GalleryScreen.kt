@@ -75,7 +75,10 @@ import coil3.compose.AsyncImage
 import com.patashot.myapp.R
 import com.patashot.myapp.domain.model.GeoMedia
 import com.patashot.myapp.domain.model.MediaType
+import com.patashot.myapp.presentation.core.hasMediaPermission
+import com.patashot.myapp.presentation.core.mediaPermissionsForSdk
 import com.patashot.myapp.presentation.sharing.shareMediaChooser
+import kotlinx.coroutines.flow.Flow
 import com.patashot.myapp.ui.theme.GeoSnapTheme
 import com.patashot.myapp.ui.theme.PrimaryGreen
 import androidx.core.net.toUri
@@ -94,6 +97,7 @@ fun GalleryScreen(
 
     GalleryContent(
         uiState = uiState,
+        events = viewModel.events,
         onBack = onBack,
         onItemClick = onItemClick,
         onRefresh = viewModel::refresh,
@@ -101,6 +105,8 @@ fun GalleryScreen(
         onStartSelectionAt = viewModel::startSelectionAt,
         onExitSelection = viewModel::exitSelection,
         onToggleSelection = viewModel::toggleSelection,
+        onToggleSelectAll = viewModel::toggleSelectAll,
+        onSaveSelection = viewModel::saveSelection,
         onDeleteSelection = viewModel::deleteSelection,
         onClearDeleteSelectionFailed = viewModel::clearDeleteSelectionFailed
     )
@@ -109,6 +115,7 @@ fun GalleryScreen(
 @Composable
 private fun GalleryContent(
     uiState: GalleryViewModel.UiState,
+    events: Flow<GalleryViewModel.GalleryEvent>? = null,
     onBack: () -> Unit,
     onItemClick: (Int) -> Unit = {},
     onRefresh: () -> Unit = {},
@@ -116,6 +123,8 @@ private fun GalleryContent(
     onStartSelectionAt: (String) -> Unit = {},
     onExitSelection: () -> Unit = {},
     onToggleSelection: (String) -> Unit = {},
+    onToggleSelectAll: () -> Unit = {},
+    onSaveSelection: () -> Unit = {},
     onDeleteSelection: () -> Unit = {},
     onClearDeleteSelectionFailed: () -> Unit = {}
 ) {
@@ -124,6 +133,14 @@ private fun GalleryContent(
     val shareLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { }
+    val mediaPermissions = remember { mediaPermissionsForSdk() }
+    val savePermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { results ->
+        if (context.hasMediaPermission() || results.values.any { it }) {
+            onSaveSelection()
+        }
+    }
     var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
 
     val selectedMedia = uiState.media.filter { it.uri.toString() in uiState.selection }
@@ -141,6 +158,9 @@ private fun GalleryContent(
     }
 
     val deleteErrorText = stringResource(R.string.gallery_delete_error)
+    val singleSavedText = stringResource(R.string.gallery_image_saved_success)
+    val saveErrorText = stringResource(R.string.gallery_save_error)
+
     LaunchedEffect(uiState.deleteSelectionFailed) {
         if (uiState.deleteSelectionFailed) {
             snackbarHostState.currentSnackbarData?.dismiss()
@@ -149,13 +169,43 @@ private fun GalleryContent(
         }
     }
 
+    LaunchedEffect(events) {
+        events?.collect { event ->
+            when (event) {
+                is GalleryViewModel.GalleryEvent.SavedToGallery -> {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    val msg = if (event.count == 1) {
+                        singleSavedText
+                    } else {
+                        context.getString(R.string.gallery_items_saved_success, event.count)
+                    }
+                    snackbarHostState.showSnackbar(msg)
+                }
+                is GalleryViewModel.GalleryEvent.SaveToGalleryFailed -> {
+                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackbarHostState.showSnackbar(saveErrorText)
+                }
+            }
+        }
+    }
+
     Scaffold(containerColor = Color.White, topBar = {
         GalleryTopBar(
             onBack = onBack,
             selectionMode = uiState.selectionMode,
             selectedCount = selectedMedia.size,
+            totalCount = uiState.media.size,
+            savingSelection = uiState.savingSelection,
             onCancelSelection = onExitSelection,
-            onEnterSelection = onEnterSelection
+            onEnterSelection = onEnterSelection,
+            onToggleSelectAll = onToggleSelectAll,
+            onSaveSelection = {
+                if (context.hasMediaPermission()) {
+                    onSaveSelection()
+                } else {
+                    savePermissionLauncher.launch(mediaPermissions.toTypedArray())
+                }
+            }
         )
     }, bottomBar = {
         // Hidden entirely until something is selected: a greyed-out pair of buttons
@@ -285,53 +335,84 @@ private fun GalleryTopBar(
     onBack: () -> Unit,
     selectionMode: Boolean,
     selectedCount: Int,
+    totalCount: Int,
+    savingSelection: Boolean,
     onCancelSelection: () -> Unit,
-    onEnterSelection: () -> Unit
+    onEnterSelection: () -> Unit,
+    onToggleSelectAll: () -> Unit,
+    onSaveSelection: () -> Unit
 ) {
     TopAppBar(
         title = {
-        Text(
-            text = if (selectionMode) {
-                stringResource(R.string.gallery_selected_count, selectedCount)
-            } else {
-                stringResource(R.string.gallery_title)
-            }, style = MaterialTheme.typography.titleLarge
-        )
-    }, navigationIcon = {
-        IconButton(onClick = if (selectionMode) onCancelSelection else onBack) {
-            Icon(
-                painter = painterResource(
-                    if (selectionMode) android.R.drawable.ic_menu_close_clear_cancel
-                    else R.drawable.ic_arrow_back
-                ), contentDescription = if (selectionMode) {
-                    stringResource(R.string.gallery_delete_cancel)
+            Text(
+                text = if (selectionMode) {
+                    stringResource(R.string.gallery_selected_count, selectedCount)
                 } else {
-                    stringResource(R.string.camera_back)
-                }
+                    stringResource(R.string.gallery_title)
+                }, style = MaterialTheme.typography.titleLarge
             )
-        }
-    }, actions = {
-        // Selection mode swaps this for the count in the title, so the button only
-        // appears alongside the plain gallery title.
-        if (!selectionMode) {
-            Row {
-                SelectActionButton(onClick = onEnterSelection)
-                Spacer(Modifier.width(8.dp))
+        }, navigationIcon = {
+            IconButton(onClick = if (selectionMode) onCancelSelection else onBack) {
+                Icon(
+                    painter = painterResource(
+                        if (selectionMode) android.R.drawable.ic_menu_close_clear_cancel
+                        else R.drawable.ic_arrow_back
+                    ), contentDescription = if (selectionMode) {
+                        stringResource(R.string.gallery_delete_cancel)
+                    } else {
+                        stringResource(R.string.camera_back)
+                    }
+                )
             }
-        }
-    }, colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+        }, actions = {
+            if (!selectionMode) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    SelectActionButton(
+                        text = stringResource(R.string.gallery_select),
+                        onClick = onEnterSelection
+                    )
+                    Spacer(Modifier.width(8.dp))
+                }
+            } else {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (selectedCount > 0) {
+                        IconButton(
+                            onClick = onSaveSelection,
+                            enabled = !savingSelection
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_download),
+                                contentDescription = stringResource(R.string.gallery_save_to_device),
+                                tint = Color.Black
+                            )
+                        }
+                    }
+                    val isAllSelected = selectedCount == totalCount && totalCount > 0
+                    SelectActionButton(
+                        text = stringResource(
+                            if (isAllSelected) R.string.gallery_deselect_all else R.string.gallery_select_all
+                        ),
+                        onClick = onToggleSelectAll
+                    )
+                    Spacer(Modifier.width(8.dp))
+                }
+            }
+        }, colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
     )
 }
 
 /**
- * Enter-selection affordance for the gallery top bar.
+ * Enter-selection / select-all affordance for the gallery top bar.
  *
  * Matches the Save button on the Templates screen: outlined, 1dp primary-green
  * border, 12dp corners, white ground and bold label, so the two top-bar actions
  * read as the same control across the app.
  */
 @Composable
-private fun SelectActionButton(onClick: () -> Unit) {
+private fun SelectActionButton(
+    text: String = stringResource(R.string.gallery_select),
+    onClick: () -> Unit
+) {
     OutlinedButton(
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(
@@ -347,7 +428,7 @@ private fun SelectActionButton(onClick: () -> Unit) {
         modifier = Modifier.height(36.dp)
     ) {
         Text(
-            text = stringResource(R.string.gallery_select),
+            text = text,
             fontWeight = FontWeight.Bold,
             lineHeight = 1.em,
             maxLines = 1

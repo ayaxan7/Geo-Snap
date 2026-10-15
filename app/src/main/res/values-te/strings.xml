@@ -111,6 +111,9 @@
     <string name="gallery_save_error">గ్యాలరీలో సేవ్ చేయలేకపోయాము</string>
     <string name="gallery_selected_count">ఎంచుకున్నవి: %1$d</string>
     <string name="gallery_select">ఎంచుకోండి</string>
+    <string name="gallery_select_all">అన్నీ ఎంచుకోండి</string>
+    <string name="gallery_deselect_all">అన్నీ తీసివేయండి</string>
+    <string name="gallery_items_saved_success">%1$d అంశాలు మీ గ్యాలరీలో సేవ్ చేయబడ్డాయి</string>
     <string name="gallery_section_today">ఈ రోజు</string>
     <string name="gallery_section_this_week">ఈ వారం</string>
     <string name="gallery_section_last_week">గత వారం</string>

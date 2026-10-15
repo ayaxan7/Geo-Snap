@@ -119,6 +119,9 @@
     <string name="gallery_save_error">Could not save to gallery</string>
     <string name="gallery_selected_count">%1$d selected</string>
     <string name="gallery_select">Select</string>
+    <string name="gallery_select_all">Select All</string>
+    <string name="gallery_deselect_all">Deselect All</string>
+    <string name="gallery_items_saved_success">%1$d items saved to your gallery</string>
 
     <!-- Gallery date sections -->
     <string name="gallery_section_today">Today</string>

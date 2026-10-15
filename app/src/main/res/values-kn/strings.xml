@@ -111,6 +111,9 @@
     <string name="gallery_save_error">ಗ್ಯಾಲರಿಯಲ್ಲಿ ಉಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ</string>
     <string name="gallery_selected_count">ಆಯ್ಕೆ ಮಾಡಲಾಗಿದೆ: %1$d</string>
     <string name="gallery_select">ಆಯ್ಕೆಮಾಡಿ</string>
+    <string name="gallery_select_all">ಎಲ್ಲವನ್ನೂ ಆಯ್ಕೆಮಾಡಿ</string>
+    <string name="gallery_deselect_all">ಎಲ್ಲವನ್ನೂ ಆಯ್ಕೆ ರದ್ದುಮಾಡಿ</string>
+    <string name="gallery_items_saved_success">%1$d ಐಟಂಗಳನ್ನು ನಿಮ್ಮ ಗ್ಯಾಲರಿಯಲ್ಲಿ ಉಳಿಸಲಾಗಿದೆ</string>
     <string name="gallery_section_today">ಇಂದು</string>
     <string name="gallery_section_this_week">ಈ ವಾರ</string>
     <string name="gallery_section_last_week">ಕಳೆದ ವಾರ</string>

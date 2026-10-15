@@ -289,4 +289,77 @@ class GalleryViewModelTest {
         assertTrue(repo.deletedUris.isEmpty())
         assertFalse(vm.uiState.first().deleteSelectionFailed)
     }
+
+    @Test
+    fun `toggleSelectAll selects all items and deselects if already all selected`() = runTest(mainDispatcherRule.scheduler) {
+        val repo = FakeMediaRepository().apply {
+            media = mutableListOf(
+                media("content://myapp.test/a", timestamp = 100),
+                media("content://myapp.test/b", timestamp = 200)
+            )
+        }
+        val vm = GalleryViewModel(mediaRepository = repo)
+        advanceUntilIdle()
+
+        vm.enterSelection()
+        vm.toggleSelectAll()
+
+        assertEquals(
+            setOf("content://myapp.test/a", "content://myapp.test/b"),
+            vm.uiState.first().selection
+        )
+
+        vm.toggleSelectAll()
+        assertTrue(vm.uiState.first().selection.isEmpty())
+    }
+
+    @Test
+    fun `saveSelection exports selected items to device gallery and exits selection mode`() = runTest(mainDispatcherRule.scheduler) {
+        val repo = FakeMediaRepository().apply {
+            media = mutableListOf(
+                media("content://myapp.test/a", timestamp = 100),
+                media("content://myapp.test/b", timestamp = 200),
+                media("content://myapp.test/c", timestamp = 300)
+            )
+        }
+        val vm = GalleryViewModel(mediaRepository = repo)
+        advanceUntilIdle()
+
+        vm.enterSelection()
+        vm.toggleSelection("content://myapp.test/a")
+        vm.toggleSelection("content://myapp.test/b")
+        vm.saveSelection()
+        advanceUntilIdle()
+
+        assertEquals(2, repo.exportedToGallery.size)
+        assertEquals(
+            setOf("content://myapp.test/a", "content://myapp.test/b"),
+            repo.exportedToGallery.map { it.uri.toString() }.toSet()
+        )
+        assertFalse(vm.uiState.first().selectionMode)
+        assertTrue(vm.uiState.first().selection.isEmpty())
+
+        val event = vm.events.first()
+        assertTrue(event is GalleryViewModel.GalleryEvent.SavedToGallery)
+        assertEquals(2, (event as GalleryViewModel.GalleryEvent.SavedToGallery).count)
+    }
+
+    @Test
+    fun `saveSelection surfaces SaveToGalleryFailed when export fails`() = runTest(mainDispatcherRule.scheduler) {
+        val repo = FakeMediaRepository().apply {
+            media = mutableListOf(media("content://myapp.test/a", timestamp = 100))
+            failSaveToDeviceGallery = true
+        }
+        val vm = GalleryViewModel(mediaRepository = repo)
+        advanceUntilIdle()
+
+        vm.enterSelection()
+        vm.toggleSelection("content://myapp.test/a")
+        vm.saveSelection()
+        advanceUntilIdle()
+
+        assertTrue(repo.exportedToGallery.isEmpty())
+        val event = vm.events.first()
+        assertTrue(event is GalleryViewModel.GalleryEvent.SaveToGalleryFailed)
+    }
 }

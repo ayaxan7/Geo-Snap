@@ -14,6 +14,9 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -79,11 +82,20 @@ class GalleryViewModel @Inject constructor(
         val selectionMode: Boolean = false,
         val selection: Set<String> = emptySet(),
         val deletingSelection: Boolean = false,
-        val deleteSelectionFailed: Boolean = false
+        val deleteSelectionFailed: Boolean = false,
+        val savingSelection: Boolean = false
     )
+
+    sealed interface GalleryEvent {
+        data class SavedToGallery(val count: Int) : GalleryEvent
+        data object SaveToGalleryFailed : GalleryEvent
+    }
 
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+
+    private val _events = Channel<GalleryEvent>(Channel.BUFFERED)
+    val events: Flow<GalleryEvent> = _events.receiveAsFlow()
 
     init {
         refresh()
@@ -166,5 +178,36 @@ class GalleryViewModel @Inject constructor(
 
     fun clearDeleteSelectionFailed() {
         _uiState.update { it.copy(deleteSelectionFailed = false) }
+    }
+
+    fun toggleSelectAll() {
+        if (!_uiState.value.selectionMode) return
+        val allUris = _uiState.value.media.map { it.uri.toString() }.toSet()
+        _uiState.update {
+            val isAllSelected = it.selection.size == allUris.size && allUris.isNotEmpty()
+            it.copy(selection = if (isAllSelected) emptySet() else allUris)
+        }
+    }
+
+    /**
+     * Exports all selected media items to the device gallery (MediaStore).
+     */
+    fun saveSelection() {
+        val selected = _uiState.value.media.filter { it.uri.toString() in _uiState.value.selection }
+        if (selected.isEmpty() || _uiState.value.savingSelection) return
+        _uiState.update { it.copy(savingSelection = true) }
+        viewModelScope.launch {
+            val results = selected.map { media ->
+                runCatching { mediaRepository.saveToDeviceGallery(media) }.getOrDefault(false)
+            }
+            val successCount = results.count { it }
+            _uiState.update { it.copy(savingSelection = false) }
+            if (successCount > 0) {
+                _events.trySend(GalleryEvent.SavedToGallery(successCount))
+                exitSelection()
+            } else {
+                _events.trySend(GalleryEvent.SaveToGalleryFailed)
+            }
+        }
     }
 }
