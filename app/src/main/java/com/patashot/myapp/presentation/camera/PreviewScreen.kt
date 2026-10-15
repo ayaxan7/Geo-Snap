@@ -422,21 +422,24 @@ private fun PreviewTopBar(
                     Icon(
                         painter = painterResource(R.drawable.ic_rotate_left),
                         contentDescription = stringResource(R.string.preview_rotate_left),
-                        tint = Color.White
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp)
                     )
                 }
                 IconButton(onClick = onCrop, enabled = !isProcessing) {
                     Icon(
                         painter = painterResource(R.drawable.ic_crop),
                         contentDescription = stringResource(R.string.preview_crop),
-                        tint = Color.White
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp)
                     )
                 }
                 IconButton(onClick = onRotateRight, enabled = !isProcessing) {
                     Icon(
                         painter = painterResource(R.drawable.ic_rotate_right),
                         contentDescription = stringResource(R.string.preview_rotate_right),
-                        tint = Color.White
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp)
                     )
                 }
                 IconButton(onClick = onShare, enabled = !isProcessing) {
