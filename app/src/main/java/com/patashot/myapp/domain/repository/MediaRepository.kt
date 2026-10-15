@@ -3,6 +3,7 @@ package com.patashot.myapp.domain.repository
 import android.graphics.Bitmap
 import com.patashot.myapp.domain.model.GeoCoordinate
 import com.patashot.myapp.domain.model.GeoMedia
+import com.patashot.myapp.domain.model.NormalizedCropRect
 import java.io.File
 
 /**
@@ -28,7 +29,9 @@ interface MediaRepository {
         coordinate: GeoCoordinate?,
         overlay: Bitmap? = null,
         filter: FloatArray? = null,
-        saveToMediaStore: Boolean = true
+        saveToMediaStore: Boolean = true,
+        rotationDegrees: Int = 0,
+        cropRect: NormalizedCropRect? = null
     ): String
 
     /**
@@ -46,7 +49,9 @@ interface MediaRepository {
         coordinate: GeoCoordinate?,
         overlay: Bitmap? = null,
         filter: FloatArray? = null,
-        saveToMediaStore: Boolean = true
+        saveToMediaStore: Boolean = true,
+        rotationDegrees: Int = 0,
+        cropRect: NormalizedCropRect? = null
     ): String
 
     /**
@@ -64,7 +69,9 @@ interface MediaRepository {
         coordinate: GeoCoordinate?,
         overlay: Bitmap? = null,
         filter: FloatArray? = null,
-        isVideo: Boolean
+        isVideo: Boolean,
+        rotationDegrees: Int = 0,
+        cropRect: NormalizedCropRect? = null
     ): String
 
     /** Queries the app gallery (Room-backed), newest first. */

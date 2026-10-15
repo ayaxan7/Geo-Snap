@@ -21,8 +21,11 @@ import androidx.exifinterface.media.ExifInterface
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.effect.BitmapOverlay
+import androidx.media3.effect.Crop
 import androidx.media3.effect.OverlayEffect
+import androidx.media3.effect.ScaleAndRotateTransformation
 import androidx.media3.effect.StaticOverlaySettings
+import com.patashot.myapp.domain.model.NormalizedCropRect
 import androidx.media3.transformer.Composition
 import androidx.media3.transformer.EditedMediaItem
 import androidx.media3.transformer.Effects
@@ -79,14 +82,17 @@ class MediaRepositoryImpl @Inject constructor(
         coordinate: GeoCoordinate?,
         overlay: Bitmap?,
         filter: FloatArray?,
-        saveToMediaStore: Boolean
+        saveToMediaStore: Boolean,
+        rotationDegrees: Int,
+        cropRect: NormalizedCropRect?
     ): String = withContext(Dispatchers.IO) {
         val now = System.currentTimeMillis()
-        val toPersist = if (overlay != null || filter != null) {
+        val hasModifications = overlay != null || filter != null || rotationDegrees % 360 != 0 || (cropRect != null && !cropRect.isDefault)
+        val toPersist = if (hasModifications) {
             try {
                 // Burn from the pristine CameraX JPEG (no prior EXIF rewrite so the
                 // decoder sees the untouched file); GPS is written onto the output.
-                burnOverlayIntoImage(sourceFile, overlay, filter, coordinate)
+                burnOverlayIntoImage(sourceFile, overlay, filter, coordinate, rotationDegrees = rotationDegrees, cropRect = cropRect)
             } catch (t: Throwable) {
                 Log.w(TAG, "Image processing failed, saving original", t)
                 writeGpsExifTo(sourceFile, coordinate, now)
@@ -137,14 +143,17 @@ class MediaRepositoryImpl @Inject constructor(
         coordinate: GeoCoordinate?,
         overlay: Bitmap?,
         filter: FloatArray?,
-        saveToMediaStore: Boolean
+        saveToMediaStore: Boolean,
+        rotationDegrees: Int,
+        cropRect: NormalizedCropRect?
     ): String = withContext(Dispatchers.IO) {
         // MP4 EXIF container support is inconsistent across devices; GPS is kept
         // in the GeoMedia model for videos so it can be written once an MP4 GPS
         // writer is introduced.
-        val toPersist = if (overlay != null || filter != null) {
+        val hasModifications = overlay != null || filter != null || rotationDegrees % 360 != 0 || (cropRect != null && !cropRect.isDefault)
+        val toPersist = if (hasModifications) {
             try {
-                transcodeWithOverlay(sourceFile, overlay, filter)
+                transcodeWithOverlay(sourceFile, overlay, filter, rotationDegrees = rotationDegrees, cropRect = cropRect)
             } catch (t: Throwable) {
                 Log.w(TAG, "Video transcode failed, saving original", t)
                 sourceFile
@@ -194,17 +203,20 @@ class MediaRepositoryImpl @Inject constructor(
         coordinate: GeoCoordinate?,
         overlay: Bitmap?,
         filter: FloatArray?,
-        isVideo: Boolean
+        isVideo: Boolean,
+        rotationDegrees: Int,
+        cropRect: NormalizedCropRect?
     ): String = withContext(Dispatchers.IO) {
         pruneShareCopies()
         val ext = if (isVideo) "mp4" else "jpg"
         val output = File(shareDir(), "share_${System.currentTimeMillis()}.$ext")
+        val hasModifications = overlay != null || filter != null || rotationDegrees % 360 != 0 || (cropRect != null && !cropRect.isDefault)
         val burned = try {
             when {
-                isVideo && (overlay != null || filter != null) ->
-                    transcodeWithOverlay(sourceFile, overlay, filter, output)
-                !isVideo && (overlay != null || filter != null) ->
-                    burnOverlayIntoImage(sourceFile, overlay, filter, coordinate, output)
+                isVideo && hasModifications ->
+                    transcodeWithOverlay(sourceFile, overlay, filter, output, rotationDegrees, cropRect)
+                !isVideo && hasModifications ->
+                    burnOverlayIntoImage(sourceFile, overlay, filter, coordinate, output, rotationDegrees, cropRect)
                 else -> {
                     // Nothing to burn: hand out a copy so the pending source file
                     // is never mutated (or deleted) while the share sheet holds it.
@@ -547,7 +559,9 @@ private fun deleteAppCopy(contentUri: String) {
         overlay: Bitmap?,
         filter: FloatArray?,
         coordinate: GeoCoordinate?,
-        output: File = File(context.cacheDir, "burned_${System.currentTimeMillis()}.jpg")
+        output: File = File(context.cacheDir, "burned_${System.currentTimeMillis()}.jpg"),
+        rotationDegrees: Int = 0,
+        cropRect: NormalizedCropRect? = null
     ): File {
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeFile(sourceFile.absolutePath, bounds)
@@ -570,6 +584,28 @@ private fun deleteAppCopy(contentUri: String) {
         if (upright !== base) {
             base.recycle()
             base = upright
+        }
+
+        val normRot = (rotationDegrees % 360 + 360) % 360
+        if (normRot != 0) {
+            val rotMatrix = Matrix().apply { postRotate(normRot.toFloat()) }
+            val rotated = Bitmap.createBitmap(base, 0, 0, base.width, base.height, rotMatrix, true)
+            if (rotated !== base) {
+                base.recycle()
+                base = rotated
+            }
+        }
+
+        if (cropRect != null && !cropRect.isDefault) {
+            val cropL = (cropRect.left.coerceIn(0f, 1f) * base.width).toInt().coerceIn(0, base.width - 1)
+            val cropT = (cropRect.top.coerceIn(0f, 1f) * base.height).toInt().coerceIn(0, base.height - 1)
+            val cropR = (cropRect.right.coerceIn(0f, 1f) * base.width).toInt().coerceIn(cropL + 1, base.width)
+            val cropB = (cropRect.bottom.coerceIn(0f, 1f) * base.height).toInt().coerceIn(cropT + 1, base.height)
+            val cropped = Bitmap.createBitmap(base, cropL, cropT, cropR - cropL, cropB - cropT)
+            if (cropped !== base) {
+                base.recycle()
+                base = cropped
+            }
         }
 
         if (filter != null) {
@@ -647,7 +683,9 @@ private fun deleteAppCopy(contentUri: String) {
         sourceFile: File,
         overlay: Bitmap?,
         filter: FloatArray?,
-        output: File = File(context.cacheDir, "burned_${System.currentTimeMillis()}.mp4")
+        output: File = File(context.cacheDir, "burned_${System.currentTimeMillis()}.mp4"),
+        rotationDegrees: Int = 0,
+        cropRect: NormalizedCropRect? = null
     ): File =
         withContext(Dispatchers.Main.immediate) {
             val finished = CompletableDeferred<Unit>()
@@ -667,13 +705,25 @@ private fun deleteAppCopy(contentUri: String) {
                 })
                 .build()
 
+            val normRot = (rotationDegrees % 360 + 360) % 360
+            val (rawDisplayWidth, rawDisplayHeight) = videoFrameSize(sourceFile)
+            val (rotWidth, rotHeight) = if (normRot == 90 || normRot == 270) {
+                rawDisplayHeight to rawDisplayWidth
+            } else {
+                rawDisplayWidth to rawDisplayHeight
+            }
+            val finalFrameWidth = if (cropRect != null && !cropRect.isDefault) {
+                ((cropRect.right - cropRect.left).coerceIn(0.05f, 1f) * rotWidth).toInt().coerceAtLeast(1)
+            } else {
+                rotWidth
+            }
+
             // Media3 composits BitmapOverlays in the output (post-rotation/display)
             // frame space, so size the card against the rotation-aware display
             // width so it occupies the same ~90% as the on-screen preview.
             val overlayEffect = overlay?.let { cardOverlay ->
-                val (frameWidth, _) = videoFrameSize(sourceFile)
                 val cardWidthPx =
-                    (frameWidth * CARD_WIDTH_FRACTION).toInt().coerceAtLeast(1)
+                    (finalFrameWidth * CARD_WIDTH_FRACTION).toInt().coerceAtLeast(1)
                 val cardHeightPx =
                     (cardWidthPx.toFloat() * cardOverlay.height / cardOverlay.width)
                         .toInt()
@@ -696,6 +746,16 @@ private fun deleteAppCopy(contentUri: String) {
                 )
             }
             val videoEffects = buildList {
+                if (normRot != 0) {
+                    add(ScaleAndRotateTransformation.Builder().setRotationDegrees(normRot.toFloat()).build())
+                }
+                if (cropRect != null && !cropRect.isDefault) {
+                    val l = (-1f + 2f * cropRect.left.coerceIn(0f, 0.99f)).coerceIn(-1f, 1f)
+                    val r = (-1f + 2f * cropRect.right.coerceIn(0.01f, 1f)).coerceIn(l + 0.01f, 1f)
+                    val b = (1f - 2f * cropRect.bottom.coerceIn(0.01f, 1f)).coerceIn(-1f, 1f)
+                    val t = (1f - 2f * cropRect.top.coerceIn(0f, 0.99f)).coerceIn(b + 0.01f, 1f)
+                    add(Crop(l, r, b, t))
+                }
                 if (filter != null) add(FilterRgbMatrix(filter))
                 if (overlayEffect != null) add(overlayEffect)
             }

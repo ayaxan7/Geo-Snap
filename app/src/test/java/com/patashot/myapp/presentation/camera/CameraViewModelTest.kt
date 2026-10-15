@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.patashot.myapp.data.maps.MapsApi
 import com.patashot.myapp.domain.usecase.GetSelectedCardTemplateUseCase
 import com.patashot.myapp.domain.model.GeoCoordinate
+import com.patashot.myapp.domain.model.NormalizedCropRect
 import com.patashot.myapp.domain.usecase.GetCurrentLocationUseCase
 import com.patashot.myapp.domain.usecase.IsLocationEnabledUseCase
 import com.patashot.myapp.presentation.navigation.Destination
@@ -979,6 +980,86 @@ class CameraViewModelTest {
             )
 
             assertNull(vm.uiState.value.pendingPreview)
+            vm.detachEngine()
+        }
+
+    @Test
+    fun `rotatePreviewRight and rotatePreviewLeft update rotation degrees`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val media = FakeMediaRepository()
+            val vm = createViewModel(mode = CameraMode.PHOTO.routeName, media = media)
+
+            vm.capturePhoto()
+            advanceUntilIdle()
+
+            assertNotNull(vm.uiState.value.pendingPreview)
+            assertEquals(0, vm.uiState.value.pendingPreview!!.rotationDegrees)
+
+            vm.rotatePreviewRight()
+            assertEquals(90, vm.uiState.value.pendingPreview!!.rotationDegrees)
+
+            vm.rotatePreviewRight()
+            assertEquals(180, vm.uiState.value.pendingPreview!!.rotationDegrees)
+
+            vm.rotatePreviewLeft()
+            assertEquals(90, vm.uiState.value.pendingPreview!!.rotationDegrees)
+
+            vm.rotatePreviewLeft()
+            assertEquals(0, vm.uiState.value.pendingPreview!!.rotationDegrees)
+
+            vm.rotatePreviewLeft()
+            assertEquals(-90, vm.uiState.value.pendingPreview!!.rotationDegrees)
+
+            vm.detachEngine()
+        }
+
+    @Test
+    fun `setPreviewCropRect and savePreviewToGallery pass rotation and crop to repository`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val media = FakeMediaRepository()
+            val vm = createViewModel(mode = CameraMode.PHOTO.routeName, media = media)
+
+            vm.capturePhoto()
+            advanceUntilIdle()
+
+            vm.rotatePreviewRight()
+            val crop = NormalizedCropRect(0.1f, 0.2f, 0.8f, 0.9f)
+            vm.setPreviewCropRect(crop)
+
+            assertEquals(90, vm.uiState.value.pendingPreview!!.rotationDegrees)
+            assertEquals(crop, vm.uiState.value.pendingPreview!!.cropRect)
+
+            vm.savePreviewToGallery()
+            advanceUntilIdle()
+
+            assertEquals(1, media.savedImages.size)
+            assertEquals(90, media.savedImages.first().rotationDegrees)
+            assertEquals(crop, media.savedImages.first().cropRect)
+
+            vm.detachEngine()
+        }
+
+    @Test
+    fun `sharePreview passes rotation and crop to repository`() =
+        runTest(mainDispatcherRule.scheduler) {
+            val media = FakeMediaRepository()
+            val vm = createViewModel(mode = CameraMode.PHOTO.routeName, media = media)
+
+            vm.capturePhoto()
+            advanceUntilIdle()
+
+            vm.rotatePreviewRight()
+            vm.rotatePreviewRight()
+            val crop = NormalizedCropRect(0.05f, 0.05f, 0.95f, 0.95f)
+            vm.setPreviewCropRect(crop)
+
+            vm.sharePreview()
+            advanceUntilIdle()
+
+            assertEquals(1, media.sharedCopies.size)
+            assertEquals(180, media.sharedCopies.first().rotationDegrees)
+            assertEquals(crop, media.sharedCopies.first().cropRect)
+
             vm.detachEngine()
         }
 }

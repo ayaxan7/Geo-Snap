@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.emptyPreferences
 import com.patashot.myapp.domain.model.GeoCoordinate
 import com.patashot.myapp.domain.model.GeoMedia
+import com.patashot.myapp.domain.model.NormalizedCropRect
 import com.patashot.myapp.domain.repository.LocationRepository
 import com.patashot.myapp.domain.repository.MediaRepository
 import com.patashot.myapp.domain.repository.PreferencesRepository
@@ -120,7 +121,9 @@ data class SavedMedia(
     val coordinate: GeoCoordinate?,
     val overlay: Bitmap? = null,
     val filter: FloatArray? = null,
-    val saveToMediaStore: Boolean = true
+    val saveToMediaStore: Boolean = true,
+    val rotationDegrees: Int = 0,
+    val cropRect: NormalizedCropRect? = null
 )
 
 /** Scripted MediaRepository that records calls instead of touching MediaStore. */
@@ -142,10 +145,20 @@ class FakeMediaRepository : MediaRepository {
         coordinate: GeoCoordinate?,
         overlay: Bitmap?,
         filter: FloatArray?,
-        saveToMediaStore: Boolean
+        saveToMediaStore: Boolean,
+        rotationDegrees: Int,
+        cropRect: NormalizedCropRect?
     ): String {
         failSaveOnce()
-        savedImages += SavedMedia(file = sourceFile, coordinate = coordinate, overlay = overlay, filter = filter, saveToMediaStore = saveToMediaStore)
+        savedImages += SavedMedia(
+            file = sourceFile,
+            coordinate = coordinate,
+            overlay = overlay,
+            filter = filter,
+            saveToMediaStore = saveToMediaStore,
+            rotationDegrees = rotationDegrees,
+            cropRect = cropRect
+        )
         return "content://myapp.test/images/${nextId++}"
     }
 
@@ -154,10 +167,20 @@ class FakeMediaRepository : MediaRepository {
         coordinate: GeoCoordinate?,
         overlay: Bitmap?,
         filter: FloatArray?,
-        saveToMediaStore: Boolean
+        saveToMediaStore: Boolean,
+        rotationDegrees: Int,
+        cropRect: NormalizedCropRect?
     ): String {
         failSaveOnce()
-        savedVideos += SavedMedia(file = sourceFile, coordinate = coordinate, overlay = overlay, filter = filter, saveToMediaStore = saveToMediaStore)
+        savedVideos += SavedMedia(
+            file = sourceFile,
+            coordinate = coordinate,
+            overlay = overlay,
+            filter = filter,
+            saveToMediaStore = saveToMediaStore,
+            rotationDegrees = rotationDegrees,
+            cropRect = cropRect
+        )
         return "content://myapp.test/videos/${nextId++}"
     }
 
@@ -166,7 +189,9 @@ class FakeMediaRepository : MediaRepository {
         coordinate: GeoCoordinate?,
         overlay: Bitmap?,
         filter: FloatArray?,
-        isVideo: Boolean
+        isVideo: Boolean,
+        rotationDegrees: Int,
+        cropRect: NormalizedCropRect?
     ): String {
         if (failShare) throw IOException("simulated share failure")
         sharedCopies += SavedMedia(
@@ -174,7 +199,9 @@ class FakeMediaRepository : MediaRepository {
             coordinate = coordinate,
             overlay = overlay,
             filter = filter,
-            saveToMediaStore = false
+            saveToMediaStore = false,
+            rotationDegrees = rotationDegrees,
+            cropRect = cropRect
         )
         return "content://myapp.test/share/${nextId++}?video=$isVideo"
     }

@@ -191,4 +191,11 @@
     <string name="template_minimal">ಮಿನಿಮಲ್</string>
     <string name="template_qrcode">ಕ್ಯೂಆರ್ ಕೋಡ್</string>
     <string name="templates_save">ಉಳಿಸಿ</string>
+    <!-- Preview crop & rotate -->
+    <string name="preview_crop">ಕ್ರಾಪ್</string>
+    <string name="preview_rotate_left">ಎಡಕ್ಕೆ ತಿರುಗಿಸಿ</string>
+    <string name="preview_rotate_right">ಬಲಕ್ಕೆ ತಿರುಗಿಸಿ</string>
+    <string name="preview_crop_reset">ಮರುಹೊಂದಿಸಿ</string>
+    <string name="preview_crop_done">ಮುಗಿದಿದೆ</string>
+    <string name="preview_crop_cancel">ರದ್ದುಮಾಡಿ</string>
 </resources>

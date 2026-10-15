@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import com.patashot.myapp.BuildConfig
 import com.patashot.myapp.data.maps.MapsApi
 import com.patashot.myapp.domain.model.GeoCoordinate
+import com.patashot.myapp.domain.model.NormalizedCropRect
 import com.patashot.myapp.domain.repository.MediaRepository
 import com.patashot.myapp.domain.repository.PreferencesRepository
 import kotlinx.coroutines.flow.first
@@ -297,6 +298,29 @@ class CameraViewModel @Inject constructor(
         }
     }
     
+    fun rotatePreviewLeft() {
+        _uiState.update { state ->
+            val preview = state.pendingPreview ?: return@update state
+            val newRotation = (preview.rotationDegrees - 90) % 360
+            state.copy(pendingPreview = preview.copy(rotationDegrees = newRotation))
+        }
+    }
+
+    fun rotatePreviewRight() {
+        _uiState.update { state ->
+            val preview = state.pendingPreview ?: return@update state
+            val newRotation = (preview.rotationDegrees + 90) % 360
+            state.copy(pendingPreview = preview.copy(rotationDegrees = newRotation))
+        }
+    }
+
+    fun setPreviewCropRect(cropRect: NormalizedCropRect?) {
+        _uiState.update { state ->
+            val preview = state.pendingPreview ?: return@update state
+            state.copy(pendingPreview = preview.copy(cropRect = cropRect))
+        }
+    }
+
     fun discardPreview() {
         if (_uiState.value.isProcessing) return
         _uiState.value.pendingPreview?.file?.delete()
@@ -367,7 +391,9 @@ class CameraViewModel @Inject constructor(
                         preview.coordinate,
                         overlay,
                         filterRecipe(uiState.value),
-                        shouldSaveToDevice
+                        shouldSaveToDevice,
+                        preview.rotationDegrees,
+                        preview.cropRect
                     )
                 } else {
                     mediaRepository.saveCapturedImage(
@@ -375,7 +401,9 @@ class CameraViewModel @Inject constructor(
                         preview.coordinate,
                         overlay,
                         filterRecipe(uiState.value),
-                        shouldSaveToDevice
+                        shouldSaveToDevice,
+                        preview.rotationDegrees,
+                        preview.cropRect
                     )
                 }
                 preview.file.delete()
@@ -415,7 +443,9 @@ class CameraViewModel @Inject constructor(
                     coordinate = preview.coordinate,
                     overlay = overlay,
                     filter = filterRecipe(uiState.value),
-                    isVideo = preview.isVideo
+                    isVideo = preview.isVideo,
+                    rotationDegrees = preview.rotationDegrees,
+                    cropRect = preview.cropRect
                 )
                 _uiState.update { it.copy(isProcessing = false) }
                 _events.tryEmit(CameraEvent.SharePrepared(uri, isVideo = preview.isVideo))

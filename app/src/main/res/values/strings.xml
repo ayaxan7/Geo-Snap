@@ -214,4 +214,11 @@
     <string name="template_minimal">Minimal</string>
     <string name="template_qrcode">QR Code</string>
     <string name="templates_save">Save</string>
+    <!-- Preview crop & rotate -->
+    <string name="preview_crop">Crop</string>
+    <string name="preview_rotate_left">Rotate left</string>
+    <string name="preview_rotate_right">Rotate right</string>
+    <string name="preview_crop_reset">Reset</string>
+    <string name="preview_crop_done">Done</string>
+    <string name="preview_crop_cancel">Cancel</string>
 </resources>

@@ -190,4 +190,11 @@
     <string name="template_minimal">मिनिमल</string>
     <string name="template_qrcode">क्यूआर कोड</string>
     <string name="templates_save">सहेजें</string>
+    <!-- Preview crop & rotate -->
+    <string name="preview_crop">क्रॉप</string>
+    <string name="preview_rotate_left">बाएं घुमाएं</string>
+    <string name="preview_rotate_right">दाएं घुमाएं</string>
+    <string name="preview_crop_reset">रीसेट</string>
+    <string name="preview_crop_done">संपन्न</string>
+    <string name="preview_crop_cancel">रद्द करें</string>
 </resources>

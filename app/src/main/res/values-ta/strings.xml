@@ -191,4 +191,11 @@
     <string name="template_minimal">மினிமல்</string>
     <string name="template_qrcode">க்யூஆர் குறியீடு</string>
     <string name="templates_save">சேமி</string>
+    <!-- Preview crop & rotate -->
+    <string name="preview_crop">செதுக்கு</string>
+    <string name="preview_rotate_left">இடதுபுறம் சுழற்று</string>
+    <string name="preview_rotate_right">வலதுபுறம் சுழற்று</string>
+    <string name="preview_crop_reset">மீட்டமை</string>
+    <string name="preview_crop_done">முடிந்தது</string>
+    <string name="preview_crop_cancel">ரத்து செய்</string>
 </resources>

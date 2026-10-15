@@ -1,6 +1,7 @@
 package com.patashot.myapp.presentation.camera
 
 import com.patashot.myapp.domain.model.GeoCoordinate
+import com.patashot.myapp.domain.model.NormalizedCropRect
 import java.io.File
 import java.io.Serializable
 
@@ -19,5 +20,7 @@ data class PreviewData(
     val file: File,
     val coordinate: GeoCoordinate?,
     val isVideo: Boolean,
-    val cardContent: GeoTagCardContent
+    val cardContent: GeoTagCardContent,
+    val rotationDegrees: Int = 0,
+    val cropRect: NormalizedCropRect? = null
 ) : Serializable
