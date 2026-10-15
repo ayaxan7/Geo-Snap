@@ -747,7 +747,10 @@ private fun deleteAppCopy(contentUri: String) {
             }
             val videoEffects = buildList {
                 if (normRot != 0) {
-                    add(ScaleAndRotateTransformation.Builder().setRotationDegrees(normRot.toFloat()).build())
+                    // Media3 ScaleAndRotateTransformation takes counterclockwise degrees.
+                    // normRot is clockwise degrees, so convert to counterclockwise.
+                    val ccwDegrees = (360 - normRot) % 360
+                    add(ScaleAndRotateTransformation.Builder().setRotationDegrees(ccwDegrees.toFloat()).build())
                 }
                 if (cropRect != null && !cropRect.isDefault) {
                     val l = (-1f + 2f * cropRect.left.coerceIn(0f, 0.99f)).coerceIn(-1f, 1f)

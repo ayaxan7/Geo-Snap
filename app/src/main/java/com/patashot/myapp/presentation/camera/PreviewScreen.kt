@@ -1,6 +1,7 @@
 package com.patashot.myapp.presentation.camera
 
 import android.net.Uri
+import android.view.LayoutInflater
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -199,6 +200,9 @@ fun PreviewScreen(
                                     scaleX = fitScale
                                     scaleY = fitScale
                                 }
+                            } else {
+                                scaleX = 1f
+                                scaleY = 1f
                             }
                         }
                 ) {
@@ -741,9 +745,11 @@ private fun PreviewVideo(
 
     AndroidView(
         factory = { ctx ->
-            PlayerView(ctx).apply {
+            (LayoutInflater.from(ctx).inflate(
+                R.layout.preview_video_player,
+                null
+            ) as PlayerView).apply {
                 player = exoPlayer
-                useController = false
             }
         },
         modifier = Modifier.fillMaxSize()
