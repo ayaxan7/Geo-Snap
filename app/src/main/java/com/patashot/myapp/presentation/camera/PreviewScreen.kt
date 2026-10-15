@@ -47,6 +47,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -220,8 +221,10 @@ fun PreviewScreen(
                 }
             }
 
-            // Location card overlay stays here untouched at bottom center!
-            mediaOverlay()
+            // Location card overlay stays here untouched at bottom center (hidden during crop mode)
+            if (!isCropping) {
+                mediaOverlay()
+            }
 
             // Interactive crop overlay when in crop mode
             if (isCropping) {
@@ -454,10 +457,21 @@ private fun PreviewTopBar(
     }
 }
 
-private enum class DragHandle { NONE, TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT, CENTER }
+private enum class DragHandle {
+    NONE,
+    TOP_LEFT,
+    TOP_RIGHT,
+    BOTTOM_LEFT,
+    BOTTOM_RIGHT,
+    EDGE_LEFT,
+    EDGE_RIGHT,
+    EDGE_TOP,
+    EDGE_BOTTOM,
+    CENTER
+}
 
 /**
- * Free-form crop overlay with draggable corner handles, center move, rule-of-thirds grid, and dimming scrim.
+ * Free-form crop overlay with draggable corner handles, edge handles, center move, rule-of-thirds grid, and dimming scrim.
  */
 @Composable
 private fun FreeformCropOverlay(
@@ -466,29 +480,52 @@ private fun FreeformCropOverlay(
     modifier: Modifier = Modifier
 ) {
     var activeHandle by remember { mutableStateOf(DragHandle.NONE) }
+    val currentCropRect by rememberUpdatedState(cropRect)
+    val currentOnCropRectChange by rememberUpdatedState(onCropRectChange)
 
     Canvas(
         modifier = modifier
-            .pointerInput(cropRect) {
-                val handleRadiusPx = 40.dp.toPx()
-                val minFraction = 0.1f
+            .pointerInput(Unit) {
+                val cornerRadiusPx = 48.dp.toPx()
+                val edgeMarginPx = 28.dp.toPx()
+                val minFraction = 0.08f
+
+                var gestureCropRect = currentCropRect
 
                 detectDragGestures(
                     onDragStart = { offset ->
-                        val leftPx = cropRect.left * size.width
-                        val topPx = cropRect.top * size.height
-                        val rightPx = cropRect.right * size.width
-                        val bottomPx = cropRect.bottom * size.height
+                        gestureCropRect = currentCropRect
+                        val leftPx = gestureCropRect.left * size.width
+                        val topPx = gestureCropRect.top * size.height
+                        val rightPx = gestureCropRect.right * size.width
+                        val bottomPx = gestureCropRect.bottom * size.height
 
                         fun dist(x1: Float, y1: Float, x2: Float, y2: Float) =
                             kotlin.math.hypot(x1 - x2, y1 - y2)
 
                         activeHandle = when {
-                            dist(offset.x, offset.y, leftPx, topPx) <= handleRadiusPx -> DragHandle.TOP_LEFT
-                            dist(offset.x, offset.y, rightPx, topPx) <= handleRadiusPx -> DragHandle.TOP_RIGHT
-                            dist(offset.x, offset.y, leftPx, bottomPx) <= handleRadiusPx -> DragHandle.BOTTOM_LEFT
-                            dist(offset.x, offset.y, rightPx, bottomPx) <= handleRadiusPx -> DragHandle.BOTTOM_RIGHT
+                            // Corners
+                            dist(offset.x, offset.y, leftPx, topPx) <= cornerRadiusPx -> DragHandle.TOP_LEFT
+                            dist(offset.x, offset.y, rightPx, topPx) <= cornerRadiusPx -> DragHandle.TOP_RIGHT
+                            dist(offset.x, offset.y, leftPx, bottomPx) <= cornerRadiusPx -> DragHandle.BOTTOM_LEFT
+                            dist(offset.x, offset.y, rightPx, bottomPx) <= cornerRadiusPx -> DragHandle.BOTTOM_RIGHT
+
+                            // Edges
+                            kotlin.math.abs(offset.x - leftPx) <= edgeMarginPx &&
+                                offset.y in (topPx - edgeMarginPx)..(bottomPx + edgeMarginPx) -> DragHandle.EDGE_LEFT
+
+                            kotlin.math.abs(offset.x - rightPx) <= edgeMarginPx &&
+                                offset.y in (topPx - edgeMarginPx)..(bottomPx + edgeMarginPx) -> DragHandle.EDGE_RIGHT
+
+                            kotlin.math.abs(offset.y - topPx) <= edgeMarginPx &&
+                                offset.x in (leftPx - edgeMarginPx)..(rightPx + edgeMarginPx) -> DragHandle.EDGE_TOP
+
+                            kotlin.math.abs(offset.y - bottomPx) <= edgeMarginPx &&
+                                offset.x in (leftPx - edgeMarginPx)..(rightPx + edgeMarginPx) -> DragHandle.EDGE_BOTTOM
+
+                            // Center pan
                             offset.x in leftPx..rightPx && offset.y in topPx..bottomPx -> DragHandle.CENTER
+
                             else -> DragHandle.NONE
                         }
                     },
@@ -502,40 +539,56 @@ private fun FreeformCropOverlay(
                         if (activeHandle == DragHandle.NONE) return@detectDragGestures
                         change.consume()
 
-                        val dx = dragAmount.x / size.width
-                        val dy = dragAmount.y / size.height
+                        val dx = dragAmount.x / size.width.toFloat()
+                        val dy = dragAmount.y / size.height.toFloat()
 
-                        val updated = when (activeHandle) {
+                        gestureCropRect = when (activeHandle) {
                             DragHandle.TOP_LEFT -> {
-                                val nl = (cropRect.left + dx).coerceIn(0f, cropRect.right - minFraction)
-                                val nt = (cropRect.top + dy).coerceIn(0f, cropRect.bottom - minFraction)
-                                cropRect.copy(left = nl, top = nt)
+                                val nl = (gestureCropRect.left + dx).coerceIn(0f, gestureCropRect.right - minFraction)
+                                val nt = (gestureCropRect.top + dy).coerceIn(0f, gestureCropRect.bottom - minFraction)
+                                gestureCropRect.copy(left = nl, top = nt)
                             }
                             DragHandle.TOP_RIGHT -> {
-                                val nr = (cropRect.right + dx).coerceIn(cropRect.left + minFraction, 1f)
-                                val nt = (cropRect.top + dy).coerceIn(0f, cropRect.bottom - minFraction)
-                                cropRect.copy(right = nr, top = nt)
+                                val nr = (gestureCropRect.right + dx).coerceIn(gestureCropRect.left + minFraction, 1f)
+                                val nt = (gestureCropRect.top + dy).coerceIn(0f, gestureCropRect.bottom - minFraction)
+                                gestureCropRect.copy(right = nr, top = nt)
                             }
                             DragHandle.BOTTOM_LEFT -> {
-                                val nl = (cropRect.left + dx).coerceIn(0f, cropRect.right - minFraction)
-                                val nb = (cropRect.bottom + dy).coerceIn(cropRect.top + minFraction, 1f)
-                                cropRect.copy(left = nl, bottom = nb)
+                                val nl = (gestureCropRect.left + dx).coerceIn(0f, gestureCropRect.right - minFraction)
+                                val nb = (gestureCropRect.bottom + dy).coerceIn(gestureCropRect.top + minFraction, 1f)
+                                gestureCropRect.copy(left = nl, bottom = nb)
                             }
                             DragHandle.BOTTOM_RIGHT -> {
-                                val nr = (cropRect.right + dx).coerceIn(cropRect.left + minFraction, 1f)
-                                val nb = (cropRect.bottom + dy).coerceIn(cropRect.top + minFraction, 1f)
-                                cropRect.copy(right = nr, bottom = nb)
+                                val nr = (gestureCropRect.right + dx).coerceIn(gestureCropRect.left + minFraction, 1f)
+                                val nb = (gestureCropRect.bottom + dy).coerceIn(gestureCropRect.top + minFraction, 1f)
+                                gestureCropRect.copy(right = nr, bottom = nb)
+                            }
+                            DragHandle.EDGE_LEFT -> {
+                                val nl = (gestureCropRect.left + dx).coerceIn(0f, gestureCropRect.right - minFraction)
+                                gestureCropRect.copy(left = nl)
+                            }
+                            DragHandle.EDGE_RIGHT -> {
+                                val nr = (gestureCropRect.right + dx).coerceIn(gestureCropRect.left + minFraction, 1f)
+                                gestureCropRect.copy(right = nr)
+                            }
+                            DragHandle.EDGE_TOP -> {
+                                val nt = (gestureCropRect.top + dy).coerceIn(0f, gestureCropRect.bottom - minFraction)
+                                gestureCropRect.copy(top = nt)
+                            }
+                            DragHandle.EDGE_BOTTOM -> {
+                                val nb = (gestureCropRect.bottom + dy).coerceIn(gestureCropRect.top + minFraction, 1f)
+                                gestureCropRect.copy(bottom = nb)
                             }
                             DragHandle.CENTER -> {
-                                val w = cropRect.right - cropRect.left
-                                val h = cropRect.bottom - cropRect.top
-                                val nl = (cropRect.left + dx).coerceIn(0f, 1f - w)
-                                val nt = (cropRect.top + dy).coerceIn(0f, 1f - h)
-                                cropRect.copy(left = nl, top = nt, right = nl + w, bottom = nt + h)
+                                val w = gestureCropRect.right - gestureCropRect.left
+                                val h = gestureCropRect.bottom - gestureCropRect.top
+                                val nl = (gestureCropRect.left + dx).coerceIn(0f, 1f - w)
+                                val nt = (gestureCropRect.top + dy).coerceIn(0f, 1f - h)
+                                gestureCropRect.copy(left = nl, top = nt, right = nl + w, bottom = nt + h)
                             }
-                            DragHandle.NONE -> cropRect
+                            DragHandle.NONE -> gestureCropRect
                         }
-                        onCropRectChange(updated)
+                        currentOnCropRectChange(gestureCropRect)
                     }
                 )
             }
