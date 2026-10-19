@@ -1,6 +1,8 @@
 package com.patashot.myapp.presentation.settings
 
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
@@ -61,6 +63,7 @@ import com.patashot.myapp.presentation.core.notificationPermissionsForSdk
 import com.patashot.myapp.presentation.core.openAppSettings
 import com.patashot.myapp.presentation.core.openNotificationSettings
 import com.patashot.myapp.ui.theme.PrimaryGreen
+import androidx.core.net.toUri
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -313,7 +316,21 @@ fun SettingsScreen(
             SettingsItemArrow(
                 icon = R.drawable.ic_app_rating,
                 titleRes = R.string.settings_rate_app,
-                onClick = { }
+                onClick = {
+                    val url = "https://play.google.com/store/apps/details?id=com.patashot.myapp"
+                    val playStoreIntent = Intent(Intent.ACTION_VIEW, url.toUri()).apply {
+                        setPackage("com.android.vending")
+                    }
+                    try {
+                        context.startActivity(playStoreIntent)
+                    } catch (e: Exception) {
+                        try {
+                            context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
+                        } catch (e2: Exception) {
+                            e2.printStackTrace()
+                        }
+                    }
+                }
             )
             SettingsDivider()
 
