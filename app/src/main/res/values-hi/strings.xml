@@ -197,4 +197,127 @@
     <string name="preview_crop_reset">रीसेट</string>
     <string name="preview_crop_done">संपन्न</string>
     <string name="preview_crop_cancel">रद्द करें</string>
+
+    <!-- Privacy Policy Screen -->
+    <string name="privacy_policy_last_updated">अंतिम अपडेट: सितंबर 2026</string>
+    <string name="privacy_policy_header_title">आपकी गोपनीयता हमारे लिए महत्वपूर्ण है</string>
+    <string name="privacy_policy_header_desc">यह गोपनीयता नीति बताती है कि जब आप इस एप्लिकेशन का उपयोग करते हैं तो PataShot किस प्रकार जानकारी को एक्सेस, उपयोग, संग्रहीत और सुरक्षित करता है।</string>
+
+    <string name="privacy_policy_s1_title">1. परिचय</string>
+    <string name="privacy_policy_s1_p1">PataShot में आपका स्वागत है, यह एक स्थान-सक्षम फ़ोटो और वीडियो एप्लिकेशन है जो उपयोगकर्ताओं को प्रासंगिक स्थान जानकारी, GPS निर्देशांक, तिथि, समय और मानचित्र विवरण के साथ फ़ोटो और वीडियो कैप्चर करने की सुविधा देता है।</string>
+    <string name="privacy_policy_s1_p2">यह गोपनीयता नीति बताती है कि जब आप एप्लिकेशन का उपयोग करते हैं तो PataShot जानकारी को कैसे एक्सेस, उपयोग, संग्रहीत और सुरक्षित करता है।</string>
+    <string name="privacy_policy_s1_p3">PataShot का उपयोग करके, आप इस गोपनीयता नीति को स्वीकार करते हैं। एप्लिकेशन केवल अपनी सुविधाओं का समर्थन करने के लिए आवश्यक अनुमतियों का अनुरोध करता है, जो आपकी डिवाइस सेटिंग्स और लागू अनुमतियों के अधीन हैं।</string>
+
+    <string name="privacy_policy_s2_title">2. हमारे द्वारा उपयोग की जाने वाली जानकारी और अनुमतियाँ</string>
+    <string name="privacy_policy_s2_intro">आपके द्वारा उपयोग की जाने वाली सुविधाओं और आपके द्वारा दी जाने वाली अनुमतियों के आधार पर, PataShot निम्नलिखित तक पहुँच प्राप्त कर सकता है:</string>
+    <string name="privacy_policy_s2_camera_title">कैमरा</string>
+    <string name="privacy_policy_s2_camera_desc"> — PataShot एप्लिकेशन के माध्यम से सीधे फ़ोटो और वीडियो कैप्चर करने की अनुमति देने के लिए कैमरा एक्सेस का अनुरोध करता है।</string>
+    <string name="privacy_policy_s2_mic_title">माइक्रोफ़ोन</string>
+    <string name="privacy_policy_s2_mic_desc"> — PataShot वीडियो रिकॉर्ड करते समय ऑडियो रिकॉर्ड करने के लिए माइक्रोफ़ोन एक्सेस का अनुरोध कर सकता है। माइक्रोफ़ोन एक्सेस उन वीडियो रिकॉर्डिंग सुविधाओं के लिए प्रासंगिक है जिनमें ऑडियो शामिल है।</string>
+    <string name="privacy_policy_s2_location_title">स्थान</string>
+    <string name="privacy_policy_s2_location_desc"> — PataShot आपके भौगोलिक स्थान को निर्धारित करने और स्थान-आधारित सुविधाओं का समर्थन करने के लिए अनुमानित और सटीक स्थान एक्सेस का अनुरोध करता है, जिसमें कैप्चर किए गए फ़ोटो और वीडियो में जियोटैग, निर्देशांक और स्थान की जानकारी जोड़ना शामिल है।\nस्थान की सटीकता आपकी डिवाइस सेटिंग्स, उपलब्ध स्थान सेवाओं और आपके द्वारा दी गई अनुमतियों पर निर्भर करती है।</string>
+    <string name="privacy_policy_s2_media_title">फ़ोटो, वीडियो और मीडिया एक्सेस</string>
+    <string name="privacy_policy_s2_media_desc"> — PataShot आपके डिवाइस पर फ़ोटो और वीडियो तक पहुँच का अनुरोध कर सकता है ताकि आप समर्थित एप्लिकेशन सुविधाओं का उपयोग करके मीडिया का चयन, देखना, अपलोड या प्रबंधित कर सकें।\nपहुँच का दायरा आपके डिवाइस के ऑपरेटिंग सिस्टम और आपके द्वारा दी गई अनुमतियों पर निर्भर करता है।</string>
+    <string name="privacy_policy_s2_internet_title">इंटरनेट एक्सेस</string>
+    <string name="privacy_policy_s2_internet_desc"> — PataShot ऑनलाइन सुविधाओं का समर्थन करने के लिए इंटरनेट एक्सेस का उपयोग करता है, जिसमें Google Maps या अन्य लागू सेवाओं के माध्यम से मानचित्र जानकारी प्रदर्शित करना शामिल हो सकता है।</string>
+    <string name="privacy_policy_s2_notifications_title">सूचनाएँ</string>
+    <string name="privacy_policy_s2_notifications_desc"> — PataShot प्रासंगिक ऐप गतिविधि सूचनाएँ, अपडेट और अन्य महत्वपूर्ण जानकारी प्रदान करने के लिए सूचना अनुमति का अनुरोध कर सकता है। आप अपनी डिवाइस सेटिंग्स के माध्यम से सूचना अनुमतियों को प्रबंधित कर सकते हैं।</string>
+
+    <string name="privacy_policy_s3_title">3. जानकारी का उपयोग कैसे किया जाता है</string>
+    <string name="privacy_policy_s3_intro">ऊपर वर्णित अनुमतियों के माध्यम से प्राप्त जानकारी का उपयोग निम्न के लिए किया जा सकता है:</string>
+    <string name="privacy_policy_s3_b1">फ़ोटो और वीडियो कैप्चर करना।</string>
+    <string name="privacy_policy_s3_b2">मीडिया में स्थान, भौगोलिक निर्देशांक, तिथि, समय या मानचित्र विवरण जोड़ना।</string>
+    <string name="privacy_policy_s3_b3">मानचित्र और स्थान से संबंधित जानकारी प्रदर्शित करना।</string>
+    <string name="privacy_policy_s3_b4">आपको समर्थित मीडिया का चयन करने, देखने या प्रबंधित करने की अनुमति देना।</string>
+    <string name="privacy_policy_s3_b5">एप्लिकेशन की सुविधाएँ और कार्यक्षमता प्रदान करना।</string>
+    <string name="privacy_policy_s3_b6">सक्षम होने पर प्रासंगिक सूचनाएं वितरित करना।</string>
+    <string name="privacy_policy_s3_b7">एप्लिकेशन सुरक्षा बनाए रखना और तकनीकी समस्याओं का निवारण करना, जहाँ लागू हो।</string>
+    <string name="privacy_policy_s3_footer">PataShot द्वारा जानकारी का वास्तविक संग्रह और प्रसंस्करण आपके द्वारा उपयोग की जाने वाली सुविधाओं और एप्लिकेशन के कार्यान्वयन पर निर्भर करता है।</string>
+
+    <string name="privacy_policy_s4_title">4. डेटा संग्रहण और प्रतिधारण</string>
+    <string name="privacy_policy_s4_p1">PataShot उपयोगकर्ताओं के फ़ोटो या वीडियो को हमारे सर्वर पर संग्रहीत नहीं करता है। मीडिया को ऐप के भीतर संभाला जाता है और आवश्यक अनुमतियों के साथ उपयोगकर्ता के फ़ोन में सहेजा जा सकता है। वर्तमान में, PataShot उपयोगकर्ताओं के नाम, फ़ोन नंबर या मीडिया विवरण एकत्र या संग्रहीत नहीं करता है।</string>
+
+    <string name="privacy_policy_s5_title">5. डेटा साझाकरण और तृतीय-पक्ष सेवाएँ</string>
+    <string name="privacy_policy_s5_p1">PataShot उपयोगकर्ताओं के फ़ोटो या वीडियो को हमारे सर्वर पर अपलोड नहीं करता है। ऐप मानचित्र और स्थान-आधारित सुविधाएँ प्रदान करने के लिए Google Maps जैसी तृतीय-पक्ष सेवाओं का उपयोग कर सकता है। ये सेवाएँ अपनी गोपनीयता नीतियों के अनुसार जानकारी संसाधित कर सकती हैं।</string>
+
+    <string name="privacy_policy_s6_title">6. डेटा सुरक्षा</string>
+    <string name="privacy_policy_s6_p1">उपयोगकर्ताओं के फ़ोटो और वीडियो उनके उपकरणों पर ही रहते हैं जब तक कि वे उन्हें साझा या स्थानांतरित करने का विकल्प नहीं चुनते। हम ऐप और उसकी सेवाओं द्वारा संसाधित जानकारी की सुरक्षा के लिए उचित उपाय करते हैं।</string>
+
+    <string name="privacy_policy_s7_title">7. आपकी पसंद और अनुमतियाँ</string>
+    <string name="privacy_policy_s7_b1">जहाँ समर्थित हो, आप अपनी डिवाइस सेटिंग्स के माध्यम से कैमरा, माइक्रोफ़ोन, स्थान, मीडिया और सूचना अनुमतियों को प्रबंधित कर सकते हैं।</string>
+    <string name="privacy_policy_s7_b2">किसी अनुमति को अक्षम करने से एप्लिकेशन की कुछ सुविधाएँ ठीक से काम करने से रुक सकती हैं।</string>
+    <string name="privacy_policy_s7_b3">आपको एप्लिकेशन द्वारा अनुरोधित अनुमतियों की समीक्षा करनी चाहिए और केवल उन्हीं को अनुमति देनी चाहिए जिन्हें आप अनुमति देने में सहज हैं।</string>
+
+    <string name="privacy_policy_s8_title">8. डेटा हटाना</string>
+    <string name="privacy_policy_s8_b1">आप अपने डिवाइस की उपलब्ध मीडिया-प्रबंधन सुविधाओं का उपयोग करके अपने डिवाइस पर संग्रहीत फ़ोटो और वीडियो को हटाने में सक्षम हो सकते हैं।</string>
+    <string name="privacy_policy_s8_b2">यदि PataShot अपने सर्वर पर या तृतीय-पक्ष सेवाओं के माध्यम से कोई व्यक्तिगत जानकारी संग्रहीत करता है, तो ऐप ऑपरेटर को उस जानकारी को हटाने का अनुरोध करने के लिए एक उपयुक्त विधि प्रदान करनी चाहिए, जहाँ लागू हो।</string>
+    <string name="privacy_policy_s8_b3">प्रश्नों या डेटा हटाने के अनुरोधों के लिए, नीचे दिए गए विवरणों का उपयोग करके हमसे संपर्क करें।</string>
+
+    <string name="privacy_policy_s9_title">9. बच्चों की गोपनीयता</string>
+    <string name="privacy_policy_s9_b1">PataShot लागू कानूनों के उल्लंघन में बच्चों से व्यक्तिगत जानकारी एकत्र करने के इरादे से नहीं बनाया गया है।</string>
+    <string name="privacy_policy_s9_b2">यदि आप मानते हैं कि किसी बच्चे से अनुचित रूप से व्यक्तिगत जानकारी एकत्र की गई है, तो कृपया हमसे संपर्क करें ताकि मामले की समीक्षा की जा सके और उचित कार्रवाई की जा सके।</string>
+
+    <string name="privacy_policy_s10_title">10. इस गोपनीयता नीति में परिवर्तन</string>
+    <string name="privacy_policy_s10_b1">जब एप्लिकेशन की सुविधाएँ, डेटा प्रथाएँ या कानूनी आवश्यकताएँ बदलती हैं, तो हम इस गोपनीयता नीति को अपडेट कर सकते हैं।</string>
+    <string name="privacy_policy_s10_b2">कोई भी अद्यतन संस्करण इस पृष्ठ पर एक संशोधित \"अंतिम अपडेट\" तिथि के साथ प्रकाशित किया जाएगा। कृपया इस पृष्ठ की समय-समय पर समीक्षा करें।</string>
+
+    <string name="privacy_policy_summary_title">आपकी गोपनीयता महत्वपूर्ण है।</string>
+    <string name="privacy_policy_summary_desc">PataShot केवल आपके कैमरे और स्थान-आधारित अनुभव को प्रदान करने और बेहतर बनाने के लिए आवश्यक जानकारी का उपयोग करता है।</string>
+
+    <!-- Terms and Conditions Screen -->
+    <string name="terms_last_updated">अंतिम अपडेट: सितंबर 2026</string>
+    <string name="terms_header_title">PataShot में आपका स्वागत है।</string>
+    <string name="terms_header_desc">हमारे ऐप का उपयोग करके, आप इन नियमों और शर्तों से सहमत होते हैं। कृपया PataShot का उपयोग करने से पहले इन्हें ध्यान से पढ़ें।</string>
+
+    <string name="terms_s1_title">1. पात्रता</string>
+    <string name="terms_s1_b1">PataShot का उपयोग करके, आप इन नियमों और शर्तों से बंधे होने के लिए सहमत होते हैं।</string>
+    <string name="terms_s1_b2">यदि आप सहमत नहीं हैं, तो कृपया ऐप का उपयोग न करें।</string>
+
+    <string name="terms_s2_title">2. PataShot के बारे में</string>
+    <string name="terms_s2_intro">PataShot आपको निम्नलिखित की अनुमति देता है:</string>
+    <string name="terms_s2_b1">फ़ोटो और वीडियो कैप्चर करना</string>
+    <string name="terms_s2_b2">स्थान, दिनांक और समय की जानकारी जोड़ना</string>
+    <string name="terms_s2_b3">अनुमति प्राप्त सीमा के भीतर स्थान विवरण संपादित करना</string>
+    <string name="terms_s2_b4">टेम्पलेट्स का उपयोग करके फ़ोटो को कस्टमाइज़ करना</string>
+    <string name="terms_s2_b5">कैप्चर किए गए कंटेंट को सहेजना और साझा करना</string>
+
+    <string name="terms_s3_title">3. स्थान और GPS डेटा</string>
+    <string name="terms_s3_b1">PataShot आपके कैप्चर में स्थान जानकारी जोड़ने के लिए आपके डिवाइस के स्थान का उपयोग कर सकता है।</string>
+    <string name="terms_s3_b2">स्थान की सटीकता आपके डिवाइस और परिवेश के आधार पर भिन्न हो सकती है।</string>
+    <string name="terms_s3_b3">संपादित स्थान मूल GPS स्थान के 1 किमी के अनुमत दायरे में होना चाहिए।</string>
+    <string name="terms_s3_b4">सहेजने या साझा करने से पहले स्थान विवरण की जांच करने के लिए आप ज़िम्मेदार हैं।</string>
+
+    <string name="terms_s4_title">4. निःशुल्क उपयोग और सदस्यताएँ</string>
+    <string name="terms_s4_b1">नए उपयोगकर्ताओं को 10 निःशुल्क कैप्चर मिलते हैं।</string>
+    <string name="terms_s4_b2">निःशुल्क सीमा के बाद, जारी रखने के लिए मोबाइल नंबर लॉगिन आवश्यक हो सकता है।</string>
+    <string name="terms_s4_b3">कम विज्ञापन और शून्य विज्ञापन के लिए सशुल्क प्लान उपलब्ध हो सकते हैं।</string>
+    <string name="terms_s4_b4">सदस्यता मूल्य और शर्तें खरीद से पहले दिखाई जाती हैं।</string>
+    <string name="terms_s4_b5">रद्द किए जाने तक सदस्यता स्वचालित रूप से नवीनीकृत हो सकती है।</string>
+
+    <string name="terms_s5_title">5. उपयोगकर्ता की जिम्मेदारियां</string>
+    <string name="terms_s5_intro">आप सहमत हैं कि:</string>
+    <string name="terms_s5_b1">PataShot का उपयोग कानूनी और जिम्मेदारी से करेंगे।</string>
+    <string name="terms_s5_b2">आवश्यक होने पर सटीक जानकारी प्रदान करेंगे।</string>
+    <string name="terms_s5_b3">अन्य लोगों की गोपनीयता और अधिकारों का सम्मान करेंगे।</string>
+    <string name="terms_s5_b4">अवैध, हानिकारक या भ्रामक गतिविधियों के लिए ऐप का उपयोग नहीं करेंगे।</string>
+
+    <string name="terms_s6_title">6. तस्वीरें और सामग्री</string>
+    <string name="terms_s6_b1">PataShot का उपयोग करके आपके द्वारा कैप्चर, संपादित, सहेजे या साझा किए गए फ़ोटो, वीडियो और अन्य सामग्री के लिए आप ज़िम्मेदार हैं।</string>
+    <string name="terms_s6_b2">अन्य लोगों या निजी स्थानों से जुड़ी सामग्री कैप्चर करने या साझा करने से पहले सुनिश्चित करें कि आपके पास आवश्यक अनुमति है।</string>
+
+    <string name="terms_s7_title">7. गोपनीयता और अनुमतियां</string>
+    <string name="terms_s7_intro">PataShot निम्नलिखित तक पहुंच का अनुरोध कर सकता है:</string>
+    <string name="terms_s7_b1">कैमरा</string>
+    <string name="terms_s7_b2">स्थान</string>
+    <string name="terms_s7_b3">फ़ोटो/मीडिया</string>
+    <string name="terms_s7_note">इन अनुमतियों का उपयोग ऐप की सुविधाएं प्रदान करने के लिए किया जाता है। अधिक जानकारी के लिए, कृपया हमारी गोपनीयता नीति देखें।</string>
+
+    <string name="terms_s8_title">8. सेवा उपलब्धता</string>
+    <string name="terms_s8_p1">हम PataShot को विश्वसनीय और उपलब्ध रखने का लक्ष्य रखते हैं, लेकिन कुछ सुविधाएं डिवाइस सेटिंग्स, GPS उपलब्धता, इंटरनेट कनेक्टिविटी या तकनीकी समस्याओं से प्रभावित हो सकती हैं।</string>
+
+    <string name="terms_s9_title">9. इन शर्तों में बदलाव</string>
+    <string name="terms_s9_p1">हम समय-समय पर इन शर्तों को अपडेट कर सकते हैं। अपडेट की गई शर्तें ऐप के भीतर उपलब्ध कराई जाएंगी।</string>
+
+    <string name="terms_summary_title">PataShot का उपयोग करके, आप हमारे नियमों और शर्तों से सहमत होते हैं।</string>
+    <string name="terms_summary_desc">कृपया ऐप का जिम्मेदारी से उपयोग करें और साझा करने से पहले अपने स्थान विवरण सत्यापित करें।</string>
 </resources>

@@ -101,40 +101,40 @@ fun PrivacyPolicyScreen(
         ) {
             // Header
             Text(
-                text = "Last Updated: September 2026",
+                text = stringResource(R.string.privacy_policy_last_updated),
                 fontWeight = FontWeight.Bold,
                 fontSize = 15.sp,
                 color = Color.Black
             )
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = "Your privacy matters to us",
+                text = stringResource(R.string.privacy_policy_header_title),
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp,
                 color = Color.Black
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "This Privacy Policy explains how PataShot accesses, uses, stores, and protects information when you use the application.",
+                text = stringResource(R.string.privacy_policy_header_desc),
                 fontSize = 13.sp,
                 color = Color(0xFF6B7280),
-                lineHeight = 18.sp
+                lineHeight = 13.sp
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             // 1. Introduction
             ExpandablePolicyCard(
-                title = "1. Introduction",
+                title = stringResource(R.string.privacy_policy_s1_title),
                 content = {
                     PolicyParagraph(
-                        text = "Welcome to PataShot, a location-enabled photo and video application that allows users to capture photos and videos with relevant location information, GPS coordinates, date, time, and map details."
+                        text = stringResource(R.string.privacy_policy_s1_p1)
                     )
                     PolicyParagraph(
-                        text = "This Privacy Policy explains how PataShot accesses, uses, stores, and protects information when you use the application."
+                        text = stringResource(R.string.privacy_policy_s1_p2)
                     )
                     PolicyParagraph(
-                        text = "By using PataShot, you acknowledge this Privacy Policy. The application requests only the permissions needed to support its features, subject to your device settings and applicable permissions."
+                        text = stringResource(R.string.privacy_policy_s1_p3)
                     )
                 }
             )
@@ -143,38 +143,38 @@ fun PrivacyPolicyScreen(
 
             // 2. Information and Permissions We Use
             ExpandablePolicyCard(
-                title = "2. Information and Permissions We Use",
+                title = stringResource(R.string.privacy_policy_s2_title),
                 content = {
                     Text(
-                        text = "Depending on the features you use and the permissions you grant, PataShot may access the following:",
+                        text = stringResource(R.string.privacy_policy_s2_intro),
                         fontSize = 13.sp,
                         color = Color(0xFF4B5563),
                         lineHeight = 18.sp,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
                     PolicyBulletPoint(
-                        boldPrefix = "Camera",
-                        text = " — PataShot requests camera access to allow you to capture photos and videos directly through the application."
+                        boldPrefix = stringResource(R.string.privacy_policy_s2_camera_title),
+                        text = stringResource(R.string.privacy_policy_s2_camera_desc)
                     )
                     PolicyBulletPoint(
-                        boldPrefix = "Microphone",
-                        text = " — PataShot may request microphone access to record audio while capturing videos. Microphone access is relevant to video recording features that include audio."
+                        boldPrefix = stringResource(R.string.privacy_policy_s2_mic_title),
+                        text = stringResource(R.string.privacy_policy_s2_mic_desc)
                     )
                     PolicyBulletPoint(
-                        boldPrefix = "Location",
-                        text = " — PataShot requests approximate and precise location access to determine your geographic location and support location-based features, including adding geotags, coordinates, and location information to captured photos and videos.\nLocation accuracy depends on your device settings, available location services, and the permissions you grant."
+                        boldPrefix = stringResource(R.string.privacy_policy_s2_location_title),
+                        text = stringResource(R.string.privacy_policy_s2_location_desc)
                     )
                     PolicyBulletPoint(
-                        boldPrefix = "Photos, Videos, and Media Access",
-                        text = " — PataShot may request access to photos and videos on your device so you can select, view, upload, or manage media using supported application features.\nThe scope of access depends on your device's operating system and the permissions you grant."
+                        boldPrefix = stringResource(R.string.privacy_policy_s2_media_title),
+                        text = stringResource(R.string.privacy_policy_s2_media_desc)
                     )
                     PolicyBulletPoint(
-                        boldPrefix = "Internet Access",
-                        text = " — PataShot uses internet access to support online features, which may include displaying map information through Google Maps or other applicable services."
+                        boldPrefix = stringResource(R.string.privacy_policy_s2_internet_title),
+                        text = stringResource(R.string.privacy_policy_s2_internet_desc)
                     )
                     PolicyBulletPoint(
-                        boldPrefix = "Notifications",
-                        text = " — PataShot may request notification permission to provide relevant app activity notifications, updates, and other important information. You can manage notification permissions through your device settings."
+                        boldPrefix = stringResource(R.string.privacy_policy_s2_notifications_title),
+                        text = stringResource(R.string.privacy_policy_s2_notifications_desc)
                     )
                 }
             )
@@ -183,25 +183,25 @@ fun PrivacyPolicyScreen(
 
             // 3. How Information Is Used
             ExpandablePolicyCard(
-                title = "3. How Information Is Used",
+                title = stringResource(R.string.privacy_policy_s3_title),
                 content = {
                     Text(
-                        text = "Information accessed through the permissions described above may be used to:",
+                        text = stringResource(R.string.privacy_policy_s3_intro),
                         fontSize = 13.sp,
                         color = Color(0xFF4B5563),
                         lineHeight = 18.sp,
                         modifier = Modifier.padding(bottom = 6.dp)
                     )
-                    PolicySimpleBullet(text = "Capture photos and videos.")
-                    PolicySimpleBullet(text = "Add location, geographic coordinates, date, time, or map details to media.")
-                    PolicySimpleBullet(text = "Display maps and location-related information.")
-                    PolicySimpleBullet(text = "Allow you to select, view, or manage supported media.")
-                    PolicySimpleBullet(text = "Provide application features and functionality.")
-                    PolicySimpleBullet(text = "Deliver relevant notifications, where enabled.")
-                    PolicySimpleBullet(text = "Maintain application security and troubleshoot technical issues, where applicable.")
+                    PolicySimpleBullet(text = stringResource(R.string.privacy_policy_s3_b1))
+                    PolicySimpleBullet(text = stringResource(R.string.privacy_policy_s3_b2))
+                    PolicySimpleBullet(text = stringResource(R.string.privacy_policy_s3_b3))
+                    PolicySimpleBullet(text = stringResource(R.string.privacy_policy_s3_b4))
+                    PolicySimpleBullet(text = stringResource(R.string.privacy_policy_s3_b5))
+                    PolicySimpleBullet(text = stringResource(R.string.privacy_policy_s3_b6))
+                    PolicySimpleBullet(text = stringResource(R.string.privacy_policy_s3_b7))
                     Spacer(modifier = Modifier.height(6.dp))
                     PolicyParagraph(
-                        text = "PataShot's actual collection and processing of information depend on the features you use and the application's implementation."
+                        text = stringResource(R.string.privacy_policy_s3_footer)
                     )
                 }
             )
@@ -210,10 +210,10 @@ fun PrivacyPolicyScreen(
 
             // 4. Data Storage and Retention
             ExpandablePolicyCard(
-                title = "4. Data Storage and Retention",
+                title = stringResource(R.string.privacy_policy_s4_title),
                 content = {
                     PolicyParagraph(
-                        text = "PataShot does not store users' photos or videos on our servers. Media is handled within the app and may be saved to the user's phone with the required permissions. Currently, PataShot does not collect or store users' names, phone numbers, or media details."
+                        text = stringResource(R.string.privacy_policy_s4_p1)
                     )
                 }
             )
@@ -222,10 +222,10 @@ fun PrivacyPolicyScreen(
 
             // 5. Data Sharing and Third-Party Services
             ExpandablePolicyCard(
-                title = "5. Data Sharing and Third-Party Services",
+                title = stringResource(R.string.privacy_policy_s5_title),
                 content = {
                     PolicyParagraph(
-                        text = "PataShot does not upload users' photos or videos to our servers. The app may use third-party services, such as Google Maps, to provide map and location-based features. These services may process information according to their own privacy policies."
+                        text = stringResource(R.string.privacy_policy_s5_p1)
                     )
                 }
             )
@@ -234,10 +234,10 @@ fun PrivacyPolicyScreen(
 
             // 6. Data Security
             ExpandablePolicyCard(
-                title = "6. Data Security",
+                title = stringResource(R.string.privacy_policy_s6_title),
                 content = {
                     PolicyParagraph(
-                        text = "Users' photos and videos remain on their devices unless they choose to share or transfer them. We take reasonable measures to protect information processed by the app and its services."
+                        text = stringResource(R.string.privacy_policy_s6_p1)
                     )
                 }
             )
@@ -246,11 +246,11 @@ fun PrivacyPolicyScreen(
 
             // 7. Your Choices and Permissions
             ExpandablePolicyCard(
-                title = "7. Your Choices and Permissions",
+                title = stringResource(R.string.privacy_policy_s7_title),
                 content = {
-                    PolicySimpleBullet(text = "You can manage camera, microphone, location, media, and notification permissions through your device settings, where supported.")
-                    PolicySimpleBullet(text = "Disabling a permission may prevent some application features from functioning correctly.")
-                    PolicySimpleBullet(text = "You should review the permissions requested by the application and grant only those you are comfortable allowing.")
+                    PolicySimpleBullet(text = stringResource(R.string.privacy_policy_s7_b1))
+                    PolicySimpleBullet(text = stringResource(R.string.privacy_policy_s7_b2))
+                    PolicySimpleBullet(text = stringResource(R.string.privacy_policy_s7_b3))
                 }
             )
 
@@ -258,11 +258,11 @@ fun PrivacyPolicyScreen(
 
             // 8. Data Deletion
             ExpandablePolicyCard(
-                title = "8. Data Deletion",
+                title = stringResource(R.string.privacy_policy_s8_title),
                 content = {
-                    PolicySimpleBullet(text = "You may be able to delete photos and videos stored on your device using your device's available media-management features.")
-                    PolicySimpleBullet(text = "If PataShot stores any personal information on its servers or through third-party services, the app operator must provide an appropriate method for requesting deletion of that information, where applicable.")
-                    PolicySimpleBullet(text = "For questions or deletion requests, contact us using the details provided below.")
+                    PolicySimpleBullet(text = stringResource(R.string.privacy_policy_s8_b1))
+                    PolicySimpleBullet(text = stringResource(R.string.privacy_policy_s8_b2))
+                    PolicySimpleBullet(text = stringResource(R.string.privacy_policy_s8_b3))
                 }
             )
 
@@ -270,10 +270,10 @@ fun PrivacyPolicyScreen(
 
             // 9. Children's Privacy
             ExpandablePolicyCard(
-                title = "9. Children's Privacy",
+                title = stringResource(R.string.privacy_policy_s9_title),
                 content = {
-                    PolicySimpleBullet(text = "PataShot is not intended to collect personal information from children in violation of applicable laws.")
-                    PolicySimpleBullet(text = "If you believe that personal information has been collected from a child inappropriately, please contact us so that the matter can be reviewed and appropriate action can be taken.")
+                    PolicySimpleBullet(text = stringResource(R.string.privacy_policy_s9_b1))
+                    PolicySimpleBullet(text = stringResource(R.string.privacy_policy_s9_b2))
                 }
             )
 
@@ -281,10 +281,10 @@ fun PrivacyPolicyScreen(
 
             // 10. Changes to This Privacy Policy
             ExpandablePolicyCard(
-                title = "10. Changes to This Privacy Policy",
+                title = stringResource(R.string.privacy_policy_s10_title),
                 content = {
-                    PolicySimpleBullet(text = "We may update this Privacy Policy when application features, data practices, or legal requirements change.")
-                    PolicySimpleBullet(text = "Any updated version will be published on this page with a revised \"Last Updated\" date. Please review this page periodically.")
+                    PolicySimpleBullet(text = stringResource(R.string.privacy_policy_s10_b1))
+                    PolicySimpleBullet(text = stringResource(R.string.privacy_policy_s10_b2))
                 }
             )
 
@@ -302,7 +302,7 @@ fun PrivacyPolicyScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Your privacy matters.",
+                        text = stringResource(R.string.privacy_policy_summary_title),
                         color = PrimaryGreen,
                         fontWeight = FontWeight.Bold,
                         fontSize = 13.sp,
@@ -310,7 +310,7 @@ fun PrivacyPolicyScreen(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "PataShot only uses information needed to provide and improve your camera and location-based experience.",
+                        text = stringResource(R.string.privacy_policy_summary_desc),
                         color = PrimaryGreen,
                         fontSize = 12.sp,
                         textAlign = TextAlign.Center,
@@ -323,7 +323,7 @@ fun PrivacyPolicyScreen(
 
             // Bottom Footer
             Text(
-                text = "Made in India. Made for Bharat 🇮🇳",
+                text = stringResource(R.string.home_made_for_bharat),
                 color = PrimaryGreen,
                 fontWeight = FontWeight.Bold,
                 fontSize = 13.sp,

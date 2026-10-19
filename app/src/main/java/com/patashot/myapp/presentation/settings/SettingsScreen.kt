@@ -68,6 +68,7 @@ fun SettingsScreen(
     onBack: () -> Unit,
     onLanguageClick: () -> Unit,
     onTemplatesClick: () -> Unit,
+    onTermsClick: () -> Unit = {},
     onPrivacyPolicyClick: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
@@ -312,6 +313,13 @@ fun SettingsScreen(
                 icon = R.drawable.ic_app_rating,
                 titleRes = R.string.settings_rate_app,
                 onClick = { }
+            )
+            SettingsDivider()
+
+            SettingsItemArrow(
+                icon = R.drawable.ic_terms,
+                titleRes = R.string.settings_terms,
+                onClick = onTermsClick
             )
             SettingsDivider()
 

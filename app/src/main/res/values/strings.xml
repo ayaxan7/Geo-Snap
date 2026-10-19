@@ -221,4 +221,128 @@
     <string name="preview_crop_reset">Reset</string>
     <string name="preview_crop_done">Done</string>
     <string name="preview_crop_cancel">Cancel</string>
+
+    <!-- Privacy Policy Screen -->
+    <string name="privacy_policy_last_updated">Last Updated: September 2026</string>
+    <string name="privacy_policy_header_title">Your privacy matters to us</string>
+    <string name="privacy_policy_header_desc">This Privacy Policy explains how PataShot accesses, uses, stores, and protects information when you use the application.</string>
+
+    <string name="privacy_policy_s1_title">1. Introduction</string>
+    <string name="privacy_policy_s1_p1">Welcome to PataShot, a location-enabled photo and video application that allows users to capture photos and videos with relevant location information, GPS coordinates, date, time, and map details.</string>
+    <string name="privacy_policy_s1_p2">This Privacy Policy explains how PataShot accesses, uses, stores, and protects information when you use the application.</string>
+    <string name="privacy_policy_s1_p3">By using PataShot, you acknowledge this Privacy Policy. The application requests only the permissions needed to support its features, subject to your device settings and applicable permissions.</string>
+
+    <string name="privacy_policy_s2_title">2. Information and Permissions We Use</string>
+    <string name="privacy_policy_s2_intro">Depending on the features you use and the permissions you grant, PataShot may access the following:</string>
+    <string name="privacy_policy_s2_camera_title">Camera</string>
+    <string name="privacy_policy_s2_camera_desc"> — PataShot requests camera access to allow you to capture photos and videos directly through the application.</string>
+    <string name="privacy_policy_s2_mic_title">Microphone</string>
+    <string name="privacy_policy_s2_mic_desc"> — PataShot may request microphone access to record audio while capturing videos. Microphone access is relevant to video recording features that include audio.</string>
+    <string name="privacy_policy_s2_location_title">Location</string>
+    <string name="privacy_policy_s2_location_desc"> — PataShot requests approximate and precise location access to determine your geographic location and support location-based features, including adding geotags, coordinates, and location information to captured photos and videos.\nLocation accuracy depends on your device settings, available location services, and the permissions you grant.</string>
+    <string name="privacy_policy_s2_media_title">Photos, Videos, and Media Access</string>
+    <string name="privacy_policy_s2_media_desc"> — PataShot may request access to photos and videos on your device so you can select, view, upload, or manage media using supported application features.\nThe scope of access depends on your device\'s operating system and the permissions you grant.</string>
+    <string name="privacy_policy_s2_internet_title">Internet Access</string>
+    <string name="privacy_policy_s2_internet_desc"> — PataShot uses internet access to support online features, which may include displaying map information through Google Maps or other applicable services.</string>
+    <string name="privacy_policy_s2_notifications_title">Notifications</string>
+    <string name="privacy_policy_s2_notifications_desc"> — PataShot may request notification permission to provide relevant app activity notifications, updates, and other important information. You can manage notification permissions through your device settings.</string>
+
+    <string name="privacy_policy_s3_title">3. How Information Is Used</string>
+    <string name="privacy_policy_s3_intro">Information accessed through the permissions described above may be used to:</string>
+    <string name="privacy_policy_s3_b1">Capture photos and videos.</string>
+    <string name="privacy_policy_s3_b2">Add location, geographic coordinates, date, time, or map details to media.</string>
+    <string name="privacy_policy_s3_b3">Display maps and location-related information.</string>
+    <string name="privacy_policy_s3_b4">Allow you to select, view, or manage supported media.</string>
+    <string name="privacy_policy_s3_b5">Provide application features and functionality.</string>
+    <string name="privacy_policy_s3_b6">Deliver relevant notifications, where enabled.</string>
+    <string name="privacy_policy_s3_b7">Maintain application security and troubleshoot technical issues, where applicable.</string>
+    <string name="privacy_policy_s3_footer">PataShot\'s actual collection and processing of information depend on the features you use and the application\'s implementation.</string>
+
+    <string name="privacy_policy_s4_title">4. Data Storage and Retention</string>
+    <string name="privacy_policy_s4_p1">PataShot does not store users\' photos or videos on our servers. Media is handled within the app and may be saved to the user\'s phone with the required permissions. Currently, PataShot does not collect or store users\' names, phone numbers, or media details.</string>
+
+    <string name="privacy_policy_s5_title">5. Data Sharing and Third-Party Services</string>
+    <string name="privacy_policy_s5_p1">PataShot does not upload users\' photos or videos to our servers. The app may use third-party services, such as Google Maps, to provide map and location-based features. These services may process information according to their own privacy policies.</string>
+
+    <string name="privacy_policy_s6_title">6. Data Security</string>
+    <string name="privacy_policy_s6_p1">Users\' photos and videos remain on their devices unless they choose to share or transfer them. We take reasonable measures to protect information processed by the app and its services.</string>
+
+    <string name="privacy_policy_s7_title">7. Your Choices and Permissions</string>
+    <string name="privacy_policy_s7_b1">You can manage camera, microphone, location, media, and notification permissions through your device settings, where supported.</string>
+    <string name="privacy_policy_s7_b2">Disabling a permission may prevent some application features from functioning correctly.</string>
+    <string name="privacy_policy_s7_b3">You should review the permissions requested by the application and grant only those you are comfortable allowing.</string>
+
+    <string name="privacy_policy_s8_title">8. Data Deletion</string>
+    <string name="privacy_policy_s8_b1">You may be able to delete photos and videos stored on your device using your device\'s available media-management features.</string>
+    <string name="privacy_policy_s8_b2">If PataShot stores any personal information on its servers or through third-party services, the app operator must provide an appropriate method for requesting deletion of that information, where applicable.</string>
+    <string name="privacy_policy_s8_b3">For questions or deletion requests, contact us using the details provided below.</string>
+
+    <string name="privacy_policy_s9_title">9. Children\'s Privacy</string>
+    <string name="privacy_policy_s9_b1">PataShot is not intended to collect personal information from children in violation of applicable laws.</string>
+    <string name="privacy_policy_s9_b2">If you believe that personal information has been collected from a child inappropriately, please contact us so that the matter can be reviewed and appropriate action can be taken.</string>
+
+    <string name="privacy_policy_s10_title">10. Changes to This Privacy Policy</string>
+    <string name="privacy_policy_s10_b1">We may update this Privacy Policy when application features, data practices, or legal requirements change.</string>
+    <string name="privacy_policy_s10_b2">Any updated version will be published on this page with a revised \"Last Updated\" date. Please review this page periodically.</string>
+
+    <string name="privacy_policy_summary_title">Your privacy matters.</string>
+    <string name="privacy_policy_summary_desc">PataShot only uses information needed to provide and improve your camera and location-based experience.</string>
+
+    <!-- Terms and Conditions Screen -->
+    <string name="terms_last_updated">Last Updated: September 2026</string>
+    <string name="terms_header_title">Welcome to PataShot.</string>
+    <string name="terms_header_desc">By using our app, you agree to these Terms and Conditions. Please read them carefully before using PataShot.</string>
+
+    <string name="terms_s1_title">1. Eligibility</string>
+    <string name="terms_s1_b1">By accessing or using PataShot, you agree to be bound by these Terms and Conditions.</string>
+    <string name="terms_s1_b2">If you do not agree, please do not use the app.</string>
+
+    <string name="terms_s2_title">2. About PataShot</string>
+    <string name="terms_s2_intro">PataShot allows you to:</string>
+    <string name="terms_s2_b1">Capture photos and videos</string>
+    <string name="terms_s2_b2">Add location, date and time information</string>
+    <string name="terms_s2_b3">Edit location details within the allowed range</string>
+    <string name="terms_s2_b4">Customize photos using templates</string>
+    <string name="terms_s2_b5">Save and share captured content</string>
+
+    <string name="terms_s3_title">3. Location &amp; GPS Data</string>
+    <string name="terms_s3_b1">PataShot may use your device\'s location to add location information to your captures.</string>
+    <string name="terms_s3_b2">Location accuracy may vary depending on your device and surroundings.</string>
+    <string name="terms_s3_b3">Edited locations must remain within the 1 km allowed radius of the original GPS location.</string>
+    <string name="terms_s3_b4">You are responsible for checking the location details before saving or sharing.</string>
+
+    <string name="terms_s4_title">4. Free Usage &amp; Subscriptions</string>
+    <string name="terms_s4_b1">New users receive 10 free captures.</string>
+    <string name="terms_s4_b2">After the free limit, mobile-number login may be required to continue.</string>
+    <string name="terms_s4_b3">Paid plans may be available for Reduced Ads and Zero Ads.</string>
+    <string name="terms_s4_b4">Subscription prices and terms are shown before purchase.</string>
+    <string name="terms_s4_b5">Subscriptions may renew automatically unless cancelled.</string>
+
+    <string name="terms_s5_title">5. User Responsibilities</string>
+    <string name="terms_s5_intro">You agree to:</string>
+    <string name="terms_s5_b1">Use PataShot lawfully and responsibly.</string>
+    <string name="terms_s5_b2">Provide accurate information when required.</string>
+    <string name="terms_s5_b3">Respect the privacy and rights of other people.</string>
+    <string name="terms_s5_b4">Not use the app for illegal, harmful, or misleading activities.</string>
+
+    <string name="terms_s6_title">6. Photos &amp; Content</string>
+    <string name="terms_s6_b1">You are responsible for the photos, videos, and other content you capture, edit, save, or share using PataShot.</string>
+    <string name="terms_s6_b2">Make sure you have the necessary permission before capturing or sharing content involving other people or private locations.</string>
+
+    <string name="terms_s7_title">7. Privacy &amp; Permissions</string>
+    <string name="terms_s7_intro">PataShot may request access to:</string>
+    <string name="terms_s7_b1">Camera</string>
+    <string name="terms_s7_b2">Location</string>
+    <string name="terms_s7_b3">Photos/Media</string>
+    <string name="terms_s7_note">These permissions are used to provide the app\'s features. For more information, please refer to our Privacy Policy.</string>
+
+    <string name="terms_s8_title">8. Service Availability</string>
+    <string name="terms_s8_p1">We aim to keep PataShot reliable and available, but some features may be affected by device settings, GPS availability, internet connectivity, or technical issues.</string>
+
+    <string name="terms_s9_title">9. Changes to These Terms</string>
+    <string name="terms_s9_p1">We may update these Terms from time to time. Updated terms will be made available within the app.</string>
+
+    <string name="terms_summary_title">By using PataShot, you agree to our Terms and Conditions.</string>
+    <string name="terms_summary_desc">Please use the app responsibly and verify your location details before sharing.</string>
 </resources>
+
