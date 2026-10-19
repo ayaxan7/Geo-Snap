@@ -320,4 +320,37 @@
 
     <string name="terms_summary_title">PataShot का उपयोग करके, आप हमारे नियमों और शर्तों से सहमत होते हैं।</string>
     <string name="terms_summary_desc">कृपया ऐप का जिम्मेदारी से उपयोग करें और साझा करने से पहले अपने स्थान विवरण सत्यापित करें।</string>
+
+    <!-- Help and Support Screen -->
+    <string name="help_support_search_hint">खोजें</string>
+    <string name="help_support_tab_faq">FAQ</string>
+    <string name="help_support_tab_contact_us">संपर्क करें</string>
+    <string name="help_support_faqs_header">अक्सर पूछे जाने वाले प्रश्न (FAQs)</string>
+    <string name="help_support_contact_us_title">हमसे संपर्क करें</string>
+    <string name="help_support_contact_us_placeholder">हम आपकी सहायता के लिए यहाँ हैं! संपर्क विकल्प जल्द ही यहाँ उपलब्ध होंगे।</string>
+    <string name="help_support_no_results">आपकी खोज से मेल खाता कोई प्रश्न नहीं मिला।</string>
+
+    <string name="faq_q1">प्र: PataShot क्या है?</string>
+    <string name="faq_a1">PataShot एक स्थान-सक्षम कैमरा ऐप है जो आपको सत्यापित GPS निर्देशांक, दिनांक, समय और अनुकूलन योग्य पते के टैग के साथ फ़ोटो और वीडियो कैप्चर करने की अनुमति देता है।</string>
+
+    <string name="faq_q2">प्र: क्या PataShot मेरी तस्वीरों को स्वचालित रूप से सहेजता है?</string>
+    <string name="faq_a2">हाँ, जब सेटिंग्स में ऑटो-सेव सक्षम होता है, तो PataShot से ली गई सभी तस्वीरें और वीडियो स्वचालित रूप से आपके डिवाइस की गैलरी में सहेजे जाते हैं।</string>
+
+    <string name="faq_q3">प्र: PataShot को मेरे स्थान की आवश्यकता क्यों है?</string>
+    <string name="faq_a3">स्थान अनुमति PataShot को आपके सटीक GPS निर्देशांक और पते को प्राप्त करने की अनुमति देती है ताकि आपकी तस्वीरों पर सटीक जियोटैग जोड़े जा सकें।</string>
+
+    <string name="faq_q4">प्र: क्या होगा यदि मेरा GPS स्थान सटीक नहीं है?</string>
+    <string name="faq_a4">GPS सटीकता आपके डिवाइस के परिवेश और सिग्नल क्षमता पर निर्भर करती है। सर्वोत्तम परिणामों के लिए, सुनिश्चित करें कि उच्च सटीकता स्थान सक्षम है और आसमान साफ दिख रहा है।</string>
+
+    <string name="faq_q5">प्र: क्या मैं फ़ोटो लेने के बाद स्थान संपादित कर सकता हूँ?</string>
+    <string name="faq_a5">हाँ, जियोटैग की प्रामाणिकता बनाए रखने के लिए आप संपादन स्क्रीन पर मूल GPS स्थान के 1 किमी के अनुमत दायरे में स्थान विवरण संपादित कर सकते हैं।</string>
+
+    <string name="faq_q6">प्र: क्या मैं मैन्युअल रूप से स्थान जोड़ सकता हूँ?</string>
+    <string name="faq_a6">आप 1 किमी के अनुमत दायरे में आस-पास के स्थान बिंदुओं को परिष्कृत या चुन सकते हैं, लेकिन अपने वास्तविक स्थान से बहुत दूर निर्देशांक नहीं रख सकते।</string>
+
+    <string name="faq_q7">प्र: क्या मैं स्थान स्टाम्प को कस्टमाइज़ कर सकता हूँ?</string>
+    <string name="faq_a7">हाँ, PataShot कई टेम्पलेट्स और कस्टमाइज़ करने योग्य स्टाम्प शैलियाँ प्रदान करता है, जिससे आप चुन सकते हैं कि कौन से विवरण प्रदर्शित किए जाएं।</string>
+
+    <string name="faq_q8">प्र: क्या मैं अपनी ली गई तस्वीरों को संपादित कर सकता हूँ?</string>
+    <string name="faq_a8">हाँ, आप ऐप से सीधे सहेजने या साझा करने से पहले अपनी तस्वीरों को क्रॉप, रोटेट और एडजस्ट कर सकते हैं।</string>
 </resources>

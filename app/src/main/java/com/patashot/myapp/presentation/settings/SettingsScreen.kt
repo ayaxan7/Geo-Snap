@@ -70,6 +70,7 @@ fun SettingsScreen(
     onTemplatesClick: () -> Unit,
     onTermsClick: () -> Unit = {},
     onPrivacyPolicyClick: () -> Unit = {},
+    onHelpSupportClick: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -327,6 +328,13 @@ fun SettingsScreen(
                 icon = R.drawable.ic_privacy,
                 titleRes = R.string.settings_privacy_policy,
                 onClick = onPrivacyPolicyClick
+            )
+            SettingsDivider()
+
+            SettingsItemArrow(
+                icon = R.drawable.ic_help,
+                titleRes = R.string.settings_help_support,
+                onClick = onHelpSupportClick
             )
 
             Spacer(modifier = Modifier.weight(1f))

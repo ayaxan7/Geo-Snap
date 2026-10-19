@@ -344,5 +344,38 @@
 
     <string name="terms_summary_title">By using PataShot, you agree to our Terms and Conditions.</string>
     <string name="terms_summary_desc">Please use the app responsibly and verify your location details before sharing.</string>
+
+    <!-- Help and Support Screen -->
+    <string name="help_support_search_hint">Search</string>
+    <string name="help_support_tab_faq">FAQ</string>
+    <string name="help_support_tab_contact_us">Contact Us</string>
+    <string name="help_support_faqs_header">FAQs</string>
+    <string name="help_support_contact_us_title">Contact Us</string>
+    <string name="help_support_contact_us_placeholder">We are here to help! Support contact options will be available here soon.</string>
+    <string name="help_support_no_results">No questions found matching your search.</string>
+
+    <string name="faq_q1">Q: What is PataShot?</string>
+    <string name="faq_a1">PataShot is a location-enabled camera app that lets you capture photos and videos stamped with verified GPS coordinates, date, time, and customizable address tags.</string>
+
+    <string name="faq_q2">Q: Does PataShot automatically save my photos?</string>
+    <string name="faq_a2">Yes, when Auto-Save is enabled in Settings, all photos and videos captured with PataShot are automatically saved to your device\'s gallery.</string>
+
+    <string name="faq_q3">Q: Why does PataShot need my location?</string>
+    <string name="faq_a3">Location permission allows PataShot to fetch your precise GPS coordinates, address, and local details to generate accurate geotags on your captures.</string>
+
+    <string name="faq_q4">Q: What if my GPS location is not accurate?</string>
+    <string name="faq_a4">GPS accuracy depends on your device surroundings and signal strength. For best results, ensure high accuracy location is enabled and you have a clear view of the sky.</string>
+
+    <string name="faq_q5">Q: Can I edit the location after taking a photo?</string>
+    <string name="faq_a5">Yes, you can edit location details on the edit screen within an allowed 1 km radius of the original GPS fix to maintain geotag integrity.</string>
+
+    <string name="faq_q6">Q: Can I add a location manually?</string>
+    <string name="faq_a6">You can refine or select nearby location points within the allowed 1 km distance range, but cannot place coordinates arbitrarily far from your actual location.</string>
+
+    <string name="faq_q7">Q: Can I customize the location stamp?</string>
+    <string name="faq_a7">Yes, PataShot offers multiple templates and customizable stamp styles, allowing you to choose which details (coordinates, address, date/time, map) are displayed.</string>
+
+    <string name="faq_q8">Q: Can I edit my captured photos?</string>
+    <string name="faq_a8">Yes, you can crop, rotate, and adjust your photos before saving or sharing them directly from the app.</string>
 </resources>
 

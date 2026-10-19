@@ -22,6 +22,7 @@ sealed class Destination(val route: String) {
     data object Templates : Destination(route = TemplatesRoute)
     data object PrivacyPolicy : Destination(route = PrivacyPolicyRoute)
     data object TermsAndConditions : Destination(route = TermsAndConditionsRoute)
+    data object HelpAndSupport : Destination(route = HelpAndSupportRoute)
 
     /** Full-screen media viewer, opened at the tapped gallery [index]. */
     data class GalleryViewer(val index: Int) : Destination(
@@ -78,6 +79,7 @@ private const val SettingsRoute = "settings"
 private const val TemplatesRoute = "templates"
 private const val PrivacyPolicyRoute = "privacy_policy"
 private const val TermsAndConditionsRoute = "terms_and_conditions"
+private const val HelpAndSupportRoute = "help_and_support"
 
 /** Central navigation entry points for the app. */
 fun NavController.navigateTo(destination: Destination, builder: NavOptionsBuilder.() -> Unit = {}) {
@@ -106,6 +108,10 @@ fun NavController.navigateToPrivacyPolicy() {
 
 fun NavController.navigateToTermsAndConditions() {
     navigateTo(Destination.TermsAndConditions) { launchSingleTop = true }
+}
+
+fun NavController.navigateToHelpAndSupport() {
+    navigateTo(Destination.HelpAndSupport) { launchSingleTop = true }
 }
 
 fun NavController.navigateToHome() {
