@@ -48,14 +48,14 @@ fun HomeScreen(
     onOpenSettings: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
-    fun onAction(action: HomeAction) {
-        when (action) {
-            HomeAction.TAKE_PHOTO -> onTakePhoto()
-            HomeAction.TAKE_VIDEO -> onTakeVideo()
-            HomeAction.QUICK_SHARE -> onQuickShare()
-            HomeAction.GALLERY -> onOpenGallery()
-        }
-    }
+//    fun onAction(action: HomeAction) {
+//        when (action) {
+//            HomeAction.TAKE_PHOTO -> onTakePhoto()
+//            HomeAction.TAKE_VIDEO -> onTakeVideo()
+//            HomeAction.QUICK_SHARE -> onQuickShare()
+//            HomeAction.GALLERY -> onOpenGallery()
+//        }
+//    }
 
     Column(
         modifier = Modifier

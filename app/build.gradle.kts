@@ -20,8 +20,8 @@ android {
         applicationId = "com.patashot.myapp"
         minSdk = 28
         targetSdk = 36
-        versionCode = 2
-        versionName = "1.0.1"
+        versionCode = 3
+        versionName = "1.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -164,4 +164,20 @@ tasks.withType<Test>().configureEach {
         "--add-opens=java.base/java.lang=ALL-UNNAMED",
         "--add-opens=java.base/java.util=ALL-UNNAMED"
     )
+}
+
+// Hilt mirrors the project's KSP/annotationProcessor classpath onto its internal
+// hiltJavaCompile tasks. Because moshi-kotlin-codegen contains a legacy javac/kapt
+// processor service provider in addition to KSP, javac triggers Moshi's kapt
+// deprecation warning even though the project has already migrated Moshi to KSP.
+// Filtering moshi-kotlin-codegen out of the hiltJavaCompile annotation processor path
+// silences the false warning.
+tasks.withType<JavaCompile>().configureEach {
+    if (name.startsWith("hiltJavaCompile")) {
+        doFirst {
+            options.annotationProcessorPath = options.annotationProcessorPath?.filter { file ->
+                !file.name.contains("moshi-kotlin-codegen")
+            }
+        }
+    }
 }

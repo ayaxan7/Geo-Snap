@@ -38,6 +38,7 @@ import com.patashot.myapp.presentation.home.HomeScreen
 import com.patashot.myapp.presentation.main.MainViewModel
 import com.patashot.myapp.presentation.onboarding.LanguageScreen
 import com.patashot.myapp.presentation.onboarding.PermissionsScreen
+import com.patashot.myapp.presentation.settings.PrivacyPolicyScreen
 import com.patashot.myapp.presentation.settings.SettingsScreen
 import com.patashot.myapp.presentation.templates.TemplatesScreen
 
@@ -136,8 +137,13 @@ internal fun GeoSnapNavHost(startDestination: String, isAlreadyOnboarded: Boolea
             SettingsScreen(
                 onBack = navController::popBackStack,
                 onLanguageClick = navController::navigateToLanguage,
-                onTemplatesClick = navController::navigateToTemplates
+                onTemplatesClick = navController::navigateToTemplates,
+                onPrivacyPolicyClick = navController::navigateToPrivacyPolicy
             )
+        }
+
+        composable(Destination.PrivacyPolicy.route) {
+            PrivacyPolicyScreen(onBack = navController::popBackStack)
         }
 
         composable(Destination.Templates.route) {

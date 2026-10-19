@@ -68,6 +68,7 @@ fun SettingsScreen(
     onBack: () -> Unit,
     onLanguageClick: () -> Unit,
     onTemplatesClick: () -> Unit,
+    onPrivacyPolicyClick: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -312,27 +313,13 @@ fun SettingsScreen(
                 titleRes = R.string.settings_rate_app,
                 onClick = { }
             )
-//            SettingsDivider()
-//
-//            SettingsItemArrow(
-//                icon = R.drawable.ic_terms,
-//                titleRes = R.string.settings_terms,
-//                onClick = { }
-//            )
-//            SettingsDivider()
-//
-//            SettingsItemArrow(
-//                icon = R.drawable.ic_privacy,
-//                titleRes = R.string.settings_privacy_policy,
-//                onClick = { }
-//            )
-//            SettingsDivider()
-//
-//            SettingsItemArrow(
-//                icon = R.drawable.ic_help,
-//                titleRes = R.string.settings_help_support,
-//                onClick = { }
-//            )
+            SettingsDivider()
+
+            SettingsItemArrow(
+                icon = R.drawable.ic_privacy,
+                titleRes = R.string.settings_privacy_policy,
+                onClick = onPrivacyPolicyClick
+            )
 
             Spacer(modifier = Modifier.weight(1f))
 
