@@ -354,4 +354,11 @@
 
     <string name="faq_q8">ಪ್ರ: ನಾನು ಸೆರೆಹಿಡಿದ ಫೋಟೋಗಳನ್ನು ಸಂಪಾದಿಸಬಹುದೇ?</string>
     <string name="faq_a8">ಹೌದು, ಆ್ಯಪ್‌ನಿಂದ ನೇರವಾಗಿ ಉಳಿಸುವ ಅಥವಾ ಹಂಚಿಕೊಳ್ಳುವ ಮೊದಲು ನಿಮ್ಮ ಫೋಟೋಗಳನ್ನು ಕ್ರಾಪ್ ಮಾಡಬಹುದು, ತಿರುಗಿಸಬಹುದು ಮತ್ತು ಸರಿಹೊಂದಿಸಬಹುದು.</string>
+
+    <!-- Contact Us Fields -->
+    <string name="contact_us_gmail_title">Gmail</string>
+    <string name="contact_us_gmail_address">support@patashot.com</string>
+    <string name="contact_us_gmail_desc">ಯಾವುದೇ ಸಮಯದಲ್ಲಿ ನಮ್ಮನ್ನು ಸಂಪರ್ಕಿಸಿ ಮತ್ತು ನಾವು ಶೀಘ್ರದಲ್ಲೇ ನಿಮ್ಮನ್ನು ಸಂಪರ್ಕಿಸುತ್ತೇವೆ</string>
+    <string name="contact_us_instagram">Instagram</string>
+    <string name="contact_us_linkedin">Linkedin</string>
 </resources>

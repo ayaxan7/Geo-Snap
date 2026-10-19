@@ -354,4 +354,11 @@
 
     <string name="faq_q8">கே: நான் எடுத்த புகைப்படங்களைத் திருத்த முடியுமா?</string>
     <string name="faq_a8">ஆம், செயலியில் இருந்தே நேரடியாகச் சேமிப்பதற்கு அல்லது பகிர்வதற்கு முன் உங்கள் புகைப்படங்களை செதுக்கலாம், சுழற்றலாம் மற்றும் மாற்றியமைக்கலாம்.</string>
+
+    <!-- Contact Us Fields -->
+    <string name="contact_us_gmail_title">Gmail</string>
+    <string name="contact_us_gmail_address">support@patashot.com</string>
+    <string name="contact_us_gmail_desc">எப்போது வேண்டுமானாலும் எங்களைத் தொடர்பு கொள்ளுங்கள், நாங்கள் விரைவில் பதிலளிப்போம்</string>
+    <string name="contact_us_instagram">Instagram</string>
+    <string name="contact_us_linkedin">Linkedin</string>
 </resources>

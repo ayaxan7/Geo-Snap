@@ -354,4 +354,11 @@
 
     <string name="faq_q8">ప్ర: నేను క్యాప్చర్ చేసిన ఫోటోలను ఎడిట్ చేయవచ్చా?</string>
     <string name="faq_a8">అవును, యాప్ నుండి నేరుగా సేవ్ చేయడానికి లేదా షేర్ చేయడానికి ముందు మీరు మీ ఫోటోలను క్రాప్ చేయవచ్చు, రొటేట్ చేయవచ్చు మరియు సర్దుబాటు చేయవచ్చు.</string>
+
+    <!-- Contact Us Fields -->
+    <string name="contact_us_gmail_title">Gmail</string>
+    <string name="contact_us_gmail_address">support@patashot.com</string>
+    <string name="contact_us_gmail_desc">ఎప్పుడైనా మమ్మల్ని సంప్రదించండి మరియు మేము త్వరలోనే మీకు ప్రతిస్పందిస్తాము</string>
+    <string name="contact_us_instagram">Instagram</string>
+    <string name="contact_us_linkedin">Linkedin</string>
 </resources>

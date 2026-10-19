@@ -353,4 +353,11 @@
 
     <string name="faq_q8">प्र: क्या मैं अपनी ली गई तस्वीरों को संपादित कर सकता हूँ?</string>
     <string name="faq_a8">हाँ, आप ऐप से सीधे सहेजने या साझा करने से पहले अपनी तस्वीरों को क्रॉप, रोटेट और एडजस्ट कर सकते हैं।</string>
+
+    <!-- Contact Us Fields -->
+    <string name="contact_us_gmail_title">Gmail</string>
+    <string name="contact_us_gmail_address">support@patashot.com</string>
+    <string name="contact_us_gmail_desc">किसी भी समय हमसे संपर्क करें और हम जल्द ही आपसे संपर्क करेंगे</string>
+    <string name="contact_us_instagram">Instagram</string>
+    <string name="contact_us_linkedin">Linkedin</string>
 </resources>
