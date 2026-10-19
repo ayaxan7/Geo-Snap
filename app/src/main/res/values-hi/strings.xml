@@ -356,8 +356,9 @@
 
     <!-- Contact Us Fields -->
     <string name="contact_us_gmail_title">Gmail</string>
-    <string name="contact_us_gmail_address">support@patashot.com</string>
+    <string name="contact_us_gmail_address">connect.patashot@gmail.com</string>
     <string name="contact_us_gmail_desc">किसी भी समय हमसे संपर्क करें और हम जल्द ही आपसे संपर्क करेंगे</string>
     <string name="contact_us_instagram">Instagram</string>
+    <string name="contact_us_youtube">Youtube</string>
     <string name="contact_us_linkedin">Linkedin</string>
 </resources>

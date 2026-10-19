@@ -505,7 +505,7 @@ private fun ContactUsPage(
                             )
                         }
                     }
-                    Spacer(modifier = Modifier.width(12.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = stringResource(R.string.contact_us_gmail_title),
@@ -517,18 +517,19 @@ private fun ContactUsPage(
                         Text(
                             text = gmailAddress,
                             color = Color.White.copy(alpha = 0.9f),
-                            fontSize = 12.sp,
-                            maxLines = 1,
+                            fontSize = 10.sp,
+                            maxLines = 2,
+                            lineHeight = 10.sp,
                             overflow = TextOverflow.Ellipsis
                         )
                     }
-//                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = stringResource(R.string.contact_us_gmail_desc),
                         color = Color.White.copy(alpha = 0.85f),
-                        fontSize = 10.5.sp,
-                        lineHeight = 11.sp,
-                        textAlign = TextAlign.Justify,
+                        fontSize = 10.sp,
+                        lineHeight = 10.sp,
+                        textAlign = TextAlign.End,
                         modifier = Modifier.width(145.dp).align(Alignment.CenterVertically)
                     )
                 }
@@ -572,6 +573,27 @@ private fun ContactUsPage(
                         Toast.makeText(
                             context,
                             "LinkedIn link not found",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            )
+            ContactSocialCard(
+                iconRes = R.drawable.ic_youtube,
+                title = stringResource(R.string.contact_us_instagram),
+                onClick = {
+                    val intent =
+                        Intent(
+                            Intent.ACTION_VIEW,
+                            "https://www.youtube.com/@PataShot/".toUri()
+                        )
+                    try {
+                        context.startActivity(intent)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        Toast.makeText(
+                            context,
+                            "Youtube link not found",
                             Toast.LENGTH_SHORT
                         ).show()
                     }
