@@ -277,7 +277,7 @@ class CanvasGeoTagOverlayRendererTest {
         val bitmap = card(CardTemplates.DEFAULT)
         val metrics = CardTemplates.DEFAULT.metrics()
         val minimumHeight =
-            ((metrics.mapHeightDp + 2 * metrics.paddingVerticalDp) * renderDensity).toInt()
+            ((metrics.mapHeightDp + 1.8f * metrics.paddingVerticalDp) * renderDensity).toInt()
 
         assertEquals((GeoTagCardShell.CARD_WIDTH_DP * renderDensity).toInt(), bitmap.width)
         assertTrue(

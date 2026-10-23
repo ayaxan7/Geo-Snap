@@ -103,14 +103,14 @@ class CanvasGeoTagOverlayRenderer internal constructor(
         mapBitmap: Bitmap?,
         mapLabel: String
     ): Bitmap {
-        val padTop = dp(metrics.paddingVerticalDp)
-        val padBottom = dp(metrics.paddingVerticalDp)
+        val padTop = dp(metrics.paddingVerticalDp * 0.6f)
+        val padBottom = dp(metrics.paddingVerticalDp * 1.4f)
         val padH = dp(metrics.paddingHorizontalDp)
         val cardWidth = dp(metrics.cardWidthDp)
         val mapWidth = dp(metrics.mapWidthDp)
         val mapHeight = dp(metrics.mapHeightDp)
         val mapLeft = padH
-        val logoSize = if (metrics.logoVisible) dp(metrics.logoSizeDp) else 0
+        val logoSize = if (metrics.logoVisible) dp(metrics.logoHeightDp) else 0
         val logoLeft = cardWidth - padH - logoSize
         val detailsGap = if (metrics.logoVisible) dp(metrics.spacerDetailsLogoDp) else 0
         val textLeft = mapLeft + mapWidth + dp(metrics.spacerMapDetailsDp)
@@ -487,7 +487,7 @@ class CanvasGeoTagOverlayRenderer internal constructor(
                 Paint(Paint.ANTI_ALIAS_FLAG).apply { color = bgColor }
             )
         }
-        val drawable = runCatching { context.getDrawable(R.drawable.geo_snap_icon) }.getOrNull()
+        val drawable = runCatching { context.getDrawable(R.drawable.geo_tag_app_icon) }.getOrNull()
             ?: return
         canvas.withClip(Path().apply { addRoundRect(rect, corner, corner, Path.Direction.CW) }) {
             drawable.setBounds(

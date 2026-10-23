@@ -75,7 +75,7 @@ data class GeoTagCardStyle(
     val iconSizeDp: Float,
 
     // Logo
-    val logoSizeDp: Float,
+    val logoHeightDp: Float,
     val logoCornerDp: Float
 ) : java.io.Serializable
 
@@ -137,7 +137,7 @@ object CardTemplates {
             coordinatesTextSizeSp = 11f,
             dateTextSizeSp = 10.5f,
             iconSizeDp = 13f,
-            logoSizeDp = 44f,
+            logoHeightDp = 56f,
             logoCornerDp = 9f
         )
     )
@@ -168,7 +168,7 @@ object CardTemplates {
             coordinatesTextSizeSp = 11f,
             dateTextSizeSp = 14f,
             iconSizeDp = 0f,
-            logoSizeDp = 0f,
+            logoHeightDp = 0f,
             logoCornerDp = 0f
         )
     )
@@ -202,7 +202,7 @@ object CardTemplates {
             coordinatesTextSizeSp = 11f,
             dateTextSizeSp = 11f,
             iconSizeDp = 13f,
-            logoSizeDp = 0f,
+            logoHeightDp = 0f,
             logoCornerDp = 0f
         )
     )

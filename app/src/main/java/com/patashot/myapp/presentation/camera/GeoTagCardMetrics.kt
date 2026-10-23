@@ -41,7 +41,7 @@ data class GeoTagCardMetrics(
     val coordinatesTextSizeSp: Float,
     val dateTextSizeSp: Float,
     val iconSizeDp: Float,
-    val logoSizeDp: Float,
+    val logoHeightDp: Float,
     val logoCornerDp: Float
 ) {
     companion object {
@@ -76,7 +76,7 @@ data class GeoTagCardMetrics(
                 coordinatesTextSizeSp = s.coordinatesTextSizeSp * scale,
                 dateTextSizeSp = s.dateTextSizeSp * scale,
                 iconSizeDp = s.iconSizeDp * scale,
-                logoSizeDp = s.logoSizeDp * scale,
+                logoHeightDp = s.logoHeightDp * scale,
                 logoCornerDp = s.logoCornerDp * scale
             )
         }

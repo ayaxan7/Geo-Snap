@@ -46,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
@@ -90,9 +91,9 @@ import kotlinx.coroutines.launch
 
 /**
  * Full-screen media viewer: swipe left/right through the app gallery. Photos
- * support pinch-zoom and pan; videos play through a single ExoPlayer that only
- * plays the visible page. A share and a delete (app gallery only) action are
- * available from the top bar.
+ * and videos support pinch-zoom and pan; videos play through a single ExoPlayer
+ * that only plays the visible page. A share and a delete (app gallery only)
+ * action are available from the top bar.
  */
 @Composable
 fun MediaViewerScreen(
@@ -228,7 +229,7 @@ fun MediaViewerScreen(
                         val item = media[page]
                         when (item.type) {
                             MediaType.IMAGE -> ZoomablePhoto(uri = item.uri)
-                            MediaType.VIDEO -> VideoPage(uri = item.uri, player = player)
+                            MediaType.VIDEO -> ZoomableVideo(uri = item.uri, player = player)
                         }
                     }
 
@@ -403,7 +404,7 @@ private fun ViewerTopBar(
 
 @OptIn(UnstableApi::class)
 @Composable
-private fun VideoPage(uri: Uri, player: ExoPlayer) {
+private fun VideoPage(uri: Uri, player: ExoPlayer, modifier: Modifier = Modifier) {
     AndroidView(
         factory = { ctx ->
             PlayerView(ctx).apply {
@@ -417,8 +418,66 @@ private fun VideoPage(uri: Uri, player: ExoPlayer) {
             }
         },
         update = { it.player = player },
-        modifier = Modifier.fillMaxSize()
+        modifier = modifier
     )
+}
+
+/**
+ * Full-screen video with pinch-zoom and pan while zoomed, matching the photo
+ * viewer. Video keeps its single-tap controller handling because gestures are
+ * only consumed on a pinch or once zoomed; at 1x a horizontal swipe passes
+ * through to the pager.
+ */
+@Composable
+private fun ZoomableVideo(uri: Uri, player: ExoPlayer) {
+    var scale by remember { mutableFloatStateOf(1f) }
+    var offset by remember { mutableStateOf(Offset.Zero) }
+    var size by remember { mutableStateOf(IntSize.Zero) }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+            .onSizeChanged { size = it }
+            .pointerInput(Unit) {
+                awaitEachGesture {
+                    awaitFirstDown(
+                        requireUnconsumed = false,
+                        pass = PointerEventPass.Initial
+                    )
+                    do {
+                        val event = awaitPointerEvent(PointerEventPass.Initial)
+                        val zoomChange = event.calculateZoom()
+                        val panChange = event.calculatePan()
+                        val zoomed = scale > 1f
+                        if (event.changes.fastAll { it.pressed } && (zoomed || zoomChange != 1f)) {
+                            val newScale = (scale * zoomChange).coerceIn(1f, MAX_ZOOM)
+                            if (newScale > 1f) {
+                                scale = newScale
+                                offset = clampOffset(offset + panChange, newScale, size)
+                            } else {
+                                scale = 1f
+                                offset = Offset.Zero
+                            }
+                            event.changes.fastForEach { it.consume() }
+                        }
+                    } while (event.changes.fastAny { it.pressed })
+                }
+            }
+    ) {
+        VideoPage(
+            uri = uri,
+            player = player,
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                    translationX = offset.x
+                    translationY = offset.y
+                }
+        )
+    }
 }
 
 /**

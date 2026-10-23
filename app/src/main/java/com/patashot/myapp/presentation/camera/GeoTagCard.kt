@@ -400,13 +400,13 @@ private fun QrCodeBadge(
 private fun LogoBadge(metrics: GeoTagCardMetrics, logoLabel: String) {
     Box(
         modifier = Modifier
-            .size(metrics.logoSizeDp.dp)
+            .size(metrics.logoHeightDp.dp)
             .clip(RoundedCornerShape(metrics.logoCornerDp.dp))
             .background(Color.Transparent),
         contentAlignment = Alignment.Center
     ) {
         Image(
-            painter = painterResource(R.drawable.geo_snap_icon),
+            painter = painterResource(R.drawable.geo_tag_app_icon),
             contentDescription = logoLabel,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.FillBounds
