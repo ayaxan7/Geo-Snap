@@ -39,6 +39,9 @@ interface CameraEngine {
     /** Toggles flash/torch and returns the new state. */
     suspend fun toggleFlash(): Boolean
 
+    /** Zooms in (`factor > 1`) or out (`factor < 1`), clamped to the lens limits. */
+    suspend fun zoomBy(factor: Float)
+
     /** Captures a single photo into a unique temp file and returns it. */
     suspend fun capturePhoto(): File
 

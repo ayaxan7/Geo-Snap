@@ -50,6 +50,7 @@ class CameraXController(
     private var activeRecording: Recording? = null
     private var activeSession: RecordingSession? = null
     private var currentLensFacing: CameraEngine.LensFacing = CameraEngine.LensFacing.BACK
+    private var currentZoom = 1f
 
     private var boundPreviewView: PreviewView? = null
     private var boundLifecycleOwner: LifecycleOwner? = null
@@ -146,6 +147,7 @@ class CameraXController(
 
     private fun attachCamera(newCamera: Camera) {
         camera = newCamera
+        currentZoom = newCamera.cameraInfo.zoomState.value?.zoomRatio ?: 1f
         _hasFlash.value = newCamera.cameraInfo.hasFlashUnit()
         _flashEnabled.value = false
     }
@@ -167,6 +169,15 @@ class CameraXController(
         }
         _flashEnabled.value = next
         next
+    }
+
+    override suspend fun zoomBy(factor: Float): Unit = withContext(Dispatchers.Main.immediate) {
+        val cam = camera ?: return@withContext
+        val bounds = cam.cameraInfo.zoomState.value ?: return@withContext
+        val target = (currentZoom * factor)
+            .coerceIn(bounds.minZoomRatio, bounds.maxZoomRatio)
+        currentZoom = target
+        cam.cameraControl.setZoomRatio(target)
     }
 
     override suspend fun capturePhoto(): File = withContext(Dispatchers.Main.immediate) {
@@ -240,6 +251,7 @@ class CameraXController(
         boundLifecycleOwner = null
         activeRecording = null
         activeSession = null
+        currentZoom = 1f
         _isRecording.value = false
         _flashEnabled.value = false
         _hasFlash.value = false

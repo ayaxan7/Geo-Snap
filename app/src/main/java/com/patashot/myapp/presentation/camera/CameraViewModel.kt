@@ -206,6 +206,11 @@ class CameraViewModel @Inject constructor(
         }
     }
 
+    fun zoomBy(factor: Float) {
+        val engine = attachedEngine ?: return
+        viewModelScope.launch { runCatching { engine.zoomBy(factor) } }
+    }
+
     fun capturePhoto() {
         val engine = attachedEngine ?: return
         if (_uiState.value.isProcessing || _uiState.value.isCountdownActive) return

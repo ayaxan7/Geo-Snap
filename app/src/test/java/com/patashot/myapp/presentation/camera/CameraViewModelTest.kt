@@ -280,6 +280,17 @@ class CameraViewModelTest {
     }
 
     @Test
+    fun `zoom forwards to engine`() = runTest(mainDispatcherRule.scheduler) {
+        val engine = FakeCameraEngine()
+        val vm = createViewModel(engine = engine)
+
+        vm.zoomBy(1.5f)
+        advanceUntilIdle()
+
+        assertEquals(listOf(1.5f), engine.zoomFactors)
+    }
+
+    @Test
     fun `mode parsed from saved state handle`() {
         val vm = createViewModel(mode = CameraMode.QUICK_SHARE.routeName)
         assertEquals(CameraMode.QUICK_SHARE, vm.mode)

@@ -318,6 +318,12 @@ class FakeCameraEngine : CameraEngine {
         return flashEnabled.value
     }
 
+    val zoomFactors = mutableListOf<Float>()
+
+    override suspend fun zoomBy(factor: Float) {
+        zoomFactors.add(factor)
+    }
+
     override suspend fun capturePhoto(): File {
         if (failCapture) {
             throw CameraCaptureException(1, File("failed.jpg"))
