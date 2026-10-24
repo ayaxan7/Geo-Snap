@@ -27,6 +27,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -90,12 +91,33 @@ class CanvasGeoTagOverlayRenderer internal constructor(
         }
     }
 
+    /** Laid-out text and the resulting geometry for one pass of [renderMapLeft]. */
+    private class MapLeftPlan(
+        val city: StaticLayout,
+        val address: StaticLayout,
+        val coordinates: StaticLayout,
+        val date: StaticLayout,
+        val addressRowH: Int,
+        val dateRowH: Int,
+        val innerH: Int,
+        val baseline: Int,
+        val gap: Int,
+        /** Bottom edge of city, address, coordinates and date rows, in that order. */
+        val rowBottoms: IntArray
+    )
+
     /**
      * Map thumbnail on the left, text block in the middle, logo on the right.
      *
-     * The card hugs its content: a top gap of the shell's vertical padding, then the
-     * map, details column and logo bottom-aligned onto a single baseline, then the
-     * same gap underneath.
+     * Mirrors Compose's `Row(verticalAlignment = Bottom)` with
+     * `padding(vertical = paddingVerticalDp)`: the same gap above and below, and the
+     * row is as tall as its tallest child (map, details column or logo). All three
+     * children end on one baseline just above the bottom gap.
+     *
+     * The logo is bottom-aligned, so the area above it is free. Each text line that
+     * sits entirely above the logo is given the extra width up to the card's right
+     * padding, so it only truncates when it genuinely runs out of room. Lines level
+     * with the logo keep the narrower width and never run under it.
      */
     private fun renderMapLeft(
         metrics: GeoTagCardMetrics,
@@ -103,8 +125,9 @@ class CanvasGeoTagOverlayRenderer internal constructor(
         mapBitmap: Bitmap?,
         mapLabel: String
     ): Bitmap {
-        val padTop = dp(metrics.paddingVerticalDp * 0.6f)
-        val padBottom = dp(metrics.paddingVerticalDp * 1.4f)
+        // Symmetric padding, exactly like Compose's padding(vertical = ...).
+        val padTop = dp(metrics.paddingVerticalDp)
+        val padBottom = dp(metrics.paddingVerticalDp)
         val padH = dp(metrics.paddingHorizontalDp)
         val cardWidth = dp(metrics.cardWidthDp)
         val mapWidth = dp(metrics.mapWidthDp)
@@ -114,30 +137,85 @@ class CanvasGeoTagOverlayRenderer internal constructor(
         val logoLeft = cardWidth - padH - logoSize
         val detailsGap = if (metrics.logoVisible) dp(metrics.spacerDetailsLogoDp) else 0
         val textLeft = mapLeft + mapWidth + dp(metrics.spacerMapDetailsDp)
-        val detailsWidth = logoLeft - detailsGap - textLeft
+        // Width beside the logo, and width when the line is clear of the logo.
+        val narrowWidth = logoLeft - detailsGap - textLeft
+        val wideWidth = cardWidth - padH - textLeft
 
         val cityPaint = textPaint(metrics.textColor, metrics.cityTextSizeSp, bold = true)
         val addressPaint = textPaint(metrics.textSecondaryColor, metrics.addressTextSizeSp)
         val coordinatesPaint = textPaint(metrics.textColor, metrics.coordinatesTextSizeSp)
         val datePaint = textPaint(metrics.textColor, metrics.dateTextSizeSp)
 
-        val cityLayout = buildLayout(copy.city, cityPaint, detailsWidth, maxLines = 1)
-        val addressLayout = buildLayout(copy.address, addressPaint, detailsWidth, maxLines = 2)
-        val coordinatesLayout =
-            buildLayout(copy.coordinates, coordinatesPaint, detailsWidth, maxLines = 1)
-        val dateLayout = buildLayout(copy.date, datePaint, detailsWidth, maxLines = 1)
-
+        // Address and date are drawn after an icon, so they lose the icon's width.
         val iconSize = dp(metrics.iconSizeDp)
-        val addressRowH = maxOf(iconSize, addressLayout.height)
-        val dateRowH = maxOf(iconSize, dateLayout.height)
+        val iconGap = iconSize + dp(metrics.iconTextGapDp)
         val detailsVPad = dp(metrics.detailsPaddingVerticalDp)
         val lineGap = dp(metrics.detailsLineGapDp)
-        val columnH = detailsVPad * 2 + cityLayout.height + lineGap + addressRowH + lineGap +
-            coordinatesLayout.height + lineGap + dateRowH
+        val clearance = lineGap
 
-        val innerH = maxOf(mapHeight, columnH)
+        fun plan(wide: BooleanArray): MapLeftPlan {
+            fun width(i: Int) = if (wide[i]) wideWidth else narrowWidth
+            val city = buildLayout(copy.city, cityPaint, width(0), maxLines = 1)
+            val address = buildLayout(
+                copy.address, addressPaint, (width(1) - iconGap).coerceAtLeast(1), maxLines = 2
+            )
+            val coordinates =
+                buildLayout(copy.coordinates, coordinatesPaint, width(2), maxLines = 1)
+            val date = buildLayout(
+                copy.date, datePaint, (width(3) - iconGap).coerceAtLeast(1), maxLines = 1
+            )
+
+            val addressRowH = maxOf(iconSize, address.height)
+            val dateRowH = maxOf(iconSize, date.height)
+            val columnH = detailsVPad * 2 + city.height + lineGap + addressRowH + lineGap +
+                    coordinates.height + lineGap + dateRowH
+
+            // The row is as tall as its tallest child, logo included.
+            val innerH = maxOf(mapHeight, columnH, logoSize)
+            val baseline = padTop + innerH
+
+            // The details column fills the whole row height; space the text doesn't
+            // need is shared between the three gaps instead of piling up on top.
+            val gap = lineGap + (innerH - columnH).coerceAtLeast(0) / 3
+
+            val top0 = baseline - innerH + detailsVPad
+            val top1 = top0 + city.height + gap
+            val top2 = top1 + addressRowH + gap
+            val top3 = top2 + coordinates.height + gap
+            return MapLeftPlan(
+                city, address, coordinates, date, addressRowH, dateRowH, innerH, baseline, gap,
+                intArrayOf(
+                    top0 + city.height,
+                    top1 + addressRowH,
+                    top2 + coordinates.height,
+                    top3 + dateRowH
+                )
+            )
+        }
+
+        fun clearOfLogo(p: MapLeftPlan, i: Int): Boolean =
+            !metrics.logoVisible || p.rowBottoms[i] <= p.baseline - logoSize - clearance
+
+        // Widening a line can change line counts and therefore positions, so settle
+        // on which lines are wide with a few passes, then drop any that ended up
+        // touching the logo.
+        var wide = BooleanArray(4)
+        var plan = plan(wide)
+        for (pass in 0 until 3) {
+            val next = BooleanArray(4) { clearOfLogo(plan, it) }
+            if (next.contentEquals(wide)) break
+            wide = next
+            plan = plan(wide)
+        }
+        val safe = BooleanArray(4) { wide[it] && clearOfLogo(plan, it) }
+        if (!safe.contentEquals(wide)) {
+            wide = safe
+            plan = plan(wide)
+        }
+
+        val innerH = plan.innerH
+        val baseline = plan.baseline
         val cardHeight = padTop + innerH + padBottom
-        val baseline = padTop + innerH
 
         val bitmap = Bitmap.createBitmap(cardWidth, cardHeight, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
@@ -157,33 +235,31 @@ class CanvasGeoTagOverlayRenderer internal constructor(
             metrics = metrics
         )
 
-        var y = baseline - columnH + detailsVPad
+        var y = baseline - innerH + detailsVPad
 
-        canvas.drawLayout(cityLayout, textLeft.toFloat(), y.toFloat())
-        y += cityLayout.height + lineGap
+        canvas.drawLayout(plan.city, textLeft.toFloat(), y.toFloat())
+        y += plan.city.height + plan.gap
 
-        val iconGap = iconSize + dp(metrics.iconTextGapDp)
+        // Same icons as the Compose card, drawn untinted.
         drawIcon(
             canvas = canvas,
-            drawableId = android.R.drawable.ic_menu_mylocation,
-            rect = Rect(textLeft, y, textLeft + iconSize, y + iconSize),
-            tint = metrics.iconAccentColor.toArgb()
+            drawableId = R.drawable.ic_map,
+            rect = Rect(textLeft, y, textLeft + iconSize, y + iconSize)
         )
-        canvas.drawLayout(addressLayout, (textLeft + iconGap).toFloat(), y.toFloat())
-        y += addressRowH + lineGap
+        canvas.drawLayout(plan.address, (textLeft + iconGap).toFloat(), y.toFloat())
+        y += plan.addressRowH + plan.gap
 
-        canvas.drawLayout(coordinatesLayout, textLeft.toFloat(), y.toFloat())
-        y += coordinatesLayout.height + lineGap
+        canvas.drawLayout(plan.coordinates, textLeft.toFloat(), y.toFloat())
+        y += plan.coordinates.height + plan.gap
 
-        val dateTextTop = y + (dateRowH - dateLayout.height) / 2
-        val dateIconTop = y + (dateRowH - iconSize) / 2
+        val dateTextTop = y + (plan.dateRowH - plan.date.height) / 2
+        val dateIconTop = y + (plan.dateRowH - iconSize) / 2
         drawIcon(
             canvas = canvas,
-            drawableId = android.R.drawable.ic_menu_today,
-            rect = Rect(textLeft, dateIconTop, textLeft + iconSize, dateIconTop + iconSize),
-            tint = metrics.textColor.toArgb()
+            drawableId = R.drawable.ic_calendar,
+            rect = Rect(textLeft, dateIconTop, textLeft + iconSize, dateIconTop + iconSize)
         )
-        canvas.drawLayout(dateLayout, (textLeft + iconGap).toFloat(), dateTextTop.toFloat())
+        canvas.drawLayout(plan.date, (textLeft + iconGap).toFloat(), dateTextTop.toFloat())
 
         if (metrics.logoVisible) {
             drawLogo(
@@ -286,8 +362,7 @@ class CanvasGeoTagOverlayRenderer internal constructor(
         drawIcon(
             canvas = canvas,
             drawableId = R.drawable.ic_calendar,
-            rect = Rect(textLeft, dateIconTop, textLeft + iconSize, dateIconTop + iconSize),
-            tint = metrics.textColor.toArgb()
+            rect = Rect(textLeft, dateIconTop, textLeft + iconSize, dateIconTop + iconSize)
         )
         canvas.drawLayout(dateLayout, (textLeft + iconGap).toFloat(), dateTextTop.toFloat())
 
@@ -343,7 +418,7 @@ class CanvasGeoTagOverlayRenderer internal constructor(
         val lineGap = dp(metrics.detailsLineGapDp)
         val detailsVPad = dp(metrics.detailsPaddingVerticalDp)
         val columnH = dateLayout.height + lineGap + locationLayout.height + lineGap +
-            coordinatesLayout.height
+                coordinatesLayout.height
         val cardHeight = padV + detailsVPad + columnH + detailsVPad + padV
 
         val bitmap = Bitmap.createBitmap(cardWidth, cardHeight, Bitmap.Config.ARGB_8888)
@@ -443,25 +518,24 @@ class CanvasGeoTagOverlayRenderer internal constructor(
         )
 
         if (mapBitmap != null) {
-            canvas.save()
-            canvas.clipPath(Path().apply {
+            canvas.withClip(Path().apply {
                 addRoundRect(rect, corner, corner, Path.Direction.CW)
-            })
-            val side = minOf(mapBitmap.width, mapBitmap.height)
-            val srcLeft = (mapBitmap.width - side) / 2
-            val srcTop = (mapBitmap.height - side) / 2
-            canvas.drawBitmap(
-                mapBitmap,
-                Rect(srcLeft, srcTop, srcLeft + side, srcTop + side),
-                Rect(
-                    rect.left.toInt(),
-                    rect.top.toInt(),
-                    rect.right.toInt(),
-                    rect.bottom.toInt()
-                ),
-                Paint(Paint.FILTER_BITMAP_FLAG)
-            )
-            canvas.restore()
+            }) {
+                val side = minOf(mapBitmap.width, mapBitmap.height)
+                val srcLeft = (mapBitmap.width - side) / 2
+                val srcTop = (mapBitmap.height - side) / 2
+                drawBitmap(
+                    mapBitmap,
+                    Rect(srcLeft, srcTop, srcLeft + side, srcTop + side),
+                    Rect(
+                        rect.left.toInt(),
+                        rect.top.toInt(),
+                        rect.right.toInt(),
+                        rect.bottom.toInt()
+                    ),
+                    Paint(Paint.FILTER_BITMAP_FLAG)
+                )
+            }
         } else {
             val textPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
                 color = metrics.textColor.toArgb()
@@ -500,10 +574,11 @@ class CanvasGeoTagOverlayRenderer internal constructor(
         }
     }
 
-    private fun drawIcon(canvas: Canvas, drawableId: Int, rect: Rect, tint: Int) {
+    private fun drawIcon(canvas: Canvas, drawableId: Int, rect: Rect, tint: Int? = null) {
         val drawable = runCatching { context.getDrawable(drawableId) }.getOrNull() ?: return
         drawable.setBounds(rect)
-        drawable.colorFilter = PorterDuffColorFilter(tint, PorterDuff.Mode.SRC_IN)
+        drawable.colorFilter =
+            tint?.let { PorterDuffColorFilter(it, PorterDuff.Mode.SRC_IN) }
         drawable.draw(canvas)
     }
 
@@ -514,9 +589,10 @@ class CanvasGeoTagOverlayRenderer internal constructor(
         restore()
     }
 
-    private fun dp(value: Float): Int = (value * density()).toInt()
+    // Rounded rather than truncated so sizes match Compose and don't lose a pixel each.
+    private fun dp(value: Float): Int = (value * density()).roundToInt()
 
-    private fun sp(value: Float): Int = (value * density()).toInt()
+    private fun sp(value: Float): Int = (value * density()).roundToInt()
 
     private fun density(): Float = RENDER_DENSITY * SUPERSAMPLE
 
