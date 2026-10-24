@@ -28,17 +28,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.patashot.myapp.R
 import com.patashot.myapp.core.LocaleHelper
-import java.text.SimpleDateFormat
 
 /**
  * The location card composable shown over the capture preview.
@@ -70,7 +71,7 @@ fun GeoTagCard(
 
     val context = LocalContext.current
     val englishContext = remember(context) { LocaleHelper.englishContext(context) }
-    val dateFormat = remember { SimpleDateFormat(CARD_DATE_PATTERN, java.util.Locale.ENGLISH) }
+    val dateFormat = remember { createCardDateFormat() }
 
     val labels = remember(englishContext, content) {
         CardLabels(
@@ -163,11 +164,35 @@ private class CardLabels(
     val copy: CardCopy
 )
 
+/** Vertical geometry of the map layout's details column, relative to the row's top. */
+private class MapLeftGeometry(
+    val innerH: Int,
+    val addressRowH: Int,
+    val dateRowH: Int,
+    val gap: Int,
+    /** Top edge of the city, address, coordinates and date rows, in that order. */
+    val tops: IntArray,
+    /** Bottom edge of the same four rows. */
+    val bottoms: IntArray
+)
+
 /**
  * Map thumbnail on the left, text block in the middle, logo on the right.
  *
- * The three columns are bottom-aligned onto a single baseline so the map, the date
- * row and the logo all end on the same line just above the card's bottom edge.
+ * The map, the details column and the logo are bottom-aligned onto a single baseline,
+ * and the row is as tall as its tallest child. The details column fills the row's
+ * height: space the text doesn't need is shared between the gaps.
+ *
+ * The logo is bottom-aligned, so the area above it is free. Every text line that sits
+ * entirely above the logo gets the extra width up to the card's right padding, so it
+ * only truncates when it genuinely runs out of room. Lines level with the logo keep
+ * the narrower width and never run under it. [CanvasGeoTagOverlayRenderer] uses the
+ * same rules, so the burned card matches this one.
+ *
+ * It is a custom [Layout] because each line's width depends on where it ends up
+ * vertically, which a plain `Row` / `Column` cannot express. Text heights for a
+ * candidate width come from intrinsics (a child may only be measured once), and the
+ * final placement uses the real measured heights.
  */
 @Composable
 private fun RowScope.MapLeftContent(
@@ -176,37 +201,31 @@ private fun RowScope.MapLeftContent(
     labels: CardLabels,
     mapImage: Any?
 ) {
-    MapThumbnail(
-        image = mapImage,
-        metrics = metrics,
-        staticMapLabel = labels.staticMap,
-        mapLabel = labels.map
-    )
-
-    Spacer(modifier = Modifier.width(metrics.spacerMapDetailsDp.dp))
-
-    Column(
-        modifier = Modifier
-            .weight(1f)
-            .padding(vertical = metrics.detailsPaddingVerticalDp.dp),
-        verticalArrangement = Arrangement.spacedBy(metrics.detailsLineGapDp.dp)
-    ) {
-        Text(
-            text = copy.city,
-            color = Color(metrics.textColor),
-            fontWeight = FontWeight.Bold,
-            fontSize = metrics.cityTextSizeSp.sp,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-
-        Row(verticalAlignment = Alignment.Top) {
+    Layout(
+        modifier = Modifier.weight(1f),
+        content = {
+            // 0: map
+            MapThumbnail(
+                image = mapImage,
+                metrics = metrics,
+                staticMapLabel = labels.staticMap,
+                mapLabel = labels.map
+            )
+            // 1: city
+            Text(
+                text = copy.city,
+                color = Color(metrics.textColor),
+                fontWeight = FontWeight.Bold,
+                fontSize = metrics.cityTextSizeSp.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            // 2, 3: address icon + text
             Image(
                 painter = painterResource(R.drawable.ic_map),
                 contentDescription = labels.map,
                 modifier = Modifier.size(metrics.iconSizeDp.dp)
             )
-            Spacer(modifier = Modifier.width(metrics.iconTextGapDp.dp))
             Text(
                 text = copy.address,
                 color = Color(metrics.textSecondaryColor),
@@ -215,23 +234,20 @@ private fun RowScope.MapLeftContent(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
-        }
-
-        Text(
-            text = copy.coordinates,
-            color = Color(metrics.textColor),
-            fontSize = metrics.coordinatesTextSizeSp.sp,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-
-        Row(verticalAlignment = Alignment.CenterVertically) {
+            // 4: coordinates
+            Text(
+                text = copy.coordinates,
+                color = Color(metrics.textColor),
+                fontSize = metrics.coordinatesTextSizeSp.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            // 5, 6: date icon + text
             Image(
                 painter = painterResource(R.drawable.ic_calendar),
                 contentDescription = labels.map,
                 modifier = Modifier.size(metrics.iconSizeDp.dp)
             )
-            Spacer(modifier = Modifier.width(metrics.iconTextGapDp.dp))
             Text(
                 text = copy.date,
                 color = Color(metrics.textColor),
@@ -239,12 +255,136 @@ private fun RowScope.MapLeftContent(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
+            // 7: logo
+            if (metrics.logoVisible) {
+                LogoBadge(metrics = metrics, logoLabel = labels.logo)
+            }
         }
-    }
+    ) { measurables, constraints ->
+        val totalW = constraints.maxWidth
+        val mapW = metrics.mapWidthDp.dp.roundToPx()
+        val mapH = metrics.mapHeightDp.dp.roundToPx()
+        val logoSize = if (metrics.logoVisible) metrics.logoHeightDp.dp.roundToPx() else 0
+        val detailsGap = if (metrics.logoVisible) metrics.spacerDetailsLogoDp.dp.roundToPx() else 0
+        val iconSize = metrics.iconSizeDp.dp.roundToPx()
+        val iconGap = iconSize + metrics.iconTextGapDp.dp.roundToPx()
+        val detailsVPad = metrics.detailsPaddingVerticalDp.dp.roundToPx()
+        val lineGap = metrics.detailsLineGapDp.dp.roundToPx()
+        val clearance = lineGap
 
-    if (metrics.logoVisible) {
-        Spacer(modifier = Modifier.width(metrics.spacerDetailsLogoDp.dp))
-        LogoBadge(metrics = metrics, logoLabel = labels.logo)
+        val textLeft = mapW + metrics.spacerMapDetailsDp.dp.roundToPx()
+        val logoLeft = totalW - logoSize
+        // Width beside the logo, and width when the line is clear of the logo.
+        val narrowW = logoLeft - detailsGap - textLeft
+        val wideW = totalW - textLeft
+
+        val mapM = measurables[0]
+        val cityM = measurables[1]
+        val addressIconM = measurables[2]
+        val addressM = measurables[3]
+        val coordinatesM = measurables[4]
+        val dateIconM = measurables[5]
+        val dateM = measurables[6]
+        val logoM = if (metrics.logoVisible) measurables[7] else null
+
+        // Max widths for city, address text, coordinates, date text.
+        fun widths(wide: BooleanArray): IntArray = IntArray(4) { i ->
+            val base = if (wide[i]) wideW else narrowW
+            val w = if (i == 1 || i == 3) base - iconGap else base
+            w.coerceAtLeast(0)
+        }
+
+        fun geometry(cityH: Int, addressH: Int, coordinatesH: Int, dateH: Int): MapLeftGeometry {
+            val addressRowH = maxOf(iconSize, addressH)
+            val dateRowH = maxOf(iconSize, dateH)
+            val columnH = detailsVPad * 2 + cityH + lineGap + addressRowH + lineGap +
+                    coordinatesH + lineGap + dateRowH
+            // The row is as tall as its tallest child, logo included.
+            val innerH = maxOf(mapH, columnH, logoSize)
+            // The column fills the row; unused space is shared between the 3 gaps.
+            val gap = lineGap + (innerH - columnH).coerceAtLeast(0) / 3
+            val top0 = detailsVPad
+            val top1 = top0 + cityH + gap
+            val top2 = top1 + addressRowH + gap
+            val top3 = top2 + coordinatesH + gap
+            return MapLeftGeometry(
+                innerH = innerH,
+                addressRowH = addressRowH,
+                dateRowH = dateRowH,
+                gap = gap,
+                tops = intArrayOf(top0, top1, top2, top3),
+                bottoms = intArrayOf(
+                    top0 + cityH,
+                    top1 + addressRowH,
+                    top2 + coordinatesH,
+                    top3 + dateRowH
+                )
+            )
+        }
+
+        fun plan(wide: BooleanArray): MapLeftGeometry {
+            val w = widths(wide)
+            return geometry(
+                cityH = cityM.minIntrinsicHeight(w[0]),
+                addressH = addressM.minIntrinsicHeight(w[1]),
+                coordinatesH = coordinatesM.minIntrinsicHeight(w[2]),
+                dateH = dateM.minIntrinsicHeight(w[3])
+            )
+        }
+
+        fun clearOfLogo(g: MapLeftGeometry, i: Int): Boolean =
+            !metrics.logoVisible || g.bottoms[i] <= g.innerH - logoSize - clearance
+
+        // Widening a line can change line counts and therefore positions, so settle
+        // on which lines are wide with a few passes, then drop any that ended up
+        // touching the logo.
+        var wide = BooleanArray(4)
+        var planned = plan(wide)
+        for (pass in 0 until 3) {
+            val next = BooleanArray(4) { clearOfLogo(planned, it) }
+            if (next.contentEquals(wide)) break
+            wide = next
+            planned = plan(wide)
+        }
+        val safe = BooleanArray(4) { wide[it] && clearOfLogo(planned, it) }
+        if (!safe.contentEquals(wide)) {
+            wide = safe
+            planned = plan(wide)
+        }
+
+        // Measure every child exactly once, with the settled widths.
+        val w = widths(wide)
+        val mapP = mapM.measure(Constraints())
+        val cityP = cityM.measure(Constraints(maxWidth = w[0]))
+        val addressIconP = addressIconM.measure(Constraints())
+        val addressP = addressM.measure(Constraints(maxWidth = w[1]))
+        val coordinatesP = coordinatesM.measure(Constraints(maxWidth = w[2]))
+        val dateIconP = dateIconM.measure(Constraints())
+        val dateP = dateM.measure(Constraints(maxWidth = w[3]))
+        val logoP = logoM?.measure(Constraints())
+
+        val g = geometry(cityP.height, addressP.height, coordinatesP.height, dateP.height)
+
+        layout(totalW, g.innerH) {
+            mapP.placeRelative(0, g.innerH - mapP.height)
+
+            cityP.placeRelative(textLeft, g.tops[0])
+
+            // Address: icon pinned to the top of its row, like Row(Alignment.Top).
+            addressIconP.placeRelative(textLeft, g.tops[1])
+            addressP.placeRelative(textLeft + iconGap, g.tops[1])
+
+            coordinatesP.placeRelative(textLeft, g.tops[2])
+
+            // Date: icon and text centred in their row.
+            dateIconP.placeRelative(textLeft, g.tops[3] + (g.dateRowH - dateIconP.height) / 2)
+            dateP.placeRelative(
+                textLeft + iconGap,
+                g.tops[3] + (g.dateRowH - dateP.height) / 2
+            )
+
+            logoP?.placeRelative(logoLeft, g.innerH - logoP.height)
+        }
     }
 }
 
@@ -286,7 +426,7 @@ private fun MinimalContent(
                 fontWeight = FontWeight.Bold
             )
         }
-        
+
         Text(
             text = "${copy.city}, ${copy.address}",
             color = Color(metrics.textSecondaryColor),

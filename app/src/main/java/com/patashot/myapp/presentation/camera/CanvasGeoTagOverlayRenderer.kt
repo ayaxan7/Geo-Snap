@@ -24,7 +24,6 @@ import com.patashot.myapp.core.LocaleHelper
 import com.patashot.myapp.data.maps.StaticMapFetcher
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.text.SimpleDateFormat
-import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.roundToInt
@@ -518,24 +517,25 @@ class CanvasGeoTagOverlayRenderer internal constructor(
         )
 
         if (mapBitmap != null) {
-            canvas.withClip(Path().apply {
+            canvas.save()
+            canvas.clipPath(Path().apply {
                 addRoundRect(rect, corner, corner, Path.Direction.CW)
-            }) {
-                val side = minOf(mapBitmap.width, mapBitmap.height)
-                val srcLeft = (mapBitmap.width - side) / 2
-                val srcTop = (mapBitmap.height - side) / 2
-                drawBitmap(
-                    mapBitmap,
-                    Rect(srcLeft, srcTop, srcLeft + side, srcTop + side),
-                    Rect(
-                        rect.left.toInt(),
-                        rect.top.toInt(),
-                        rect.right.toInt(),
-                        rect.bottom.toInt()
-                    ),
-                    Paint(Paint.FILTER_BITMAP_FLAG)
-                )
-            }
+            })
+            val side = minOf(mapBitmap.width, mapBitmap.height)
+            val srcLeft = (mapBitmap.width - side) / 2
+            val srcTop = (mapBitmap.height - side) / 2
+            canvas.drawBitmap(
+                mapBitmap,
+                Rect(srcLeft, srcTop, srcLeft + side, srcTop + side),
+                Rect(
+                    rect.left.toInt(),
+                    rect.top.toInt(),
+                    rect.right.toInt(),
+                    rect.bottom.toInt()
+                ),
+                Paint(Paint.FILTER_BITMAP_FLAG)
+            )
+            canvas.restore()
         } else {
             val textPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
                 color = metrics.textColor.toArgb()
@@ -602,8 +602,7 @@ class CanvasGeoTagOverlayRenderer internal constructor(
 
     private companion object {
         val DATE_FORMAT = object : ThreadLocal<SimpleDateFormat>() {
-            override fun initialValue(): SimpleDateFormat =
-                SimpleDateFormat(CARD_DATE_PATTERN, Locale.ENGLISH)
+            override fun initialValue(): SimpleDateFormat = createCardDateFormat()
         }
 
         /** Base resolution in dp density units (device independent). */
