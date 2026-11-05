@@ -634,7 +634,7 @@ private fun deleteAppCopy(contentUri: String) {
         }
 
         FileOutputStream(output).use { stream ->
-            base.compress(Bitmap.CompressFormat.JPEG, 90, stream)
+            base.compress(Bitmap.CompressFormat.JPEG, 100, stream)
         }
         base.recycle()
         writeGpsExifTo(output, coordinate, coordinate?.timestamp ?: System.currentTimeMillis())
@@ -879,7 +879,7 @@ private fun deleteAppCopy(contentUri: String) {
         const val FILE_PREFIX = "GeoSnap"
         const val SHARE_DIR = "share"
         const val SHARE_COPY_TTL_MS = 24 * 60 * 60 * 1000L
-        const val MAX_DECODE_EDGE = 4096
+        const val MAX_DECODE_EDGE = 12288
         const val CARD_WIDTH_FRACTION = 0.9f
         const val CARD_MARGIN_BOTTOM_FRACTION = 0.05f
         const val DEFAULT_VIDEO_WIDTH = 1920

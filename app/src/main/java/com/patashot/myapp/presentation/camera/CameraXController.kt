@@ -1,11 +1,24 @@
 package com.patashot.myapp.presentation.camera
 
 import android.content.Context
+import android.graphics.BitmapFactory
+import android.graphics.ImageFormat
+import android.hardware.camera2.CameraCharacteristics
+import android.hardware.camera2.CameraManager
+import android.os.Build
+import android.util.Log
+import android.util.Size
+import androidx.annotation.OptIn
+import androidx.camera.camera2.interop.Camera2CameraInfo
+import androidx.camera.camera2.interop.ExperimentalCamera2Interop
+import androidx.camera.core.AspectRatio
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
+import androidx.camera.core.resolutionselector.ResolutionSelector
+import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.video.FallbackStrategy
 import androidx.camera.video.FileOutputOptions
@@ -17,7 +30,11 @@ import androidx.camera.video.VideoCapture
 import androidx.camera.video.VideoRecordEvent
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
+import androidx.core.util.Consumer
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import androidx.exifinterface.media.ExifInterface
 import java.io.File
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -71,6 +88,8 @@ class CameraXController(
         lensFacing: CameraEngine.LensFacing,
         mode: CameraMode
     ) {
+        Log.d(DIAG_TAG, "DEVICE manufacturer=${Build.MANUFACTURER} model=${Build.MODEL} sdk=${Build.VERSION.SDK_INT}")
+        Log.d(DIAG_TAG, "CAMERAX_VERSION=1.6.2")
         boundPreviewView = previewView
         boundLifecycleOwner = lifecycleOwner
         boundMode = mode
@@ -105,12 +124,22 @@ class CameraXController(
         _flashEnabled.value = false
 
         val preview = Preview.Builder()
+            .setTargetAspectRatio(AspectRatio.RATIO_4_3)
             .build()
             .also { it.surfaceProvider = previewView.surfaceProvider }
         val selector = selectorFor(lensFacing)
         val newCamera = when (boundMode) {
             CameraMode.PHOTO, CameraMode.QUICK_SHARE -> {
-                boundImageCapture = ImageCapture.Builder().build()
+                boundImageCapture = ImageCapture.Builder()
+                    .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
+                    .setJpegQuality(100)
+                    .setResolutionSelector(
+                        ResolutionSelector.Builder()
+                            .setResolutionStrategy(ResolutionStrategy.HIGHEST_AVAILABLE_STRATEGY)
+                            .setAllowedResolutionMode(ResolutionSelector.PREFER_HIGHER_RESOLUTION_OVER_CAPTURE_RATE)
+                            .build()
+                    )
+                    .build()
                 boundVideoCapture = null
                 provider.bindToLifecycle(lifecycleOwner, selector, preview, boundImageCapture)
             }
@@ -121,17 +150,86 @@ class CameraXController(
             }
         }
         attachCamera(newCamera)
+
+        // --- DIAGNOSTICS (non-fatal; do not alter capture behaviour) ---
+        runCatching { logCameraDiagnostics(newCamera, lensFacing) }
+            .onFailure { Log.e(DIAG_TAG, "Camera diagnostics failed", it) }
+        runCatching { logResolutionInfo() }
+            .onFailure { Log.e(DIAG_TAG, "ResolutionInfo read failed", it) }
+        runCatching { observeCameraResolutionOnce(lifecycleOwner.lifecycle) }
+            .onFailure { Log.e(DIAG_TAG, "Camera resolution observer failed", it) }
     }
 
     private fun buildVideoCapture(): VideoCapture<Recorder> {
         val qualitySelector = QualitySelector.fromOrderedList(
-            listOf(Quality.FHD, Quality.HD),
-            FallbackStrategy.lowerQualityOrHigherThan(Quality.HD)
+            listOf(Quality.UHD, Quality.FHD, Quality.HD, Quality.SD),
+            FallbackStrategy.lowerQualityOrHigherThan(Quality.UHD)
         )
         val recorder = Recorder.Builder()
             .setQualitySelector(qualitySelector)
             .build()
         return VideoCapture.withOutput(recorder)
+    }
+
+    @OptIn(ExperimentalCamera2Interop::class)
+    private fun logCameraDiagnostics(camera: Camera, lensFacing: CameraEngine.LensFacing) {
+        val camera2Info = Camera2CameraInfo.from(camera.cameraInfo)
+        val cameraId = camera2Info.cameraId
+        Log.d(DIAG_TAG, "CAMERA lensFacing=$lensFacing cameraId=$cameraId")
+
+        val cm = appContext.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+        val chars = cm.getCameraCharacteristics(cameraId)
+        val hwLevel = chars.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL)
+        val caps = chars.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES) ?: intArrayOf()
+        val burstSupported = caps.contains(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE)
+        Log.d(DIAG_TAG, "HARDWARE_LEVEL=$hwLevel BURST_CAPTURE=$burstSupported")
+
+        val map = chars.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
+        val jpegSizes = map?.getOutputSizes(ImageFormat.JPEG) ?: emptyArray()
+        val highResSizes = map?.getHighResolutionOutputSizes(ImageFormat.JPEG) ?: emptyArray()
+        Log.d(DIAG_TAG, "JPEG_SIZES=${jpegSizes.joinToString()}")
+        Log.d(DIAG_TAG, "HIGH_RES_JPEG_SIZES=${highResSizes.joinToString()}")
+        Log.d(DIAG_TAG, "MAX_NORMAL_JPEG=${jpegSizes.maxByOrNull { it.width * it.height }}")
+        Log.d(DIAG_TAG, "MAX_HIGH_RES_JPEG=${highResSizes.maxByOrNull { it.width * it.height }}")
+
+        val sensorSize = chars.get(CameraCharacteristics.SENSOR_INFO_PIXEL_ARRAY_SIZE)
+        Log.d(DIAG_TAG, "SENSOR_PIXEL_ARRAY_SIZE=$sensorSize")
+        Log.d(DIAG_TAG, "CAPABILITIES=${caps.contentToString()}")
+    }
+
+    private fun logResolutionInfo() {
+        val ri = boundImageCapture?.resolutionInfo
+        if (ri == null) {
+            Log.d(DIAG_TAG, "RESOLUTION_INFO=null (will retry on capture)")
+            return
+        }
+        Log.d(DIAG_TAG, "IMAGECAPTURE_RESOLUTION=${ri.resolution}")
+        Log.d(DIAG_TAG, "IMAGECAPTURE_CROP_RECT=${ri.cropRect}")
+        Log.d(DIAG_TAG, "IMAGECAPTURE_ROTATION=${ri.rotationDegrees}")
+    }
+
+    /**
+     * Best-effort diagnostic: read ImageCapture resolution info once the camera
+     * session is configured. Observes the owner lifecycle [START] as a proxy for
+     * camera readiness, self-removes after a single read to avoid leaks/polling.
+     * Does not block bind() or lens switching, and never delays capture.
+     */
+    private fun observeCameraResolutionOnce(lifecycle: Lifecycle) {
+        val observer = object : DefaultLifecycleObserver {
+            private var emitted = false
+            override fun onStart(owner: LifecycleOwner) {
+                if (emitted) return
+                val ri = boundImageCapture?.resolutionInfo
+                if (ri != null) {
+                    emitted = true
+                    lifecycle.removeObserver(this)
+                    Log.d(DIAG_TAG, "IMAGECAPTURE_RESOLUTION(lifecycle)=${ri.resolution}")
+                    Log.d(DIAG_TAG, "IMAGECAPTURE_CROP_RECT(lifecycle)=${ri.cropRect}")
+                    Log.d(DIAG_TAG, "IMAGECAPTURE_ROTATION(lifecycle)=${ri.rotationDegrees}")
+                }
+            }
+        }
+        lifecycle.addObserver(observer)
     }
 
     private fun selectorFor(lensFacing: CameraEngine.LensFacing): CameraSelector =
@@ -187,11 +285,32 @@ class CameraXController(
         val file = createTempFile("jpg")
         val options = ImageCapture.OutputFileOptions.Builder(file).build()
         suspendCancellableCoroutine { continuation ->
+            if (boundImageCapture?.resolutionInfo == null) {
+                Log.d(DIAG_TAG, "RESOLUTION_INFO still null at capture time")
+            }
             imageCapture.takePicture(
                 options,
                 ContextCompat.getMainExecutor(appContext),
                 object : ImageCapture.OnImageSavedCallback {
                     override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                        runCatching {
+                            val opts = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+                            BitmapFactory.decodeFile(file.absolutePath, opts)
+                            val exif = ExifInterface(file.absolutePath)
+                            val exifW = exif.getAttributeInt(ExifInterface.TAG_IMAGE_WIDTH, -1)
+                            val exifH = exif.getAttributeInt(ExifInterface.TAG_IMAGE_LENGTH, -1)
+                            val orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED)
+                            val sizeKb = file.length() / 1024.0
+                            val sizeMb = file.length() / (1024.0 * 1024.0)
+                            Log.d(DIAG_TAG, "SAVED_JPEG path=${file.absolutePath}")
+                            Log.d(DIAG_TAG, "SAVED_JPEG dims=${opts.outWidth}x${opts.outHeight}")
+                            Log.d(DIAG_TAG, "SAVED_JPEG exifDims=${exifW}x${exifH} orientation=$orientation")
+                            Log.d(DIAG_TAG, "SAVED_JPEG size=${sizeKb}KB (${sizeMb}MB)")
+
+                            val ri = boundImageCapture?.resolutionInfo
+                            Log.d(DIAG_TAG, "COMPARE selected=${ri?.resolution} saved=${opts.outWidth}x${opts.outHeight} rotation=${ri?.rotationDegrees}")
+                        }.onFailure { Log.e(DIAG_TAG, "JPEG diagnostics failed", it) }
+
                         if (!continuation.isCancelled) continuation.resume(file)
                     }
 
@@ -207,7 +326,10 @@ class CameraXController(
         }
     }
 
-    override suspend fun startRecording(): File = withContext(Dispatchers.Main.immediate) {
+    override suspend fun startRecording(): File = withContext(Dispatchers.Main.immediate)
+    @androidx.annotation.RequiresPermission(
+        android.Manifest.permission.RECORD_AUDIO
+    ) {
         val videoCapture = boundVideoCapture
             ?: throw CameraInitException("Camera not bound for video")
         val recorder = videoCapture.output
@@ -221,7 +343,7 @@ class CameraXController(
         activeSession = session
         activeRecording = pending.start(
             ContextCompat.getMainExecutor(appContext),
-            androidx.core.util.Consumer { event -> session.onEvent(event) }
+            Consumer { event -> session.onEvent(event) }
         )
         session.awaitStart()
         _isRecording.value = true
@@ -239,6 +361,26 @@ class CameraXController(
         val file = session.awaitFinalize()
         activeRecording = null
         activeSession = null
+
+        // --- VIDEO DIAGNOSTICS (non-fatal) ---
+        runCatching {
+            val retriever = android.media.MediaMetadataRetriever().apply {
+                setDataSource(file.absolutePath)
+            }
+            val width = retriever.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)
+                ?.toIntOrNull() ?: -1
+            val height = retriever.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)
+                ?.toIntOrNull() ?: -1
+            val rotation = retriever.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)
+                ?.toIntOrNull() ?: 0
+            val sizeKb = file.length() / 1024.0
+            val sizeMb = file.length() / (1024.0 * 1024.0)
+            Log.d(DIAG_TAG, "SAVED_VIDEO path=${file.absolutePath}")
+            Log.d(DIAG_TAG, "SAVED_VIDEO dims=${width}x${height} rotation=$rotation")
+            Log.d(DIAG_TAG, "SAVED_VIDEO size=${sizeKb}KB (${sizeMb}MB)")
+            runCatching { retriever.release() }
+        }.onFailure { Log.e(DIAG_TAG, "Video diagnostics failed", it) }
+
         file
     }
 
@@ -335,3 +477,4 @@ class CameraCaptureException(
 class CameraRecordingException(val errorCode: Int) : Exception("Recording failed ($errorCode)")
 
 private const val TEMP_DIR = "geosnap_camera"
+private const val DIAG_TAG = "PatashotCameraDiagnostics"
