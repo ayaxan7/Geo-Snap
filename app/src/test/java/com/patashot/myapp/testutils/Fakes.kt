@@ -27,6 +27,7 @@ import com.patashot.myapp.core.update.UpdateSignalSource
 import com.patashot.myapp.data.maps.GeocodeResponse
 import com.patashot.myapp.data.maps.GeocodeResult
 import com.patashot.myapp.data.maps.MapsApi
+import com.patashot.myapp.data.media.CapturedMediaEntity
 import java.io.File
 import java.io.IOException
 import kotlinx.coroutines.flow.Flow
@@ -147,7 +148,8 @@ class FakeMediaRepository : MediaRepository {
         filter: FloatArray?,
         saveToMediaStore: Boolean,
         rotationDegrees: Int,
-        cropRect: NormalizedCropRect?
+        cropRect: NormalizedCropRect?,
+        cardContent: GeoTagCardContent?
     ): String {
         failSaveOnce()
         savedImages += SavedMedia(
@@ -169,7 +171,8 @@ class FakeMediaRepository : MediaRepository {
         filter: FloatArray?,
         saveToMediaStore: Boolean,
         rotationDegrees: Int,
-        cropRect: NormalizedCropRect?
+        cropRect: NormalizedCropRect?,
+        cardContent: GeoTagCardContent?
     ): String {
         failSaveOnce()
         savedVideos += SavedMedia(
@@ -226,6 +229,20 @@ class FakeMediaRepository : MediaRepository {
         exportedToGallery += media
         return true
     }
+
+    override suspend fun getMediaEntityById(id: Long): CapturedMediaEntity? = null
+
+    override suspend fun resolveMediaFile(contentUri: String): File? = null
+
+    override suspend fun updateCapturedMedia(
+        id: Long,
+        coordinate: GeoCoordinate?,
+        overlay: Bitmap?,
+        filter: FloatArray?,
+        rotationDegrees: Int,
+        cropRect: NormalizedCropRect?,
+        cardContent: GeoTagCardContent
+    ): Boolean = true
 
     private fun failSaveOnce() {
         if (failSave) throw IOException("simulated storage failure")

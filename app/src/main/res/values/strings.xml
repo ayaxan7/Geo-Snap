@@ -151,6 +151,7 @@
     <string name="preview_retake">Retake</string>
     <string name="preview_edit">Edit</string>
     <string name="preview_save_to_gallery">Save to Gallery</string>
+    <string name="edit_save_changes">Save Changes</string>
     <string name="preview_save">Save</string>
     <string name="preview_image">Image Preview</string>
 

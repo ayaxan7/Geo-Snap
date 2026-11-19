@@ -1,9 +1,11 @@
 package com.patashot.myapp.domain.repository
 
 import android.graphics.Bitmap
+import com.patashot.myapp.data.media.CapturedMediaEntity
 import com.patashot.myapp.domain.model.GeoCoordinate
 import com.patashot.myapp.domain.model.GeoMedia
 import com.patashot.myapp.domain.model.NormalizedCropRect
+import com.patashot.myapp.presentation.camera.GeoTagCardContent
 import java.io.File
 
 /**
@@ -31,7 +33,8 @@ interface MediaRepository {
         filter: FloatArray? = null,
         saveToMediaStore: Boolean = true,
         rotationDegrees: Int = 0,
-        cropRect: NormalizedCropRect? = null
+        cropRect: NormalizedCropRect? = null,
+        cardContent: GeoTagCardContent? = null
     ): String
 
     /**
@@ -51,7 +54,8 @@ interface MediaRepository {
         filter: FloatArray? = null,
         saveToMediaStore: Boolean = true,
         rotationDegrees: Int = 0,
-        cropRect: NormalizedCropRect? = null
+        cropRect: NormalizedCropRect? = null,
+        cardContent: GeoTagCardContent? = null
     ): String
 
     /**
@@ -92,4 +96,24 @@ interface MediaRepository {
      * @return true when the media was exported successfully.
      */
     suspend fun saveToDeviceGallery(media: GeoMedia): Boolean
+
+    /** Fetches the full database entity including cleanPath and location details by database ID. */
+    suspend fun getMediaEntityById(id: Long): CapturedMediaEntity?
+
+    /** Resolves the local file corresponding to an app media content URI. */
+    suspend fun resolveMediaFile(contentUri: String): File?
+
+    /**
+     * Overwrites an existing captured media item in the gallery with newly rendered
+     * modifications (location, overlay, filter, crop, rotation) applied to the clean original.
+     */
+    suspend fun updateCapturedMedia(
+        id: Long,
+        coordinate: GeoCoordinate?,
+        overlay: Bitmap?,
+        filter: FloatArray?,
+        rotationDegrees: Int,
+        cropRect: NormalizedCropRect?,
+        cardContent: GeoTagCardContent
+    ): Boolean
 }

@@ -8,6 +8,15 @@
     <files-path
         name="app_media"
         path="GeoSnap/" />
+    <files-path
+        name="app_media_patashot"
+        path="Patashot/" />
+    <files-path
+        name="app_originals"
+        path="originals/" />
+    <files-path
+        name="all_files"
+        path="." />
     <!-- Burnt copies prepared for sharing (see MediaRepositoryImpl.prepareShareCopy). -->
     <cache-path
         name="share_cache"

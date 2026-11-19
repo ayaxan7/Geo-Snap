@@ -26,5 +26,11 @@ data class CapturedMediaEntity(
     val latitude: Double? = null,
     val longitude: Double? = null,
     val displayName: String? = null,
-    val deleted: Boolean = false
+    val deleted: Boolean = false,
+    val cleanPath: String? = null,
+    val originalLatitude: Double? = null,
+    val originalLongitude: Double? = null,
+    val city: String? = null,
+    val fullAddress: String? = null,
+    val templateId: String? = null
 )

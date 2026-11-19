@@ -83,6 +83,7 @@ import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import coil3.compose.AsyncImage
 import com.patashot.myapp.R
+import com.patashot.myapp.domain.model.GeoMedia
 import com.patashot.myapp.domain.model.MediaType
 import com.patashot.myapp.presentation.core.hasMediaPermission
 import com.patashot.myapp.presentation.core.mediaPermissionsForSdk
@@ -99,6 +100,7 @@ import kotlinx.coroutines.launch
 fun MediaViewerScreen(
     initialIndex: Int,
     onBack: () -> Unit,
+    onEdit: (GeoMedia) -> Unit = {},
     viewModel: ViewerViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -106,6 +108,10 @@ fun MediaViewerScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
+
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        viewModel.load()
+    }
 
     val player = remember(context) { ExoPlayer.Builder(context).build() }
     DisposableEffect(Unit) {
@@ -236,10 +242,12 @@ fun MediaViewerScreen(
                     ViewerTopBar(
                         current = pagerState.currentPage + 1,
                         total = pageCount,
+                        editEnabled = currentMedia != null && !uiState.deleting && !uiState.saving,
                         saveEnabled = currentMedia != null && !uiState.saving,
                         shareEnabled = currentMedia != null,
                         deleteEnabled = currentMedia != null && !uiState.deleting,
                         onBack = onBack,
+                        onEdit = { currentMedia?.let(onEdit) },
                         onSave = {
                             if (context.hasMediaPermission()) {
                                 viewModel.saveToDeviceGallery(pagerState.currentPage)
@@ -349,10 +357,12 @@ fun MediaViewerScreen(
 private fun ViewerTopBar(
     current: Int,
     total: Int,
+    editEnabled: Boolean,
     saveEnabled: Boolean,
     shareEnabled: Boolean,
     deleteEnabled: Boolean,
     onBack: () -> Unit,
+    onEdit: () -> Unit,
     onSave: () -> Unit,
     onShare: () -> Unit,
     onDelete: () -> Unit,
@@ -378,6 +388,13 @@ private fun ViewerTopBar(
             textAlign = TextAlign.Center,
             modifier = Modifier.weight(1f)
         )
+        IconButton(onClick = onEdit, enabled = editEnabled) {
+            Icon(
+                painter = painterResource(R.drawable.ic_edit),
+                contentDescription = stringResource(R.string.preview_edit),
+                tint = Color.White
+            )
+        }
         IconButton(onClick = onSave, enabled = saveEnabled) {
             Icon(
                 painter = painterResource(R.drawable.ic_download),

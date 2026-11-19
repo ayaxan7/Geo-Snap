@@ -135,6 +135,7 @@
     <string name="preview_retake">మళ్లీ తీయండి</string>
     <string name="preview_edit">సవరించండి</string>
     <string name="preview_save_to_gallery">గ్యాలరీకి సేవ్ చేయండి</string>
+    <string name="edit_save_changes">మార్పులను సేవ్ చేయండి</string>
     <string name="preview_save">సేవ్ చేయండి</string>
     <string name="preview_image">చిత్రం ప్రివ్యూ</string>
 

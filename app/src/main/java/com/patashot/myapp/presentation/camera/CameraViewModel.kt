@@ -229,7 +229,8 @@ class CameraViewModel @Inject constructor(
                                 sourceFile = file,
                                 coordinate = coordinate,
                                 overlay = renderOverlay(cardContent),
-                                saveToMediaStore = false
+                                saveToMediaStore = false,
+                                cardContent = cardContent
                             )
                         } catch (e: Exception) {
                             Log.e(TAG, "Photo save failed", e)
@@ -239,14 +240,30 @@ class CameraViewModel @Inject constructor(
                         _uiState.update { it.copy(isProcessing = false) }
                         _events.tryEmit(CameraEvent.QuickShareRequested(uri))
                     } else {
+                        val hasMediaPermission = context.hasMediaPermission()
+                        val isAutoSaveEnabled = preferencesRepository.isAutoSaveEnabled.first()
+                        val shouldSaveToDevice = hasMediaPermission && isAutoSaveEnabled
+                        val uri = try {
+                            mediaRepository.saveCapturedImage(
+                                sourceFile = file,
+                                coordinate = coordinate,
+                                overlay = renderOverlay(cardContent),
+                                saveToMediaStore = shouldSaveToDevice,
+                                cardContent = cardContent
+                            )
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Photo save failed", e)
+                            throw CaptureException(CameraError.SAVE_FAILED)
+                        }
+                        file.delete()
                         _uiState.update {
                             it.copy(
                                 isProcessing = false,
                                 filter = CaptureFilter.ORIGINAL,
-                                filterStrength = FILTER_STRENGTH_NORMAL,
-                                pendingPreview = PreviewData(file, coordinate, false, cardContent)
+                                filterStrength = FILTER_STRENGTH_NORMAL
                             )
                         }
+                        _events.tryEmit(CameraEvent.MediaSaved(uri, isVideo = false))
                     }
                 }
             } catch (e: CaptureException) {
@@ -289,20 +306,42 @@ class CameraViewModel @Inject constructor(
                 pendingCoordinate = null
                 pendingRecordingFile = null
                 val cardContent = resolveCardContent(coordinate)
+
+                val hasMediaPermission = context.hasMediaPermission()
+                val isAutoSaveEnabled = preferencesRepository.isAutoSaveEnabled.first()
+                val shouldSaveToDevice = hasMediaPermission && isAutoSaveEnabled
+                val uri = try {
+                    mediaRepository.saveCapturedVideo(
+                        sourceFile = file,
+                        coordinate = coordinate,
+                        overlay = renderOverlay(cardContent),
+                        saveToMediaStore = shouldSaveToDevice,
+                        cardContent = cardContent
+                    )
+                } catch (e: Exception) {
+                    Log.e(TAG, "Video save failed", e)
+                    throw Exception("Video save failed", e)
+                }
+                file.delete()
                 _uiState.update {
                     it.copy(
                         isProcessing = false,
                         filter = CaptureFilter.ORIGINAL,
-                        filterStrength = FILTER_STRENGTH_NORMAL,
-                        pendingPreview = PreviewData(file, coordinate, true, cardContent)
+                        filterStrength = FILTER_STRENGTH_NORMAL
                     )
                 }
+                _events.tryEmit(CameraEvent.MediaSaved(uri, isVideo = true))
             } catch (e: Exception) {
                 _uiState.update { it.copy(isProcessing = false, error = CameraError.RECORD_FAILED) }
             }
         }
     }
     
+    @androidx.annotation.VisibleForTesting
+    fun setPendingPreview(preview: PreviewData?) {
+        _uiState.update { it.copy(pendingPreview = preview) }
+    }
+
     fun rotatePreviewLeft() {
         _uiState.update { state ->
             val preview = state.pendingPreview ?: return@update state

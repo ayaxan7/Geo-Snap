@@ -30,6 +30,12 @@ interface CapturedMediaDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAll(entities: List<CapturedMediaEntity>)
 
+    @Query("SELECT * FROM captured_media WHERE id = :id LIMIT 1")
+    suspend fun findById(id: Long): CapturedMediaEntity?
+
+    @Query("SELECT * FROM captured_media WHERE contentUri = :contentUri LIMIT 1")
+    suspend fun findByUri(contentUri: String): CapturedMediaEntity?
+
     @Query("UPDATE captured_media SET deleted = 1 WHERE contentUri = :contentUri")
     suspend fun markDeleted(contentUri: String)
 }

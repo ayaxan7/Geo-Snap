@@ -30,8 +30,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import com.patashot.myapp.R
+import com.patashot.myapp.domain.model.GeoMedia
 import com.patashot.myapp.presentation.camera.CameraMode
 import com.patashot.myapp.presentation.camera.CameraScreen
+import com.patashot.myapp.presentation.gallery.EditMediaScreen
 import com.patashot.myapp.presentation.gallery.GalleryScreen
 import com.patashot.myapp.presentation.gallery.MediaViewerScreen
 import com.patashot.myapp.presentation.home.HomeScreen
@@ -182,7 +184,22 @@ internal fun GeoSnapNavHost(startDestination: String, isAlreadyOnboarded: Boolea
                 ?.getInt(Destination.GalleryViewer.ARGUMENT_INDEX)
                 ?.coerceAtLeast(0)
                 ?: 0
-            MediaViewerScreen(initialIndex = index, onBack = navController::popBackStack)
+            MediaViewerScreen(
+                initialIndex = index,
+                onBack = navController::popBackStack,
+                onEdit = { media ->
+                    navController.navigateToEdit(media.id)
+                }
+            )
+        }
+
+        composable(
+            route = Destination.EditMedia.ROUTE_PATTERN,
+            arguments = listOf(
+                navArgument(Destination.EditMedia.ARGUMENT_ID) { type = NavType.LongType }
+            )
+        ) {
+            EditMediaScreen(onBack = navController::popBackStack)
         }
 
         composable(

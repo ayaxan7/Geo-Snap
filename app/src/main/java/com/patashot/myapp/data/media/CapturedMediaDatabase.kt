@@ -9,7 +9,7 @@ import androidx.room.TypeConverters
  * captured. The actual files live in MediaStore; rows hold the content uri and
  * geolocation metadata.
  */
-@Database(entities = [CapturedMediaEntity::class], version = 1, exportSchema = false)
+@Database(entities = [CapturedMediaEntity::class], version = 2, exportSchema = false)
 @TypeConverters(MediaTypeConverters::class)
 abstract class CapturedMediaDatabase : RoomDatabase() {
     abstract fun capturedMediaDao(): CapturedMediaDao

@@ -99,9 +99,9 @@ import com.patashot.myapp.ui.theme.PrimaryGreen
 fun PreviewScreen(
     uri: Uri,
     isVideo: Boolean,
-    onDelete: () -> Unit,
-    onRetake: () -> Unit,
-    onEdit: () -> Unit,
+    onDelete: () -> Unit = {},
+    onRetake: () -> Unit = {},
+    onEdit: () -> Unit = {},
     onSaveToGallery: () -> Unit,
     onShare: () -> Unit,
     onBack: () -> Unit,
@@ -116,6 +116,9 @@ fun PreviewScreen(
     filterStrength: Float = 0f,
     onFilterChange: (CaptureFilter) -> Unit = {},
     onFilterStrengthChange: (Float) -> Unit = {},
+    showDelete: Boolean = false,
+    showRetake: Boolean = false,
+    saveButtonText: String = stringResource(R.string.preview_save_to_gallery),
     mediaOverlay: @Composable BoxScope.() -> Unit = {}
 ) {
     var isMuted by rememberSaveable { mutableStateOf(true) }
@@ -277,19 +280,23 @@ fun PreviewScreen(
                 else -> {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                        horizontalArrangement = if (!showDelete && !showRetake) Arrangement.Center else Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.Top
                     ) {
-                        PreviewAction(
-                            iconRes = R.drawable.ic_delete,
-                            labelRes = R.string.preview_delete,
-                            onClick = onDelete
-                        )
-                        PreviewAction(
-                            iconRes = R.drawable.ic_retake,
-                            labelRes = R.string.preview_retake,
-                            onClick = onRetake
-                        )
+                        if (showDelete) {
+                            PreviewAction(
+                                iconRes = R.drawable.ic_delete,
+                                labelRes = R.string.preview_delete,
+                                onClick = onDelete
+                            )
+                        }
+                        if (showRetake) {
+                            PreviewAction(
+                                iconRes = R.drawable.ic_retake,
+                                labelRes = R.string.preview_retake,
+                                onClick = onRetake
+                            )
+                        }
                         PreviewAction(
                             iconRes = R.drawable.ic_edit,
                             labelRes = R.string.preview_edit,
@@ -315,7 +322,7 @@ fun PreviewScreen(
                         )
                     ) {
                         Text(
-                            text = stringResource(R.string.preview_save_to_gallery),
+                            text = saveButtonText,
                             style = MaterialTheme.typography.titleMedium
                         )
                     }

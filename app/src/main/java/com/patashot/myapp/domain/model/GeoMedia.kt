@@ -7,6 +7,7 @@ import android.net.Uri
  * metadata captured at the moment it was taken (when available).
  */
 data class GeoMedia(
+    val id: Long = 0,
     val uri: Uri,
     val type: MediaType,
     val timestamp: Long,

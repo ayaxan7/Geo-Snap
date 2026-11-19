@@ -63,6 +63,8 @@ fun EditLocationScreen(
     initialLng: Double,
     initialAddress: String?,
     initialLandmark: String?,
+    centerLat: Double = initialLat,
+    centerLng: Double = initialLng,
     onResolveLocation: suspend (Double, Double) -> Pair<String, String?>,
     onSave: (String?, String?, Double, Double) -> Unit,
     onBack: () -> Unit
@@ -72,11 +74,11 @@ fun EditLocationScreen(
     var address by remember { mutableStateOf(initialAddress ?: "") }
     var landmark by remember { mutableStateOf(initialLandmark ?: "") }
 
-    val center = remember { LocationClamp.Coords(initialLat, initialLng) }
+    val center = remember(centerLat, centerLng) { LocationClamp.Coords(centerLat, centerLng) }
 
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(
-            LatLng(center.latitude, center.longitude),
+            LatLng(initialLat, initialLng),
             15f
         )
     }

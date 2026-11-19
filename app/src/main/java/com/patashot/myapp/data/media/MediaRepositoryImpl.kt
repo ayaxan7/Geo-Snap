@@ -36,6 +36,7 @@ import com.patashot.myapp.domain.model.GeoCoordinate
 import com.patashot.myapp.domain.model.GeoMedia
 import com.patashot.myapp.domain.model.MediaType
 import com.patashot.myapp.domain.repository.MediaRepository
+import com.patashot.myapp.presentation.camera.GeoTagCardContent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import java.io.FileOutputStream
@@ -84,9 +85,15 @@ class MediaRepositoryImpl @Inject constructor(
         filter: FloatArray?,
         saveToMediaStore: Boolean,
         rotationDegrees: Int,
-        cropRect: NormalizedCropRect?
+        cropRect: NormalizedCropRect?,
+        cardContent: GeoTagCardContent?
     ): String = withContext(Dispatchers.IO) {
         val now = System.currentTimeMillis()
+        val cleanDir = File(context.filesDir, "originals").apply { mkdirs() }
+        val displayName = "${FILE_PREFIX}-${timestampText(now)}.jpg"
+        val cleanFile = File(cleanDir, "clean_$displayName")
+        runCatching { sourceFile.copyTo(cleanFile, overwrite = true) }
+
         val hasModifications = overlay != null || filter != null || rotationDegrees % 360 != 0 || (cropRect != null && !cropRect.isDefault)
         val toPersist = if (hasModifications) {
             try {
@@ -103,7 +110,6 @@ class MediaRepositoryImpl @Inject constructor(
             sourceFile
         }
         try {
-            val displayName = "${FILE_PREFIX}-${timestampText(now)}.jpg"
             // The app's own copy is the source of truth for the app gallery, so
             // the phone-gallery copy can be deleted without affecting it.
             val uri = persistInternal(toPersist, displayName).toString()
@@ -129,7 +135,13 @@ class MediaRepositoryImpl @Inject constructor(
                     timestamp = now,
                     latitude = coordinate?.latitude,
                     longitude = coordinate?.longitude,
-                    displayName = displayName
+                    displayName = displayName,
+                    cleanPath = cleanFile.takeIf { it.exists() }?.absolutePath,
+                    originalLatitude = coordinate?.latitude,
+                    originalLongitude = coordinate?.longitude,
+                    city = cardContent?.cityString,
+                    fullAddress = cardContent?.fullAddress,
+                    templateId = cardContent?.template?.id
                 )
             )
             uri
@@ -145,11 +157,18 @@ class MediaRepositoryImpl @Inject constructor(
         filter: FloatArray?,
         saveToMediaStore: Boolean,
         rotationDegrees: Int,
-        cropRect: NormalizedCropRect?
+        cropRect: NormalizedCropRect?,
+        cardContent: GeoTagCardContent?
     ): String = withContext(Dispatchers.IO) {
         // MP4 EXIF container support is inconsistent across devices; GPS is kept
         // in the GeoMedia model for videos so it can be written once an MP4 GPS
         // writer is introduced.
+        val now = System.currentTimeMillis()
+        val displayName = "${FILE_PREFIX}-${timestampText(now)}.mp4"
+        val cleanDir = File(context.filesDir, "originals").apply { mkdirs() }
+        val cleanFile = File(cleanDir, "clean_$displayName")
+        runCatching { sourceFile.copyTo(cleanFile, overwrite = true) }
+
         val hasModifications = overlay != null || filter != null || rotationDegrees % 360 != 0 || (cropRect != null && !cropRect.isDefault)
         val toPersist = if (hasModifications) {
             try {
@@ -162,8 +181,6 @@ class MediaRepositoryImpl @Inject constructor(
             sourceFile
         }
         try {
-            val now = System.currentTimeMillis()
-            val displayName = "${FILE_PREFIX}-${timestampText(now)}.mp4"
             // The app's own copy is the source of truth for the app gallery, so
             // the phone-gallery copy can be deleted without affecting it.
             val uri = persistInternal(toPersist, displayName).toString()
@@ -189,7 +206,13 @@ class MediaRepositoryImpl @Inject constructor(
                     timestamp = now,
                     latitude = coordinate?.latitude,
                     longitude = coordinate?.longitude,
-                    displayName = displayName
+                    displayName = displayName,
+                    cleanPath = cleanFile.takeIf { it.exists() }?.absolutePath,
+                    originalLatitude = coordinate?.latitude,
+                    originalLongitude = coordinate?.longitude,
+                    city = cardContent?.cityString,
+                    fullAddress = cardContent?.fullAddress,
+                    templateId = cardContent?.template?.id
                 )
             )
             uri
@@ -263,10 +286,122 @@ class MediaRepositoryImpl @Inject constructor(
 
 override suspend fun deleteMedia(contentUri: String): Boolean = withContext(Dispatchers.IO) {
     runCatching {
+        val entity = capturedMediaDao.findByUri(contentUri)
+        entity?.cleanPath?.let { path ->
+            runCatching { File(path).delete() }
+        }
         capturedMediaDao.markDeleted(contentUri)
         deleteAppCopy(contentUri)
     }.isSuccess
 }
+
+    override suspend fun getMediaEntityById(id: Long): CapturedMediaEntity? = withContext(Dispatchers.IO) {
+        capturedMediaDao.findById(id)
+    }
+
+    override suspend fun resolveMediaFile(contentUri: String): File? = withContext(Dispatchers.IO) {
+        val uri = runCatching { contentUri.toUri() }.getOrNull() ?: return@withContext null
+        if (uri.authority != "${context.packageName}.fileprovider") return@withContext null
+        val segments = uri.pathSegments
+        if (segments.size >= 2) {
+            val fileName = segments.last()
+            val candidate = File(context.filesDir, DIRECTORY_NAME).resolve(fileName)
+            if (candidate.exists()) return@withContext candidate
+            val candidateRoot = File(context.filesDir, segments.drop(1).joinToString(File.separator))
+            if (candidateRoot.exists()) return@withContext candidateRoot
+        }
+        null
+    }
+
+    override suspend fun updateCapturedMedia(
+        id: Long,
+        coordinate: GeoCoordinate?,
+        overlay: Bitmap?,
+        filter: FloatArray?,
+        rotationDegrees: Int,
+        cropRect: NormalizedCropRect?,
+        cardContent: GeoTagCardContent
+    ): Boolean = withContext(Dispatchers.IO) {
+        val entity = capturedMediaDao.findById(id) ?: return@withContext false
+        val cleanFile = entity.cleanPath?.let { File(it) }?.takeIf { it.exists() }
+            ?: resolveMediaFile(entity.contentUri)
+            ?: return@withContext false
+
+        val destFile = resolveMediaFile(entity.contentUri) ?: return@withContext false
+        val now = System.currentTimeMillis()
+
+        if (entity.type == MediaType.IMAGE) {
+            val hasModifications = overlay != null || filter != null || rotationDegrees % 360 != 0 || (cropRect != null && !cropRect.isDefault)
+            val updated = if (hasModifications) {
+                try {
+                    burnOverlayIntoImage(
+                        sourceFile = cleanFile,
+                        overlay = overlay,
+                        filter = filter,
+                        coordinate = coordinate,
+                        rotationDegrees = rotationDegrees,
+                        cropRect = cropRect
+                    )
+                } catch (t: Throwable) {
+                    Log.w(TAG, "Update image processing failed", t)
+                    val copy = File.createTempFile("fallback", ".jpg", context.cacheDir)
+                    cleanFile.copyTo(copy, overwrite = true)
+                    writeGpsExifTo(copy, coordinate, now)
+                    copy
+                }
+            } else {
+                val copy = File.createTempFile("fallback", ".jpg", context.cacheDir)
+                cleanFile.copyTo(copy, overwrite = true)
+                writeGpsExifTo(copy, coordinate, now)
+                copy
+            }
+            try {
+                updated.copyTo(destFile, overwrite = true)
+            } finally {
+                if (updated !== cleanFile && updated !== destFile) updated.delete()
+            }
+        } else {
+            val hasModifications = overlay != null || filter != null || rotationDegrees % 360 != 0 || (cropRect != null && !cropRect.isDefault)
+            val updated = if (hasModifications) {
+                try {
+                    transcodeWithOverlay(
+                        sourceFile = cleanFile,
+                        overlay = overlay,
+                        filter = filter,
+                        rotationDegrees = rotationDegrees,
+                        cropRect = cropRect
+                    )
+                } catch (t: Throwable) {
+                    Log.w(TAG, "Update video transcode failed", t)
+                    cleanFile
+                }
+            } else {
+                cleanFile
+            }
+            try {
+                if (updated !== cleanFile && updated !== destFile) {
+                    updated.copyTo(destFile, overwrite = true)
+                }
+            } finally {
+                if (updated !== cleanFile && updated !== destFile) updated.delete()
+            }
+        }
+
+        capturedMediaDao.upsert(
+            entity.copy(
+                latitude = coordinate?.latitude,
+                longitude = coordinate?.longitude,
+                city = cardContent.cityString,
+                fullAddress = cardContent.fullAddress,
+                templateId = cardContent.template.id
+            )
+        )
+        runCatching {
+            coil3.SingletonImageLoader.get(context).diskCache?.remove(entity.contentUri)
+            coil3.SingletonImageLoader.get(context).memoryCache?.remove(coil3.memory.MemoryCache.Key(entity.contentUri))
+        }
+        true
+    }
 
     override suspend fun saveToDeviceGallery(media: GeoMedia): Boolean = withContext(Dispatchers.IO) {
         runCatching {
@@ -359,9 +494,10 @@ private fun deleteAppCopy(contentUri: String) {
     val uri = runCatching { contentUri.toUri() }.getOrNull() ?: return
     if (uri.authority != "${context.packageName}.fileprovider") return
     val segments = uri.pathSegments
-    if (segments.size == 2 && segments[0] == "app_media") {
+    if (segments.size >= 2) {
+        val fileName = segments.last()
         runCatching {
-            File(context.filesDir, DIRECTORY_NAME).resolve(segments[1]).delete()
+            File(context.filesDir, DIRECTORY_NAME).resolve(fileName).delete()
         }
     }
 }
@@ -411,6 +547,7 @@ private fun deleteAppCopy(contentUri: String) {
 
     private fun toGeoMedia(entity: CapturedMediaEntity): GeoMedia =
         GeoMedia(
+            id = entity.id,
             uri = entity.contentUri.toUri(),
             type = entity.type,
             timestamp = entity.timestamp,

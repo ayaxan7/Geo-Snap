@@ -47,6 +47,27 @@ sealed class Destination(val route: String) {
         }
     }
 
+    /** Full-screen media editor, opened for gallery item with [mediaId]. */
+    data class EditMedia(val mediaId: Long) : Destination(
+        route = "$EditMediaBaseRoute/$mediaId"
+    ) {
+        companion object {
+            const val EditMediaBaseRoute = "gallery/edit"
+            const val ARGUMENT_ID = "mediaId"
+
+            const val ROUTE_PATTERN = "$EditMediaBaseRoute/{$ARGUMENT_ID}"
+
+            fun fromRoute(route: String?): EditMedia? {
+                val prefix = "$EditMediaBaseRoute/"
+                val idValue = route
+                    ?.takeIf { it.startsWith(prefix) }
+                    ?.removePrefix(prefix)
+                val id = idValue?.toLongOrNull() ?: return null
+                return EditMedia(id)
+            }
+        }
+    }
+
     /** The single reusable camera screen, parameterised by [mode]. */
     data class Camera(val mode: CameraMode) : Destination(
         route = "$CameraBaseRoute/${mode.routeName}"
@@ -127,6 +148,10 @@ fun NavController.navigateToGallery() {
 
 fun NavController.navigateToViewer(index: Int) {
     navigateTo(Destination.GalleryViewer(index)) { launchSingleTop = true }
+}
+
+fun NavController.navigateToEdit(mediaId: Long) {
+    navigateTo(Destination.EditMedia(mediaId)) { launchSingleTop = true }
 }
 
 fun NavController.navigateToCamera(mode: CameraMode) {

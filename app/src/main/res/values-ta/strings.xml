@@ -135,6 +135,7 @@
     <string name="preview_retake">மீண்டும் எடு</string>
     <string name="preview_edit">திருத்து</string>
     <string name="preview_save_to_gallery">கேலரியில் சேமி</string>
+    <string name="edit_save_changes">மாற்றங்களைச் சேமி</string>
     <string name="preview_save">சேமி</string>
     <string name="preview_image">பட முன்னோட்டம்</string>
 
