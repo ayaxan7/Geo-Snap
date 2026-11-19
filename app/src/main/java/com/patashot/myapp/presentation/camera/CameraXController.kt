@@ -11,12 +11,12 @@ import android.util.Size
 import androidx.annotation.OptIn
 import androidx.camera.camera2.interop.Camera2CameraInfo
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
-import androidx.camera.core.AspectRatio
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
+import androidx.camera.core.resolutionselector.AspectRatioStrategy
 import androidx.camera.core.resolutionselector.ResolutionSelector
 import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -72,6 +72,7 @@ class CameraXController(
     private var boundPreviewView: PreviewView? = null
     private var boundLifecycleOwner: LifecycleOwner? = null
     private var boundMode: CameraMode = CameraMode.PHOTO
+    private var boundPreview: Preview? = null
 
     private val _hasFlash = MutableStateFlow(false)
     override val hasFlash: StateFlow<Boolean> = _hasFlash.asStateFlow()
@@ -124,9 +125,17 @@ class CameraXController(
         _flashEnabled.value = false
 
         val preview = Preview.Builder()
-            .setTargetAspectRatio(AspectRatio.RATIO_4_3)
+            .setResolutionSelector(
+                ResolutionSelector.Builder()
+                    .setAspectRatioStrategy(AspectRatioStrategy.RATIO_16_9_FALLBACK_AUTO_STRATEGY)
+                    .setResolutionStrategy(ResolutionStrategy.HIGHEST_AVAILABLE_STRATEGY)
+                    .build()
+            )
             .build()
-            .also { it.surfaceProvider = previewView.surfaceProvider }
+            .also {
+                it.surfaceProvider = previewView.surfaceProvider
+                boundPreview = it
+            }
         val selector = selectorFor(lensFacing)
         val newCamera = when (boundMode) {
             CameraMode.PHOTO, CameraMode.QUICK_SHARE -> {
@@ -135,6 +144,7 @@ class CameraXController(
                     .setJpegQuality(100)
                     .setResolutionSelector(
                         ResolutionSelector.Builder()
+                            .setAspectRatioStrategy(AspectRatioStrategy.RATIO_16_9_FALLBACK_AUTO_STRATEGY)
                             .setResolutionStrategy(ResolutionStrategy.HIGHEST_AVAILABLE_STRATEGY)
                             .setAllowedResolutionMode(ResolutionSelector.PREFER_HIGHER_RESOLUTION_OVER_CAPTURE_RATE)
                             .build()
@@ -156,6 +166,8 @@ class CameraXController(
             .onFailure { Log.e(DIAG_TAG, "Camera diagnostics failed", it) }
         runCatching { logResolutionInfo() }
             .onFailure { Log.e(DIAG_TAG, "ResolutionInfo read failed", it) }
+        runCatching { logPreviewResolution(lifecycleOwner.lifecycle) }
+            .onFailure { Log.e(DIAG_TAG, "Preview resolution read failed", it) }
         runCatching { observeCameraResolutionOnce(lifecycleOwner.lifecycle) }
             .onFailure { Log.e(DIAG_TAG, "Camera resolution observer failed", it) }
     }
@@ -192,8 +204,18 @@ class CameraXController(
         Log.d(DIAG_TAG, "MAX_NORMAL_JPEG=${jpegSizes.maxByOrNull { it.width * it.height }}")
         Log.d(DIAG_TAG, "MAX_HIGH_RES_JPEG=${highResSizes.maxByOrNull { it.width * it.height }}")
 
+        // Aspect ratio analysis from supported JPEG sizes
+        val ratios = jpegSizes.map { size ->
+            val gcd = gcd(size.width, size.height)
+            "${size.width}/${size.height}=${size.width / gcd}:${size.height / gcd}"
+        }.toSet()
+        Log.d(DIAG_TAG, "SUPPORTED_JPEG_ASPECT_RATIOS=${ratios.joinToString()}")
+
         val sensorSize = chars.get(CameraCharacteristics.SENSOR_INFO_PIXEL_ARRAY_SIZE)
         Log.d(DIAG_TAG, "SENSOR_PIXEL_ARRAY_SIZE=$sensorSize")
+        sensorSize?.let { sensor ->
+            Log.d(DIAG_TAG, "SENSOR_ASPECT_RATIO=${sensor.width}:${sensor.height}")
+        }
         Log.d(DIAG_TAG, "CAPABILITIES=${caps.contentToString()}")
     }
 
@@ -206,6 +228,31 @@ class CameraXController(
         Log.d(DIAG_TAG, "IMAGECAPTURE_RESOLUTION=${ri.resolution}")
         Log.d(DIAG_TAG, "IMAGECAPTURE_CROP_RECT=${ri.cropRect}")
         Log.d(DIAG_TAG, "IMAGECAPTURE_ROTATION=${ri.rotationDegrees}")
+        ri.resolution?.let { size ->
+            val gcd = gcd(size.width, size.height)
+            Log.d(DIAG_TAG, "IMAGECAPTURE_ASPECT_RATIO=${size.width / gcd}:${size.height / gcd}")
+            // Detect cropping: compare selected resolution to sensor size
+            Log.d(DIAG_TAG, "IMAGECAPTURE_IS_CROPPED=${isCroppedFromSensor(size)}")
+        }
+    }
+
+    private fun gcd(a: Int, b: Int): Int = if (b == 0) a else gcd(b, a % b)
+
+    @OptIn(ExperimentalCamera2Interop::class)
+    private fun isCroppedFromSensor(captureSize: Size): Boolean {
+        val map = appContext.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+        val camera2Info = Camera2CameraInfo.from(camera?.cameraInfo ?: return false)
+        val chars = try {
+            map.getCameraCharacteristics(camera2Info.cameraId)
+        } catch (e: Exception) {
+            return false
+        }
+        val sensorSize = chars.get(CameraCharacteristics.SENSOR_INFO_PIXEL_ARRAY_SIZE) ?: return false
+        val sensorGcd = gcd(sensorSize.width, sensorSize.height)
+        val captureGcd = gcd(captureSize.width, captureSize.height)
+        // If aspect ratios differ, cropping occurred
+        return sensorSize.width / sensorGcd != captureSize.width / captureGcd ||
+            sensorSize.height / sensorGcd != captureSize.height / captureGcd
     }
 
     /**
@@ -226,6 +273,32 @@ class CameraXController(
                     Log.d(DIAG_TAG, "IMAGECAPTURE_RESOLUTION(lifecycle)=${ri.resolution}")
                     Log.d(DIAG_TAG, "IMAGECAPTURE_CROP_RECT(lifecycle)=${ri.cropRect}")
                     Log.d(DIAG_TAG, "IMAGECAPTURE_ROTATION(lifecycle)=${ri.rotationDegrees}")
+                }
+            }
+        }
+        lifecycle.addObserver(observer)
+    }
+
+    /**
+     * Best-effort diagnostic: read Preview resolution info once the camera
+     * session is configured. Observes the owner lifecycle [START] as a proxy for
+     * camera readiness, self-removes after a single read.
+     */
+    private fun logPreviewResolution(lifecycle: Lifecycle) {
+        val observer = object : DefaultLifecycleObserver {
+            private var emitted = false
+            override fun onStart(owner: LifecycleOwner) {
+                if (emitted) return
+                val ri = boundPreview?.resolutionInfo
+                if (ri != null) {
+                    emitted = true
+                    lifecycle.removeObserver(this)
+                    Log.d(DIAG_TAG, "PREVIEW_RESOLUTION=${ri.resolution}")
+                    ri.resolution?.let { size ->
+                        val gcd = gcd(size.width, size.height)
+                        Log.d(DIAG_TAG, "PREVIEW_ASPECT_RATIO=${size.width / gcd}:${size.height / gcd}")
+                    }
+                    Log.d(DIAG_TAG, "PREVIEW_ROTATION=${ri.rotationDegrees}")
                 }
             }
         }
@@ -306,6 +379,13 @@ class CameraXController(
                             Log.d(DIAG_TAG, "SAVED_JPEG dims=${opts.outWidth}x${opts.outHeight}")
                             Log.d(DIAG_TAG, "SAVED_JPEG exifDims=${exifW}x${exifH} orientation=$orientation")
                             Log.d(DIAG_TAG, "SAVED_JPEG size=${sizeKb}KB (${sizeMb}MB)")
+                            opts.outWidth?.let { w ->
+                                opts.outHeight?.let { h ->
+                                    val gcd = gcd(w, h)
+                                    Log.d(DIAG_TAG, "SAVED_JPEG_ASPECT_RATIO=${w / gcd}:${h / gcd}")
+                                    Log.d(DIAG_TAG, "SAVED_JPEG_CROPPED=${isCroppedFromSensor(Size(w, h))}")
+                                }
+                            }
 
                             val ri = boundImageCapture?.resolutionInfo
                             Log.d(DIAG_TAG, "COMPARE selected=${ri?.resolution} saved=${opts.outWidth}x${opts.outHeight} rotation=${ri?.rotationDegrees}")
@@ -390,6 +470,7 @@ class CameraXController(
         boundImageCapture = null
         boundVideoCapture = null
         boundPreviewView = null
+        boundPreview = null
         boundLifecycleOwner = null
         activeRecording = null
         activeSession = null

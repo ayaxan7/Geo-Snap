@@ -57,13 +57,13 @@ import androidx.core.graphics.createBitmap
  * Media persistence for the app gallery.
  *
  * Design notes:
- *  - Every capture gets a permanent private copy under `filesDir/GeoSnap`;
+ *  - Every capture gets a permanent private copy under `filesDir/Patashot`;
  *    its FileProvider `content://` URI is what Room records, so deleting the
  *    photo from the device gallery never affects the app gallery (and vice
  *    versa).
  *  - When phone-gallery saving is enabled (`saveToMediaStore`) the same bytes
- *    are also written to the public MediaStore under `Pictures/GeoSnap` /
- *    `Movies/GeoSnap` (scoped storage needs no permission on API 29+; API 28
+ *    are also written to the public MediaStore under `Pictures/Patashot` /
+ *    `Movies/Patashot` (scoped storage needs no permission on API 29+; API 28
  *    requires `WRITE_EXTERNAL_STORAGE`, see AndroidManifest `maxSdkVersion`).
  *  - Images are geotagged by writing EXIF GPS tags before they are copied out,
  *    so metadata survives on the final files without re-opening URIs for write.
@@ -103,7 +103,7 @@ class MediaRepositoryImpl @Inject constructor(
             sourceFile
         }
         try {
-            val displayName = "${FILE_PREFIX}_${timestampText(now)}.jpg"
+            val displayName = "${FILE_PREFIX}-${timestampText(now)}.jpg"
             // The app's own copy is the source of truth for the app gallery, so
             // the phone-gallery copy can be deleted without affecting it.
             val uri = persistInternal(toPersist, displayName).toString()
@@ -163,7 +163,7 @@ class MediaRepositoryImpl @Inject constructor(
         }
         try {
             val now = System.currentTimeMillis()
-            val displayName = "${FILE_PREFIX}_${timestampText(now)}.mp4"
+            val displayName = "${FILE_PREFIX}-${timestampText(now)}.mp4"
             // The app's own copy is the source of truth for the app gallery, so
             // the phone-gallery copy can be deleted without affecting it.
             val uri = persistInternal(toPersist, displayName).toString()
@@ -209,7 +209,7 @@ class MediaRepositoryImpl @Inject constructor(
     ): String = withContext(Dispatchers.IO) {
         pruneShareCopies()
         val ext = if (isVideo) "mp4" else "jpg"
-        val output = File(shareDir(), "share_${System.currentTimeMillis()}.$ext")
+        val output = File(shareDir(), "Patashot-share-${timestampText(System.currentTimeMillis())}.$ext")
         val hasModifications = overlay != null || filter != null || rotationDegrees % 360 != 0 || (cropRect != null && !cropRect.isDefault)
         val burned = try {
             when {
@@ -282,7 +282,7 @@ override suspend fun deleteMedia(contentUri: String): Boolean = withContext(Disp
             val mimeType = if (isVideo) "video/mp4" else "image/jpeg"
             val extension = if (isVideo) "mp4" else "jpg"
             val displayName = media.displayName?.takeIf { it.isNotBlank() }
-                ?: "${FILE_PREFIX}_${timestampText(media.timestamp)}.$extension"
+                ?: "${FILE_PREFIX}-${timestampText(media.timestamp)}.$extension"
             val now = media.timestamp
 
             val values = ContentValues().apply {
@@ -871,12 +871,12 @@ private fun deleteAppCopy(contentUri: String) {
 
     /** Millisecond resolution keeps two same-second captures from colliding. */
     private fun timestampText(millis: Long): String =
-        SimpleDateFormat("yyyyMMdd_HHmmss_SSS", Locale.US).format(Date(millis))
+        SimpleDateFormat("yyyyMMdd-HHmmss-SSS", Locale.US).format(Date(millis))
 
     private companion object {
         const val TAG = "MediaRepositoryImpl"
-        const val DIRECTORY_NAME = "GeoSnap"
-        const val FILE_PREFIX = "GeoSnap"
+        const val DIRECTORY_NAME = "Patashot"
+        const val FILE_PREFIX = "Patashot"
         const val SHARE_DIR = "share"
         const val SHARE_COPY_TTL_MS = 24 * 60 * 60 * 1000L
         const val MAX_DECODE_EDGE = 12288

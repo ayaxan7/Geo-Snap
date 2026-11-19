@@ -83,7 +83,7 @@ import com.patashot.myapp.ui.theme.GeoSnapTheme
 import com.patashot.myapp.ui.theme.PrimaryGreen
 import androidx.core.net.toUri
 
-private const val LONG_HOLD_MILLIS = 1000L
+private const val LONG_HOLD_MILLIS = 500L
 
 @Composable
 fun GalleryScreen(
