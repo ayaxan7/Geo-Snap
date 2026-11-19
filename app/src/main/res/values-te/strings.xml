@@ -134,6 +134,7 @@
     <string name="preview_delete">తొలగించు</string>
     <string name="preview_retake">మళ్లీ తీయండి</string>
     <string name="preview_edit">సవరించండి</string>
+    <string name="preview_filter">ఫిల్టర్</string>
     <string name="preview_save_to_gallery">గ్యాలరీకి సేవ్ చేయండి</string>
     <string name="edit_save_changes">మార్పులను సేవ్ చేయండి</string>
     <string name="preview_save">సేవ్ చేయండి</string>
@@ -194,8 +195,8 @@
     <string name="templates_save">సేవ్ చేయండి</string>
     <!-- Preview crop & rotate -->
     <string name="preview_crop">క్రాప్</string>
-    <string name="preview_rotate_left">ఎడమకు తిప్పండి</string>
-    <string name="preview_rotate_right">కుడికి తిప్పండి</string>
+    <string name="preview_rotate_left">ఎడమకు\nతిప్పండి</string>
+    <string name="preview_rotate_right">కుడికి\nతిప్పండి</string>
     <string name="preview_crop_reset">రీసెట్</string>
     <string name="preview_crop_done">పూర్తయింది</string>
     <string name="preview_crop_cancel">రద్దు చేయి</string>

@@ -134,6 +134,7 @@
     <string name="preview_delete">ಅಳಿಸಿ</string>
     <string name="preview_retake">ಮತ್ತೆ ತೆಗೆಯಿರಿ</string>
     <string name="preview_edit">ಸಂಪಾದಿಸಿ</string>
+    <string name="preview_filter">ಫಿಲ್ಟರ್</string>
     <string name="preview_save_to_gallery">ಗ್ಯಾಲರಿಗೆ ಉಳಿಸಿ</string>
     <string name="edit_save_changes">ಬದಲಾವಣೆಗಳನ್ನು ಉಳಿಸಿ</string>
     <string name="preview_save">ಉಳಿಸಿ</string>
@@ -194,8 +195,8 @@
     <string name="templates_save">ಉಳಿಸಿ</string>
     <!-- Preview crop & rotate -->
     <string name="preview_crop">ಕ್ರಾಪ್</string>
-    <string name="preview_rotate_left">ಎಡಕ್ಕೆ ತಿರುಗಿಸಿ</string>
-    <string name="preview_rotate_right">ಬಲಕ್ಕೆ ತಿರುಗಿಸಿ</string>
+    <string name="preview_rotate_left">ಎಡಕ್ಕೆ\nತಿರುಗಿಸಿ</string>
+    <string name="preview_rotate_right">ಬಲಕ್ಕೆ\nತಿರುಗಿಸಿ</string>
     <string name="preview_crop_reset">ಮರುಹೊಂದಿಸಿ</string>
     <string name="preview_crop_done">ಮುಗಿದಿದೆ</string>
     <string name="preview_crop_cancel">ರದ್ದುಮಾಡಿ</string>

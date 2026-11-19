@@ -150,6 +150,7 @@
     <string name="preview_delete">Delete</string>
     <string name="preview_retake">Retake</string>
     <string name="preview_edit">Edit</string>
+    <string name="preview_filter">Filter</string>
     <string name="preview_save_to_gallery">Save to Gallery</string>
     <string name="edit_save_changes">Save Changes</string>
     <string name="preview_save">Save</string>
@@ -217,8 +218,8 @@
     <string name="templates_save">Save</string>
     <!-- Preview crop & rotate -->
     <string name="preview_crop">Crop</string>
-    <string name="preview_rotate_left">Rotate left</string>
-    <string name="preview_rotate_right">Rotate right</string>
+    <string name="preview_rotate_left">Rotate\nleft</string>
+    <string name="preview_rotate_right">Rotate\nright</string>
     <string name="preview_crop_reset">Reset</string>
     <string name="preview_crop_done">Done</string>
     <string name="preview_crop_cancel">Cancel</string>

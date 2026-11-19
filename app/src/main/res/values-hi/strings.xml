@@ -133,6 +133,7 @@
     <string name="preview_delete">हटाएँ</string>
     <string name="preview_retake">फिर से लें</string>
     <string name="preview_edit">संपादित करें</string>
+    <string name="preview_filter">फ़िल्टर</string>
     <string name="preview_save_to_gallery">गैलरी में सहेजें</string>
     <string name="edit_save_changes">बदलाव सहेजें</string>
     <string name="preview_save">सहेजें</string>
@@ -193,8 +194,8 @@
     <string name="templates_save">सहेजें</string>
     <!-- Preview crop & rotate -->
     <string name="preview_crop">क्रॉप</string>
-    <string name="preview_rotate_left">बाएं घुमाएं</string>
-    <string name="preview_rotate_right">दाएं घुमाएं</string>
+    <string name="preview_rotate_left">बाएं\nघुमाएं</string>
+    <string name="preview_rotate_right">दाएं\nघुमाएं</string>
     <string name="preview_crop_reset">रीसेट</string>
     <string name="preview_crop_done">संपन्न</string>
     <string name="preview_crop_cancel">रद्द करें</string>

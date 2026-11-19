@@ -69,6 +69,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -140,9 +141,6 @@ fun PreviewScreen(
             isCropping = isCropping,
             isProcessing = isProcessing,
             onToggleMute = { isMuted = !isMuted },
-            onRotateLeft = onRotateLeft,
-            onCrop = { isCropping = true },
-            onRotateRight = onRotateRight,
             onShare = onShare,
             onSaveEdit = { isEditing = false },
             onResetCrop = { tempCropRect = NormalizedCropRect() },
@@ -280,30 +278,39 @@ fun PreviewScreen(
                 else -> {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = if (!showDelete && !showRetake) Arrangement.Center else Arrangement.SpaceBetween,
+                        horizontalArrangement = Arrangement.SpaceEvenly,
                         verticalAlignment = Alignment.Top
                     ) {
-                        if (showDelete) {
-                            PreviewAction(
-                                iconRes = R.drawable.ic_delete,
-                                labelRes = R.string.preview_delete,
-                                onClick = onDelete
-                            )
-                        }
-                        if (showRetake) {
-                            PreviewAction(
-                                iconRes = R.drawable.ic_retake,
-                                labelRes = R.string.preview_retake,
-                                onClick = onRetake
-                            )
-                        }
                         PreviewAction(
                             iconRes = R.drawable.ic_edit,
-                            labelRes = R.string.preview_edit,
+                            label = stringResource(R.string.preview_filter),
                             onClick = {
                                 onEdit()
                                 isEditing = true
-                            }
+                            },
+                            enabled = !isProcessing,
+                            modifier = Modifier.weight(1f)
+                        )
+                        PreviewAction(
+                            iconRes = R.drawable.ic_rotate_right,
+                            label = stringResource(R.string.preview_rotate_right),
+                            onClick = onRotateRight,
+                            enabled = !isProcessing,
+                            modifier = Modifier.weight(1f)
+                        )
+                        PreviewAction(
+                            iconRes = R.drawable.ic_rotate_left,
+                            label = stringResource(R.string.preview_rotate_left),
+                            onClick = onRotateLeft,
+                            enabled = !isProcessing,
+                            modifier = Modifier.weight(1f)
+                        )
+                        PreviewAction(
+                            iconRes = R.drawable.ic_crop,
+                            label = stringResource(R.string.preview_crop),
+                            onClick = { isCropping = true },
+                            enabled = !isProcessing,
+                            modifier = Modifier.weight(1f)
                         )
                     }
 
@@ -333,8 +340,7 @@ fun PreviewScreen(
 }
 
 /**
- * Top bar with back arrow, optional video mute, rotate left, crop, rotate right, and share buttons.
- * Ordering: [Rotate Left] [Crop] [Rotate Right] [Share]
+ * Top bar with back arrow, optional video mute, and share button.
  */
 @Composable
 private fun PreviewTopBar(
@@ -344,9 +350,6 @@ private fun PreviewTopBar(
     isCropping: Boolean,
     isProcessing: Boolean,
     onToggleMute: () -> Unit,
-    onRotateLeft: () -> Unit,
-    onCrop: () -> Unit,
-    onRotateRight: () -> Unit,
     onShare: () -> Unit,
     onSaveEdit: () -> Unit,
     onResetCrop: () -> Unit,
@@ -432,30 +435,6 @@ private fun PreviewTopBar(
                     Text(stringResource(R.string.preview_save), fontWeight = FontWeight.Bold)
                 }
             } else {
-                IconButton(onClick = onRotateLeft, enabled = !isProcessing) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_rotate_left),
-                        contentDescription = stringResource(R.string.preview_rotate_left),
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-                IconButton(onClick = onCrop, enabled = !isProcessing) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_crop),
-                        contentDescription = stringResource(R.string.preview_crop),
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-                IconButton(onClick = onRotateRight, enabled = !isProcessing) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_rotate_right),
-                        contentDescription = stringResource(R.string.preview_rotate_right),
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
                 IconButton(onClick = onShare, enabled = !isProcessing) {
                     Icon(
                         painter = painterResource(R.drawable.ic_share),
@@ -890,29 +869,46 @@ private fun FilterItem(
     }
 }
 
-/** Icon-over-label tile for the delete / retake / edit row. */
+/** Icon-over-label tile for the filter / rotate / crop row. */
 @Composable
 private fun PreviewAction(
     iconRes: Int,
-    labelRes: Int,
-    onClick: () -> Unit
+    label: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
 ) {
+    val textStyle = MaterialTheme.typography.bodySmall
+    val fontSize = textStyle.fontSize
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 4.dp)
+        modifier = modifier
+            .clickable(enabled = enabled, onClick = onClick)
+            .padding(horizontal = 4.dp, vertical = 4.dp)
     ) {
-        Icon(
-            painter = painterResource(iconRes),
-            contentDescription = stringResource(labelRes),
-            tint = Color.White,
-            modifier = Modifier.size(ACTION_ICON_SIZE)
-        )
+        Box(
+            modifier = Modifier.size(ACTION_ICON_SIZE),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter = painterResource(iconRes),
+                contentDescription = label.replace("\n", " "),
+                tint = if (enabled) Color.White else Color.White.copy(alpha = 0.38f),
+                modifier = Modifier.size(ACTION_ICON_SIZE)
+            )
+        }
+        Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = stringResource(labelRes),
-            color = Color.White,
-            style = MaterialTheme.typography.bodySmall
+            text = label,
+            color = if (enabled) Color.White else Color.White.copy(alpha = 0.38f),
+            style = textStyle.copy(
+                fontSize = fontSize,
+                lineHeight = fontSize,
+                textAlign = TextAlign.Center
+            ),
+            textAlign = TextAlign.Center,
+            maxLines = 2
         )
     }
 }

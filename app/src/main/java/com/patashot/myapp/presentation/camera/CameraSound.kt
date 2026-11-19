@@ -17,13 +17,18 @@ interface CameraSound {
 }
 
 /**
- * Production [CameraSound] backed by [SoundPool]. Pre-loads all three sound
- * assets on construction; call [release] when the owning ViewModel is cleared.
+ * Production [CameraSound].
+ *
+ * - Capture/shutter → USAGE_ASSISTANCE_SONIFICATION (system-sounds stream)
+ * - Video start/stop → USAGE_MEDIA (media/music stream, significantly louder)
+ *
+ * Call [release] when the owning ViewModel is cleared.
  */
 class CameraSoundImpl(context: Context) : CameraSound {
 
-    private val pool: SoundPool = SoundPool.Builder()
-        .setMaxStreams(2)
+    // Shutter sound — plays on the quiet system-sounds stream
+    private val shutterPool: SoundPool = SoundPool.Builder()
+        .setMaxStreams(1)
         .setAudioAttributes(
             AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
@@ -32,14 +37,29 @@ class CameraSoundImpl(context: Context) : CameraSound {
         )
         .build()
 
-    private val idCapture: Int = pool.load(context, R.raw.sound_capture, 1)
-    private val idVideoStart: Int = pool.load(context, R.raw.sound_video_start, 1)
-    private val idVideoStop: Int = pool.load(context, R.raw.sound_video_stop, 1)
+    // Video sounds — plays on the louder media/music stream
+    private val videoPool: SoundPool = SoundPool.Builder()
+        .setMaxStreams(2)
+        .setAudioAttributes(
+            AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                .build()
+        )
+        .build()
 
-    override fun playCapture() { pool.play(idCapture, 1f, 1f, 1, 0, 1f) }
-    override fun playVideoStart() { pool.play(idVideoStart, 1f, 1f, 1, 0, 1f) }
-    override fun playVideoStop() { pool.play(idVideoStop, 1f, 1f, 1, 0, 1f) }
-    override fun release() { pool.release() }
+    private val idCapture: Int = shutterPool.load(context, R.raw.sound_capture, 1)
+    private val idVideoStart: Int = videoPool.load(context, R.raw.sound_video_start, 1)
+    private val idVideoStop: Int = videoPool.load(context, R.raw.sound_video_stop, 1)
+
+    override fun playCapture() { shutterPool.play(idCapture, 1f, 1f, 1, 0, 1f) }
+    override fun playVideoStart() { videoPool.play(idVideoStart, 1f, 1f, 1, 0, 1f) }
+    override fun playVideoStop() { videoPool.play(idVideoStop, 1f, 1f, 1, 0, 1f) }
+
+    override fun release() {
+        shutterPool.release()
+        videoPool.release()
+    }
 }
 
 /** No-op stub used in unit tests (avoids SoundPool Android dependency). */
