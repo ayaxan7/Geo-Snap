@@ -14,7 +14,6 @@ import com.patashot.myapp.domain.model.GeoCoordinate
 import com.patashot.myapp.domain.model.NormalizedCropRect
 import com.patashot.myapp.domain.repository.MediaRepository
 import com.patashot.myapp.domain.repository.PreferencesRepository
-import kotlinx.coroutines.flow.first
 import com.patashot.myapp.domain.usecase.GetCurrentLocationUseCase
 import com.patashot.myapp.domain.usecase.GetSelectedCardTemplateUseCase
 import com.patashot.myapp.domain.usecase.IsLocationEnabledUseCase
@@ -22,6 +21,21 @@ import com.patashot.myapp.presentation.core.hasMediaPermission
 import com.patashot.myapp.presentation.navigation.Destination
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import java.io.File
 import java.util.Locale
 import javax.inject.Inject
@@ -29,21 +43,6 @@ import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -63,6 +62,18 @@ class CameraViewModel @Inject constructor(
     private val getSelectedCardTemplate: GetSelectedCardTemplateUseCase,
     private val preferencesRepository: PreferencesRepository
 ) : ViewModel() {
+
+    // Replaced by NoOpCameraSound in unit tests via setCameraSound()
+    private var cameraSound: CameraSound = try {
+        CameraSoundImpl(context)
+    } catch (_: Exception) {
+        NoOpCameraSound()
+    }
+
+    @androidx.annotation.VisibleForTesting
+    fun setCameraSound(sound: CameraSound) {
+        cameraSound = sound
+    }
 
     var mode: CameraMode = CameraMode.fromRoute(
         savedStateHandle.get<String>(Destination.Camera.ARGUMENT_MODE)
@@ -131,7 +142,13 @@ class CameraViewModel @Inject constructor(
         locationUpdatesJob?.cancel()
         locationUpdatesJob = null
         _uiState.update {
-            it.copy(isReady = false, isRecording = false, recordingElapsedMs = 0L, countdownSeconds = null, isCountdownActive = false)
+            it.copy(
+                isReady = false,
+                isRecording = false,
+                recordingElapsedMs = 0L,
+                countdownSeconds = null,
+                isCountdownActive = false
+            )
         }
         stopRecordingTimer()
     }
@@ -140,7 +157,6 @@ class CameraViewModel @Inject constructor(
         val current = attachedEngine ?: return
         viewModelScope.launch {
             current.isRecording
-                .catch { }
                 .collect { isRecording ->
                     if (isRecording) {
                         startRecordingTimer()
@@ -152,12 +168,10 @@ class CameraViewModel @Inject constructor(
         }
         viewModelScope.launch {
             current.hasFlash
-                .catch { }
                 .collect { hasFlash -> _uiState.update { it.copy(hasFlash = hasFlash) } }
         }
         viewModelScope.launch {
             current.flashEnabled
-                .catch { }
                 .collect { flash -> _uiState.update { it.copy(flashEnabled = flash) } }
         }
     }
@@ -220,6 +234,7 @@ class CameraViewModel @Inject constructor(
             try {
                 val coordinate = fetchCoordinateForTagging()
                 executeWithTimer(_uiState.value.timerSeconds) {
+                    cameraSound.playCapture()
                     val file = engine.capturePhoto()
                     val cardContent = resolveCardContent(coordinate)
 
@@ -285,7 +300,9 @@ class CameraViewModel @Inject constructor(
             try {
                 pendingCoordinate = fetchCoordinateForTagging()
                 executeWithTimer(_uiState.value.timerSeconds) {
+                    cameraSound.playVideoStart()
                     val file = engine.startRecording()
+
                     pendingRecordingFile = file
                     _uiState.update { it.copy(isProcessing = false) }
                 }
@@ -301,7 +318,9 @@ class CameraViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
+                cameraSound.playVideoStop()
                 val file = engine.stopRecording()
+
                 val coordinate = pendingCoordinate
                 pendingCoordinate = null
                 pendingRecordingFile = null
@@ -336,7 +355,7 @@ class CameraViewModel @Inject constructor(
             }
         }
     }
-    
+
     @androidx.annotation.VisibleForTesting
     fun setPendingPreview(preview: PreviewData?) {
         _uiState.update { it.copy(pendingPreview = preview) }
@@ -689,10 +708,7 @@ class CameraViewModel @Inject constructor(
             return false
         }
         val lastFailure = lastFailedCoordinate ?: return true
-        if (lastFailure.latitude != coord.latitude || lastFailure.longitude != coord.longitude) {
-            return true
-        }
-        return geocodeBackoffPolls <= 0
+        return lastFailure.latitude != coord.latitude || lastFailure.longitude != coord.longitude || geocodeBackoffPolls <= 0
     }
 
     private fun distanceMeters(
@@ -704,8 +720,8 @@ class CameraViewModel @Inject constructor(
         val dLat = Math.toRadians(lat2 - lat1)
         val dLon = Math.toRadians(lon2 - lon1)
         val a = sin(dLat / 2) * sin(dLat / 2) +
-            cos(Math.toRadians(lat1)) * cos(Math.toRadians(lat2)) *
-            sin(dLon / 2) * sin(dLon / 2)
+                cos(Math.toRadians(lat1)) * cos(Math.toRadians(lat2)) *
+                sin(dLon / 2) * sin(dLon / 2)
         return 6371000.0 * 2 * atan2(sqrt(a), sqrt(1 - a))
     }
 
@@ -787,6 +803,11 @@ class CameraViewModel @Inject constructor(
     private fun stopRecordingTimer() {
         recordingElapsedJob?.cancel()
         recordingElapsedJob = null
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        cameraSound.release()
     }
 
     private class CaptureException(val error: CameraError) : Throwable()

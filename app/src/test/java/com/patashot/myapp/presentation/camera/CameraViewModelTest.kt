@@ -62,7 +62,8 @@ class CameraViewModelTest {
             geoTagOverlayRenderer = renderer,
             mapsApi = mapsApi,
             getSelectedCardTemplate = GetSelectedCardTemplateUseCase(preferences),
-            preferencesRepository = preferences
+            preferencesRepository = preferences,
+            cameraSound = NoOpCameraSound()
         )
         viewModel.attachEngine(engine)
         return viewModel
