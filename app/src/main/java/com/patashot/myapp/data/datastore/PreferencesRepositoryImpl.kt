@@ -3,6 +3,7 @@ package com.patashot.myapp.data.datastore
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -27,6 +28,7 @@ class PreferencesRepositoryImpl @Inject constructor(
         val SELECTED_LANGUAGE = stringPreferencesKey("selected_language")
         val SELECTED_CARD_TEMPLATE = stringPreferencesKey("selected_card_template")
         val AUTO_SAVE_TO_DEVICE = booleanPreferencesKey("auto_save_to_device")
+        val HOME_LAUNCH_COUNT = intPreferencesKey("home_launch_count")
     }
 
     override val hasCompletedOnboarding: Flow<Boolean> = dataStore.data
@@ -67,5 +69,19 @@ class PreferencesRepositoryImpl @Inject constructor(
         dataStore.edit { preferences ->
             preferences[Keys.AUTO_SAVE_TO_DEVICE] = enabled
         }
+    }
+
+    override val homeLaunchCount: Flow<Int> = dataStore.data
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .map { preferences -> preferences[Keys.HOME_LAUNCH_COUNT] ?: 0 }
+
+    override suspend fun incrementHomeLaunchCount(): Int {
+        var count = 1
+        dataStore.edit { preferences ->
+            val current = preferences[Keys.HOME_LAUNCH_COUNT] ?: 0
+            count = current + 1
+            preferences[Keys.HOME_LAUNCH_COUNT] = count
+        }
+        return count
     }
 }

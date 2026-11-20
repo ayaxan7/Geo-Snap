@@ -1,5 +1,6 @@
 package com.patashot.myapp.presentation.camera
 
+import android.annotation.SuppressLint
 import android.Manifest
 import android.content.Context
 import android.content.Intent
@@ -62,6 +63,7 @@ import com.patashot.myapp.presentation.camera.components.CountdownOverlay
 import com.patashot.myapp.presentation.camera.components.TimerWheelPicker
 import com.patashot.myapp.presentation.sharing.shareMediaChooser
 
+@SuppressLint("LocalContextGetResourceValueCall", "UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun CameraScreen(
     mode: CameraMode,

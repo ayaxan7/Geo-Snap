@@ -1,6 +1,7 @@
 package com.patashot.myapp.data.location
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
@@ -39,6 +40,7 @@ class LocationProviderImpl @Inject constructor(
 
     private val singleFixDispatcher = SingleFixDispatcher()
 
+    @SuppressLint("MissingPermission")
     override suspend fun getCurrentLocation(): GeoCoordinate? = withContext(Dispatchers.IO) {
         if (!hasLocationPermission()) return@withContext null
 
@@ -59,6 +61,7 @@ class LocationProviderImpl @Inject constructor(
         }
     }
 
+    @SuppressLint("MissingPermission")
     private suspend fun requestSingleFix(): GeoCoordinate? = withTimeoutOrNull(FIX_TIMEOUT_MS) {
         val provider = enabledProvider() ?: return@withTimeoutOrNull null
         if (!hasLocationPermission()) return@withTimeoutOrNull null

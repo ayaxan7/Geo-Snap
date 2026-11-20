@@ -55,6 +55,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patashot.myapp.R
+import com.patashot.myapp.core.review.openPlayStoreListing
 import com.patashot.myapp.presentation.core.findActivity
 import com.patashot.myapp.presentation.core.hasMediaPermission
 import com.patashot.myapp.presentation.core.hasNotificationPermission
@@ -128,6 +129,7 @@ fun SettingsScreen(
             when (target) {
                 SettingsViewModel.NavigationTarget.AppInfo -> context.openAppSettings()
                 SettingsViewModel.NavigationTarget.Notifications -> context.openNotificationSettings()
+                SettingsViewModel.NavigationTarget.PlayStoreListing -> openPlayStoreListing(context)
             }
         }
     }
@@ -317,19 +319,7 @@ fun SettingsScreen(
                 icon = R.drawable.ic_app_rating,
                 titleRes = R.string.settings_rate_app,
                 onClick = {
-                    val url = "https://play.google.com/store/apps/details?id=com.patashot.myapp"
-                    val playStoreIntent = Intent(Intent.ACTION_VIEW, url.toUri()).apply {
-                        setPackage("com.android.vending")
-                    }
-                    try {
-                        context.startActivity(playStoreIntent)
-                    } catch (e: Exception) {
-                        try {
-                            context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
-                        } catch (e2: Exception) {
-                            e2.printStackTrace()
-                        }
-                    }
+                    viewModel.rateApp(context.findActivity())
                 }
             )
             SettingsDivider()

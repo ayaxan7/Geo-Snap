@@ -1,5 +1,7 @@
 package com.patashot.myapp.presentation.settings
 
+import android.app.Activity
+import com.patashot.myapp.core.review.InAppReviewManager
 import com.patashot.myapp.testutils.FakePreferencesRepository
 import com.patashot.myapp.testutils.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -185,5 +187,19 @@ class SettingsViewModelTest {
         assertTrue(vm.uiState.value.showNotificationRevokeDialog)
         assertTrue(vm.uiState.value.showEnableDialog)
         assertTrue(vm.uiState.value.autoSaveToDevice)
+    }
+
+    @Test
+    fun `rateApp invokes inAppReviewManager and falls back to PlayStoreListing navigation target`() = runTest {
+        val reviewManager = object : InAppReviewManager {
+            override fun launchReviewFlow(activity: Activity?, onFallback: () -> Unit) {
+                onFallback()
+            }
+        }
+        val vm = SettingsViewModel(FakePreferencesRepository(), reviewManager)
+
+        vm.rateApp(activity = null)
+
+        assertEquals(SettingsViewModel.NavigationTarget.PlayStoreListing, vm.navigation.first())
     }
 }

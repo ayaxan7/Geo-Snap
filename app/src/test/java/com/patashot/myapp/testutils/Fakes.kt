@@ -60,18 +60,21 @@ class FakePreferencesRepository(
     initialOnboarding: Boolean = false,
     initialLanguage: String? = null,
     initialCardTemplateId: String? = null,
-    initialAutoSave: Boolean = false
+    initialAutoSave: Boolean = false,
+    initialHomeLaunchCount: Int = 0
 ) : PreferencesRepository {
 
     private val _onboarding = MutableStateFlow(initialOnboarding)
     private val _language = MutableStateFlow(initialLanguage)
     private val _cardTemplateId = MutableStateFlow(initialCardTemplateId)
     private val _autoSave = MutableStateFlow(initialAutoSave)
+    private val _homeLaunchCount = MutableStateFlow(initialHomeLaunchCount)
 
     override val hasCompletedOnboarding: Flow<Boolean> = _onboarding.asStateFlow()
     override val selectedLanguage: Flow<String?> = _language.asStateFlow()
     override val selectedCardTemplateId: Flow<String?> = _cardTemplateId.asStateFlow()
     override val isAutoSaveEnabled: Flow<Boolean> = _autoSave.asStateFlow()
+    override val homeLaunchCount: Flow<Int> = _homeLaunchCount.asStateFlow()
 
     val onboardingValue: Boolean get() = _onboarding.value
     val languageValue: String? get() = _language.value
@@ -96,6 +99,12 @@ class FakePreferencesRepository(
 
     override suspend fun setAutoSaveEnabled(enabled: Boolean) {
         _autoSave.value = enabled
+    }
+
+    override suspend fun incrementHomeLaunchCount(): Int {
+        val next = _homeLaunchCount.value + 1
+        _homeLaunchCount.value = next
+        return next
     }
 }
 

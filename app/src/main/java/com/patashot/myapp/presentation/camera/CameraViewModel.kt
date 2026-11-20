@@ -806,7 +806,6 @@ class CameraViewModel @Inject constructor(
     }
 
     override fun onCleared() {
-        super.onCleared()
         cameraSound.release()
     }
 

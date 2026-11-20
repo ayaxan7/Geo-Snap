@@ -23,6 +23,8 @@ interface PreferencesRepository {
 
     val isAutoSaveEnabled: Flow<Boolean>
 
+    val homeLaunchCount: Flow<Int>
+
     suspend fun setOnboardingCompleted()
 
     suspend fun setSelectedLanguage(languageCode: String)
@@ -30,4 +32,6 @@ interface PreferencesRepository {
     suspend fun setSelectedCardTemplateId(templateId: String)
 
     suspend fun setAutoSaveEnabled(enabled: Boolean)
+
+    suspend fun incrementHomeLaunchCount(): Int
 }

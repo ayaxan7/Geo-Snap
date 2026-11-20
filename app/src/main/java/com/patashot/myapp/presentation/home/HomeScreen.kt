@@ -22,11 +22,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
@@ -36,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.patashot.myapp.R
+import com.patashot.myapp.presentation.core.findActivity
 import com.patashot.myapp.presentation.home.HomeViewModel.HomeAction
 import com.patashot.myapp.ui.theme.PrimaryGreen
 
@@ -48,14 +51,11 @@ fun HomeScreen(
     onOpenSettings: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
-//    fun onAction(action: HomeAction) {
-//        when (action) {
-//            HomeAction.TAKE_PHOTO -> onTakePhoto()
-//            HomeAction.TAKE_VIDEO -> onTakeVideo()
-//            HomeAction.QUICK_SHARE -> onQuickShare()
-//            HomeAction.GALLERY -> onOpenGallery()
-//        }
-//    }
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        viewModel.onHomeScreenOpened(context.findActivity())
+    }
 
     Column(
         modifier = Modifier

@@ -20,8 +20,8 @@ android {
         applicationId = "com.patashot.myapp"
         minSdk = 28
         targetSdk = 36
-        versionCode = 7
-        versionName = "1.0.6"
+        versionCode = 8
+        versionName = "1.0.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -142,8 +142,9 @@ dependencies {
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
 
-    // Play In-App Updates
+    // Play In-App Updates & Reviews
     implementation(libs.play.app.update.ktx)
+    implementation(libs.play.review.ktx)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

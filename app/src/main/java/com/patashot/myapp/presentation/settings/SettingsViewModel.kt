@@ -1,7 +1,10 @@
 package com.patashot.myapp.presentation.settings
 
+import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.patashot.myapp.core.review.InAppReviewManager
+import com.patashot.myapp.core.review.NoOpInAppReviewManager
 import com.patashot.myapp.domain.repository.PreferencesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -24,7 +27,8 @@ import kotlinx.coroutines.launch
  */
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val preferencesRepository: PreferencesRepository
+    private val preferencesRepository: PreferencesRepository,
+    private val inAppReviewManager: InAppReviewManager = NoOpInAppReviewManager()
 ) : ViewModel() {
 
     data class UiState(
@@ -49,6 +53,7 @@ class SettingsViewModel @Inject constructor(
     sealed interface NavigationTarget {
         data object AppInfo : NavigationTarget
         data object Notifications : NavigationTarget
+        data object PlayStoreListing : NavigationTarget
     }
 
     /** Where [confirmOpenSettings] should send the user, for the open dialog. */
@@ -129,6 +134,15 @@ class SettingsViewModel @Inject constructor(
     /** Confirms navigation for a notification dialog and clears it. */
     fun confirmOpenNotificationSettings() {
         confirmNavigation(SettingsTarget.NOTIFICATIONS)
+    }
+
+    /**
+     * Initiates in-app review with fallback to opening Play Store directly.
+     */
+    fun rateApp(activity: Activity?) {
+        inAppReviewManager.launchReviewFlow(activity, onFallback = {
+            _navigation.trySend(NavigationTarget.PlayStoreListing)
+        })
     }
 
     private fun confirmNavigation(target: SettingsTarget) {

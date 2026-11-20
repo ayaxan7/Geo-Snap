@@ -1,5 +1,6 @@
 package com.patashot.myapp.presentation.camera
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.BitmapFactory
 import android.graphics.ImageFormat
@@ -406,10 +407,8 @@ class CameraXController(
         }
     }
 
-    override suspend fun startRecording(): File = withContext(Dispatchers.Main.immediate)
-    @androidx.annotation.RequiresPermission(
-        android.Manifest.permission.RECORD_AUDIO
-    ) {
+    @SuppressLint("MissingPermission")
+    override suspend fun startRecording(): File = withContext(Dispatchers.Main.immediate) {
         val videoCapture = boundVideoCapture
             ?: throw CameraInitException("Camera not bound for video")
         val recorder = videoCapture.output

@@ -1,5 +1,6 @@
 package com.patashot.myapp.presentation.gallery
 
+import android.annotation.SuppressLint
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -85,6 +86,7 @@ import androidx.core.net.toUri
 
 private const val LONG_HOLD_MILLIS = 500L
 
+@SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun GalleryScreen(
     onBack: () -> Unit,
@@ -112,6 +114,7 @@ fun GalleryScreen(
     )
 }
 
+@SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 private fun GalleryContent(
     uiState: GalleryViewModel.UiState,
