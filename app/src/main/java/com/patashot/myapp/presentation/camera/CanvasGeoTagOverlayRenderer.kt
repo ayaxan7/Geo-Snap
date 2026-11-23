@@ -87,6 +87,7 @@ class CanvasGeoTagOverlayRenderer internal constructor(
             )
             CardLayout.MINIMAL -> renderMinimal(metrics = metrics, copy = copy)
             CardLayout.QR_CODE -> renderQrCode(metrics = metrics, copy = copy, content = content)
+            CardLayout.ACCENT_BAR -> renderAccentBar(metrics = metrics, copy = copy)
         }
     }
 
@@ -369,6 +370,98 @@ class CanvasGeoTagOverlayRenderer internal constructor(
     }
 
     /**
+     * Vertical accent bar on the left, bold city on top, pin with address and date/time on bottom.
+     */
+    private fun renderAccentBar(metrics: GeoTagCardMetrics, copy: CardCopy): Bitmap {
+        val padV = dp(metrics.paddingVerticalDp)
+        val padH = dp(metrics.paddingHorizontalDp)
+        val cardWidth = dp(metrics.cardWidthDp)
+        val barWidth = dp(2.5f)
+        val barCorner = dp(1.5f).toFloat()
+        val barGap = dp(8f)
+        val contentLeft = padH + barWidth + barGap
+        val contentWidth = cardWidth - padH - contentLeft
+
+        val cityPaint = textPaint(metrics.textColor, metrics.cityTextSizeSp, bold = true).apply {
+            setShadowLayer(4f, 1f, 1f, 0xCC000000.toInt())
+        }
+        val addressPaint = textPaint(metrics.textSecondaryColor, metrics.addressTextSizeSp).apply {
+            setShadowLayer(4f, 1f, 1f, 0xCC000000.toInt())
+        }
+        val datePaint = textPaint(metrics.textColor, metrics.dateTextSizeSp).apply {
+            setShadowLayer(4f, 1f, 1f, 0xCC000000.toInt())
+        }
+
+        val iconSize = dp(metrics.iconSizeDp)
+        val iconGap = iconSize + dp(metrics.iconTextGapDp)
+
+        val cityLayout = buildLayout(copy.city, cityPaint, contentWidth, maxLines = 1)
+        val addressLayout = buildLayout(
+            copy.address,
+            addressPaint,
+            (contentWidth - iconGap).coerceAtLeast(1),
+            maxLines = 1
+        )
+        val dateLayout = buildLayout(
+            copy.date,
+            datePaint,
+            (contentWidth - iconGap).coerceAtLeast(1),
+            maxLines = 1
+        )
+
+        val lineGap = dp(metrics.detailsLineGapDp)
+        val detailsVPad = dp(metrics.detailsPaddingVerticalDp)
+        val addressRowH = maxOf(iconSize, addressLayout.height)
+        val dateRowH = maxOf(iconSize, dateLayout.height)
+        val columnH = detailsVPad * 2 + cityLayout.height + lineGap + addressRowH + lineGap + dateRowH
+        val cardHeight = padV * 2 + columnH
+
+        val bitmap = Bitmap.createBitmap(cardWidth, cardHeight, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+
+        drawCardShell(canvas, bitmap, metrics)
+
+        val barPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = metrics.accentColor.toArgb()
+            setShadowLayer(4f, 1f, 1f, 0xCC000000.toInt())
+        }
+        val barTop = (padV + detailsVPad).toFloat()
+        val barBottom = (padV + columnH - detailsVPad).toFloat()
+        val barRect = RectF(
+            padH.toFloat(),
+            barTop,
+            (padH + barWidth).toFloat(),
+            barBottom
+        )
+        canvas.drawRoundRect(barRect, barCorner, barCorner, barPaint)
+
+        var y = padV + detailsVPad
+        canvas.drawLayout(cityLayout, contentLeft.toFloat(), y.toFloat())
+        y += cityLayout.height + lineGap
+
+        val addressIconTop = y + (addressRowH - iconSize) / 2
+        drawIcon(
+            canvas = canvas,
+            drawableId = R.drawable.ic_map,
+            rect = Rect(contentLeft, addressIconTop, contentLeft + iconSize, addressIconTop + iconSize)
+        )
+        val addressTextTop = y + (addressRowH - addressLayout.height) / 2
+        canvas.drawLayout(addressLayout, (contentLeft + iconGap).toFloat(), addressTextTop.toFloat())
+        y += addressRowH + lineGap
+
+        val dateIconTop = y + (dateRowH - iconSize) / 2
+        drawIcon(
+            canvas = canvas,
+            drawableId = R.drawable.ic_calendar,
+            rect = Rect(contentLeft, dateIconTop, contentLeft + iconSize, dateIconTop + iconSize)
+        )
+        val dateTextTop = y + (dateRowH - dateLayout.height) / 2
+        canvas.drawLayout(dateLayout, (contentLeft + iconGap).toFloat(), dateTextTop.toFloat())
+
+        return bitmap
+    }
+
+    /**
      * No map, no logo: one centred column of time, date, location and coordinates.
      *
      * The time comes first with the accent separator between the two date halves,
@@ -459,24 +552,28 @@ class CanvasGeoTagOverlayRenderer internal constructor(
     private fun drawCardShell(canvas: Canvas, bitmap: Bitmap, metrics: GeoTagCardMetrics) {
         val bounds = RectF(0f, 0f, bitmap.width.toFloat(), bitmap.height.toFloat())
         val corner = dp(metrics.cardCornerDp).toFloat()
-        canvas.drawRoundRect(
-            bounds,
-            corner,
-            corner,
-            Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = metrics.cardBackgroundColor.toArgb()
-            }
-        )
-        canvas.drawRoundRect(
-            bounds,
-            corner,
-            corner,
-            Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = metrics.cardBorderColor.toArgb()
-                style = Paint.Style.STROKE
-                strokeWidth = dp(metrics.cardBorderDp).toFloat()
-            }
-        )
+        if (metrics.cardBackgroundColor != 0L) {
+            canvas.drawRoundRect(
+                bounds,
+                corner,
+                corner,
+                Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = metrics.cardBackgroundColor.toArgb()
+                }
+            )
+        }
+        if (metrics.cardBorderDp > 0f && metrics.cardBorderColor != 0L) {
+            canvas.drawRoundRect(
+                bounds,
+                corner,
+                corner,
+                Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = metrics.cardBorderColor.toArgb()
+                    style = Paint.Style.STROKE
+                    strokeWidth = dp(metrics.cardBorderDp).toFloat()
+                }
+            )
+        }
     }
 
     private fun textPaint(color: Long, textSizeSp: Float, bold: Boolean = false): TextPaint =

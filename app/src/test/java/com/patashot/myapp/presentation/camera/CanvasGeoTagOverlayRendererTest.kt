@@ -316,6 +316,39 @@ class CanvasGeoTagOverlayRendererTest {
         assertTrue("QR code card should contain white pixels", pixels.any { it == android.graphics.Color.WHITE })
     }
 
+    @Test
+    fun `accent bar layout renders successfully with location`() {
+        val bitmap = renderOrFail(
+            content(
+                template = CardTemplates.ACCENT_BAR,
+                city = "Vijayawada, Andhra Pradesh",
+                address = "Flat No. 302, Sai Heights, Eluru",
+                lat = 16.5062,
+                lng = 80.6480
+            )
+        )
+
+        assertTrue(bitmap.width > 1 && bitmap.height > 1)
+        val pixels = IntArray(bitmap.width * bitmap.height)
+        bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
+        assertTrue("Accent bar card should contain white pixels", pixels.any { it == android.graphics.Color.WHITE })
+    }
+
+    @Test
+    fun `accent bar layout renders when location is unknown`() {
+        val bitmap = renderOrFail(
+            content(
+                template = CardTemplates.ACCENT_BAR,
+                city = null,
+                address = null,
+                lat = null,
+                lng = null
+            )
+        )
+
+        assertTrue(bitmap.width > 1 && bitmap.height > 1)
+    }
+
     private companion object {
         /** Anything drawn over the card background (alpha 0xB3) is content. */
         const val INK_ALPHA_THRESHOLD = 185

@@ -45,6 +45,9 @@ import androidx.compose.ui.unit.em
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patashot.myapp.R
+import com.patashot.myapp.presentation.camera.CardTemplate
+import com.patashot.myapp.presentation.camera.GeoTagCard
+import com.patashot.myapp.presentation.camera.GeoTagCardContent
 import com.patashot.myapp.ui.theme.PrimaryGreen
 
 /**
@@ -57,11 +60,9 @@ import com.patashot.myapp.ui.theme.PrimaryGreen
 private val TEMPLATE_PREVIEW_IMAGES: List<Int> = listOf(
     R.drawable.ic_template_1,
     R.drawable.ic_template_2,
-    R.drawable.ic_template_3
+    R.drawable.ic_template_3,
+    R.drawable.ic_template_4
 )
-
-/** How many previews exist to show. The picker renders exactly these many rows. */
-private const val TEMPLATE_PREVIEW_COUNT = 3
 
 /**
  * Lets the user pick the geotag card design applied to new captures.
@@ -135,11 +136,12 @@ fun TemplatesScreen(
             contentPadding = PaddingValues(vertical = 8.dp)
         ) {
             itemsIndexed(
-                items = uiState.templates.take(TEMPLATE_PREVIEW_COUNT),
+                items = uiState.templates,
                 key = { _, template -> template.id }
             ) { index, template ->
                 TemplateCard(
-                    imageRes = TEMPLATE_PREVIEW_IMAGES[index],
+                    imageRes = TEMPLATE_PREVIEW_IMAGES.getOrNull(index),
+                    template = template,
                     selected = template.id == uiState.pendingTemplateId,
                     onClick = { viewModel.selectTemplate(template) }
                 )
@@ -158,7 +160,8 @@ fun TemplatesScreen(
  */
 @Composable
 private fun TemplateCard(
-    imageRes: Int,
+    imageRes: Int?,
+    template: CardTemplate,
     selected: Boolean,
     onClick: () -> Unit
 ) {
@@ -175,12 +178,36 @@ private fun TemplateCard(
                 else Modifier
             )
     ) {
-        Image(
-            painter = painterResource(imageRes),
-            contentDescription = "Template $imageRes",
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
-        )
+        if (imageRes != null) {
+            Image(
+                painter = painterResource(imageRes),
+                contentDescription = stringResource(template.labelRes),
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0xFF1E2022))
+            ) {
+                GeoTagCard(
+                    content = GeoTagCardContent(
+                        cityString = "Vijayawada, Andhra Pradesh",
+                        fullAddress = "Flat No. 302, Sai Heights, Eluru",
+                        latitude = 16.5062,
+                        longitude = 80.6480,
+                        timestamp = System.currentTimeMillis(),
+                        staticMapUrl = null,
+                        template = template
+                    ),
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(horizontal = 8.dp, vertical = 6.dp),
+                    scale = 0.5f
+                )
+            }
+        }
 
         if (selected) {
             Icon(

@@ -50,9 +50,9 @@ data class GeoTagCardMetrics(
             return GeoTagCardMetrics(
                 cardWidthDp = GeoTagCardShell.CARD_WIDTH_DP * scale,
                 cardCornerDp = GeoTagCardShell.CARD_CORNER_DP * scale,
-                cardBorderDp = GeoTagCardShell.CARD_BORDER_DP * scale,
-                cardBackgroundColor = GeoTagCardShell.CARD_BACKGROUND_COLOR,
-                cardBorderColor = GeoTagCardShell.CARD_BORDER_COLOR,
+                cardBorderDp = s.cardBorderDp * scale,
+                cardBackgroundColor = s.cardBackgroundColor,
+                cardBorderColor = s.cardBorderColor,
                 paddingHorizontalDp = GeoTagCardShell.PADDING_HORIZONTAL_DP * scale,
                 paddingVerticalDp = GeoTagCardShell.PADDING_VERTICAL_DP * scale,
                 textColor = s.textColor,

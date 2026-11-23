@@ -115,5 +115,19 @@ class CardTemplatesTest {
         assertSame(CardTemplates.QR_CODE, CardTemplates.fromId("qrcode"))
         assertEquals(CardLayout.QR_CODE, CardTemplates.QR_CODE.layout)
     }
+
+    @Test
+    fun `accent bar template is registered under a stable id`() {
+        assertSame(CardTemplates.ACCENT_BAR, CardTemplates.fromId("accent_bar"))
+        assertEquals(CardLayout.ACCENT_BAR, CardTemplates.ACCENT_BAR.layout)
+    }
+
+    @Test
+    fun `accent bar template has no border and transparent background`() {
+        val style = CardTemplates.ACCENT_BAR.style
+        assertEquals(0f, style.cardBorderDp, 0f)
+        assertEquals(0L, style.cardBackgroundColor)
+        assertEquals(0L, style.cardBorderColor)
+    }
 }
 

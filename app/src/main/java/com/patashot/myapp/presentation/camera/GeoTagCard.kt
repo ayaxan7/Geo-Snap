@@ -7,9 +7,11 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,13 +27,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
@@ -100,14 +105,26 @@ fun GeoTagCard(
                         Modifier.width(metrics.cardWidthDp.dp)
                     }
                 )
-                .background(
-                    Color(metrics.cardBackgroundColor),
-                    RoundedCornerShape(metrics.cardCornerDp.dp)
+                .then(
+                    if (metrics.cardBackgroundColor != 0L) {
+                        Modifier.background(
+                            Color(metrics.cardBackgroundColor),
+                            RoundedCornerShape(metrics.cardCornerDp.dp)
+                        )
+                    } else {
+                        Modifier
+                    }
                 )
-                .border(
-                    width = metrics.cardBorderDp.dp,
-                    color = Color(metrics.cardBorderColor),
-                    shape = RoundedCornerShape(metrics.cardCornerDp.dp)
+                .then(
+                    if (metrics.cardBorderDp > 0f && metrics.cardBorderColor != 0L) {
+                        Modifier.border(
+                            width = metrics.cardBorderDp.dp,
+                            color = Color(metrics.cardBorderColor),
+                            shape = RoundedCornerShape(metrics.cardCornerDp.dp)
+                        )
+                    } else {
+                        Modifier
+                    }
                 )
                 .padding(
                     horizontal = metrics.paddingHorizontalDp.dp,
@@ -133,6 +150,12 @@ fun GeoTagCard(
                     copy = labels.copy,
                     metrics = metrics,
                     locationUrl = content.locationUrl(),
+                    scale = scale
+                )
+                CardLayout.ACCENT_BAR -> AccentBarContent(
+                    copy = labels.copy,
+                    metrics = metrics,
+                    labels = labels,
                     scale = scale
                 )
             }
@@ -589,6 +612,111 @@ private fun MapThumbnail(
                 color = Color.White,
                 fontSize = 10.sp
             )
+        }
+    }
+}
+
+/**
+ * Vertical accent bar on the left, bold city on top, pin with address and date/time on bottom.
+ */
+@Composable
+private fun RowScope.AccentBarContent(
+    copy: CardCopy,
+    metrics: GeoTagCardMetrics,
+    labels: CardLabels,
+    scale: Float
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .width((2.5f * scale).dp)
+                .clip(RoundedCornerShape((1.5f * scale).dp))
+                .background(Color(metrics.accentColor))
+        )
+
+        Spacer(modifier = Modifier.width((8f * scale).dp))
+
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(vertical = metrics.detailsPaddingVerticalDp.dp)
+        ) {
+            Text(
+                text = copy.city,
+                color = Color(metrics.textColor),
+                fontSize = metrics.cityTextSizeSp.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = TextStyle(
+                    shadow = Shadow(
+                        color = Color.Black.copy(alpha = 0.8f),
+                        offset = Offset(1f, 1f),
+                        blurRadius = 3f
+                    )
+                )
+            )
+
+            Spacer(modifier = Modifier.height(metrics.detailsLineGapDp.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.ic_map),
+                    contentDescription = labels.map,
+                    modifier = Modifier.size(metrics.iconSizeDp.dp)
+                )
+                Spacer(modifier = Modifier.width(metrics.iconTextGapDp.dp))
+                Text(
+                    text = copy.address,
+                    color = Color(metrics.textSecondaryColor),
+                    fontSize = metrics.addressTextSizeSp.sp,
+                    lineHeight = metrics.addressLineHeightSp.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = TextStyle(
+                        shadow = Shadow(
+                            color = Color.Black.copy(alpha = 0.8f),
+                            offset = Offset(1f, 1f),
+                            blurRadius = 3f
+                        )
+                    )
+                )
+            }
+
+            Spacer(modifier = Modifier.height(metrics.detailsLineGapDp.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.ic_calendar),
+                    contentDescription = labels.map,
+                    modifier = Modifier.size(metrics.iconSizeDp.dp)
+                )
+                Spacer(modifier = Modifier.width(metrics.iconTextGapDp.dp))
+                Text(
+                    text = copy.date,
+                    color = Color(metrics.textColor),
+                    fontSize = metrics.dateTextSizeSp.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = TextStyle(
+                        shadow = Shadow(
+                            color = Color.Black.copy(alpha = 0.8f),
+                            offset = Offset(1f, 1f),
+                            blurRadius = 3f
+                        )
+                    )
+                )
+            }
         }
     }
 }

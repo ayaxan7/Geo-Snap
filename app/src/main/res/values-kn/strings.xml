@@ -192,6 +192,7 @@
     <string name="template_not_selected">ಆಯ್ಕೆಮಾಡಿಲ್ಲ</string>
     <string name="template_minimal">ಮಿನಿಮಲ್</string>
     <string name="template_qrcode">ಕ್ಯೂಆರ್ ಕೋಡ್</string>
+    <string name="template_accent_bar">ಆಕ್ಸೆಂಟ್ ಬಾರ್</string>
     <string name="templates_save">ಉಳಿಸಿ</string>
     <!-- Preview crop & rotate -->
     <string name="preview_crop">ಕ್ರಾಪ್</string>

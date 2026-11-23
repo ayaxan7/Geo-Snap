@@ -31,7 +31,12 @@ enum class CardLayout {
     /**
      * QR code on the left with location link embedded, details on the right.
      */
-    QR_CODE
+    QR_CODE,
+
+    /**
+     * Vertical accent bar on the left, city on top, pin with address and date/time on bottom.
+     */
+    ACCENT_BAR
 }
 
 /**
@@ -76,7 +81,12 @@ data class GeoTagCardStyle(
 
     // Logo
     val logoHeightDp: Float,
-    val logoCornerDp: Float
+    val logoCornerDp: Float,
+
+    // Shell overrides (defaults to shared GeoTagCardShell)
+    val cardBackgroundColor: Long = GeoTagCardShell.CARD_BACKGROUND_COLOR,
+    val cardBorderColor: Long = GeoTagCardShell.CARD_BORDER_COLOR,
+    val cardBorderDp: Float = GeoTagCardShell.CARD_BORDER_DP
 ) : java.io.Serializable
 
 /**
@@ -142,8 +152,10 @@ object CardTemplates {
         )
     )
 
+    const val MINIMAL_ID = "minimal"
+
     val MINIMAL = CardTemplate(
-        id = "minimal",
+        id = MINIMAL_ID,
         labelRes = R.string.template_minimal,
         layout = CardLayout.MINIMAL,
         style = GeoTagCardStyle(
@@ -207,8 +219,47 @@ object CardTemplates {
         )
     )
 
+    const val ACCENT_BAR_ID = "accent_bar"
+
+    /**
+     * Vertical accent bar on the left, bold city/state, pin with address and date/time on bottom.
+     */
+    val ACCENT_BAR = CardTemplate(
+        id = ACCENT_BAR_ID,
+        labelRes = R.string.template_accent_bar,
+        layout = CardLayout.ACCENT_BAR,
+        style = GeoTagCardStyle(
+            textColor = 0xFFFFFFFFL,
+            textSecondaryColor = 0xFFFFFFFFL,
+            iconAccentColor = 0xFFFF0000L,
+            accentColor = 0xFFFFFFFFL,
+            logoBackgroundColor = 0x00000000L,
+            logoVisible = false,
+            mapBackgroundColor = 0x00000000L,
+            mapWidthDp = 0f,
+            mapHeightDp = 0f,
+            mapCornerDp = 0f,
+            spacerMapDetailsDp = 0f,
+            spacerDetailsLogoDp = 0f,
+            detailsPaddingVerticalDp = 4f,
+            detailsLineGapDp = 4f,
+            iconTextGapDp = 5f,
+            cityTextSizeSp = 15f,
+            addressTextSizeSp = 11f,
+            addressLineHeightSp = 15f,
+            coordinatesTextSizeSp = 11f,
+            dateTextSizeSp = 11f,
+            iconSizeDp = 12f,
+            logoHeightDp = 0f,
+            logoCornerDp = 0f,
+            cardBackgroundColor = 0x00000000L,
+            cardBorderColor = 0x00000000L,
+            cardBorderDp = 0f
+        )
+    )
+
     /** Every selectable template, in the order the picker lists them. */
-    val ALL: List<CardTemplate> = listOf(DEFAULT, MINIMAL, QR_CODE)
+    val ALL: List<CardTemplate> = listOf(DEFAULT, MINIMAL, QR_CODE, ACCENT_BAR)
 
     /** Resolves a persisted [id], falling back to [DEFAULT] when it is unknown or absent. */
     fun fromId(id: String?): CardTemplate = ALL.firstOrNull { it.id == id } ?: DEFAULT
